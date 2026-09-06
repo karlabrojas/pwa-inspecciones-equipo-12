@@ -115,8 +115,41 @@ Estas capacidades se documentan como requisitos futuros (ver RF-06 y RF-07 en do
 
 ## Consecuencias y riesgos
 
-Incluye consecuencias positivas, costos, riesgos técnicos y mitigaciones.
+**Consecuencias positivas:**
+- Distribución sencilla: los técnicos pueden acceder a la aplicación mediante una URL, sin depender de una tienda de aplicaciones.
+- Una sola base de código web para todos los dispositivos (móvil y escritorio).
+- Posibilidad de instalación en el dispositivo del técnico sin proceso de publicación.
+- Ruta clara de evolución hacia funcionamiento offline mediante Service Workers y almacenamiento local.
+- Menor costo de mantenimiento comparado con desarrollar y mantener aplicaciones nativas separadas para Android e iOS.
+
+**Costos:**
+- Será necesario implementar posteriormente almacenamiento offline (IndexedDB/Cache API).
+- Será necesario implementar sincronización de datos cuando se recupere la conexión.
+- Se requerirán pruebas en diferentes navegadores y dispositivos para confirmar consistencia del comportamiento offline.
+
+**Riesgos técnicos:**
+- Diferencias de soporte de Service Workers y APIs offline entre navegadores.
+- Complejidad al implementar la lógica de sincronización (RF-07).
+- Posibles conflictos de datos si una inspección se registra o edita en más de un dispositivo mientras no hay conexión.
+- Limitaciones de almacenamiento local en dispositivos móviles más antiguos.
+
+**Mitigaciones:**
+- Probar la aplicación en distintos navegadores y dispositivos a medida que se implementen las capacidades offline.
+- Mantener el uso exclusivo de datos sintéticos durante todo el desarrollo.
+- Conservar comandos de instalación y ejecución reproducibles (`npm ci`, `npm run dev`, `npm run verify`).
+- Definir reglas claras de sincronización antes de implementar RF-06 y RF-07.
+- Validar el comportamiento offline de forma progresiva, semana a semana, en lugar de implementarlo todo de una vez.
 
 ## Validación
 
-Indica qué evidencia de código, prueba o medición permitirá revisar esta decisión en semanas posteriores.
+Esta decisión se revisará en semanas posteriores mediante la siguiente evidencia:
+
+- Instalación exitosa de la PWA en un dispositivo móvil y en escritorio.
+- Verificación del funcionamiento con conectividad intermitente (registrar una inspección sin conexión y confirmar que no se pierde).
+- Confirmación de que los datos se almacenan localmente cuando no hay conexión (RF-06).
+- Confirmación de que los datos se sincronizan correctamente al recuperar la conexión, sin duplicados (RF-07).
+- Pruebas en distintos navegadores y dispositivos para verificar consistencia del comportamiento.
+- Medición de tiempos de carga de la pantalla inicial (RNF-05).
+- Ejecución reproducible del proyecto mediante `npm ci`, `npm run dev` y `npm run verify` en cada entrega semanal.
+
+Ninguna de estas validaciones se ha ejecutado todavía en Semana 1; se documentan aquí como plan de verificación para las semanas correspondientes.
