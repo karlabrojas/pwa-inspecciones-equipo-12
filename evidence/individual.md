@@ -1,10 +1,12 @@
 # Evidencia individual — completar antes de entregar
 
-- Nombre:
-- Repositorio y commit evaluado:
-- Mi contribución concreta:
-- Decisión técnica que puedo explicar:
-- Comando o prueba que ejecuté y resultado:
-- Limitación o riesgo que encontré:
-- Uso de IA (herramienta, propósito, fragmentos influenciados y validación humana):
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:** redacté las secciones 4 (Requisitos no funcionales medibles: reproducibilidad, accesibilidad, seguridad, privacidad, rendimiento, offline futuro), 5 (Datos sintéticos y límites) y 6 (Criterios de aceptación de Semana 1) en `docs/requirements.md`. En `docs/decision-record.md` reforcé el análisis de "web tradicional" relacionándolo con el riesgo de conectividad intermitente, redacté la sección "Decisión" (justificación de PWA), y redacté "Consecuencias y riesgos" y "Validación" en conjunto con el resto del equipo. Commits: [`06a67ce`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/06a67ce) (RNF, datos sintéticos, criterios de aceptación y refuerzo de web tradicional), [`4cac718`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/4cac718) (sección Decisión), [`9836c12`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9836c12) (Consecuencias, riesgos y Validación).
+- **Decisión que puedo explicar y por qué:** al reforzar "web tradicional" decidí no reescribir el análisis que ya existía, sino complementarlo agregando específicamente el riesgo de pérdida de datos cuando la conexión se pierde durante el registro de una inspección (Escenario 3 del proyecto), porque ese análisis original no mencionaba explícitamente el caso de conectividad intermitente, que es la restricción central del proyecto.
+- **Comando o prueba que ejecuté:** `npm ci`, `npm run dev` y `npm run verify`.
+- **Resultado real que observé:** `npm ci` instaló las dependencias sin errores; `npm run dev` levantó el servidor y en http://localhost:3000 se mostró correctamente la pantalla inicial con las inspecciones sintéticas de ejemplo; `npm run verify` terminó con el mensaje `Starter verificable: PASS` y generó `reports/verification.json` con el contenido: `{"schemaVersion": 1, "checkedAt": "2026-09-06T06:08:24.676Z", "status": "pass", "missing": []}`.
+- **Qué verifica esa prueba y qué no verifica:** `npm run verify` confirma que la estructura de archivos requerida está presente y que no falta ningún archivo esperado (`missing: []`). No verifica la calidad ni la coherencia del análisis documental de `requirements.md` o `decision-record.md`, ni certifica que no existan datos sensibles; tampoco prueba funcionalidades futuras como offline, sincronización o autenticación, que no se implementan en Semana 1.
+- **Limitación, dificultad o riesgo que identifiqué:** mi mayor riesgo no es técnico sino de contenido. Las secciones de Decisión, Consecuencias/riesgos y Validación en `docs/decision-record.md` son un análisis argumentado y una proyección de lo que se validará en semanas futuras, no algo que `npm run verify` pueda comprobar; el "pass" técnico solo confirma que la estructura del proyecto está completa, no que la profundidad del análisis sea suficiente. Si el equipo o el docente considera que falta profundidad en algún punto de la justificación de PWA o de los riesgos identificados, habría que ajustar el documento en una revisión posterior.
+- **Uso de IA:** usé un asistente de IA conversacional para estructurar y redactar un primer borrador de las secciones 4, 5 y 6 de `docs/requirements.md`, y de las secciones de multiplataforma, refuerzo de web tradicional, Decisión, Consecuencias/riesgos y Validación en `docs/decision-record.md`. Yo decidí qué contenido conservar y lo conecté con los escenarios y requisitos que ya había definido el equipo. Revisé personalmente cada sección, ejecuté los comandos de verificación y confirmé las salidas; no acepté nada sin validarlo.
 
