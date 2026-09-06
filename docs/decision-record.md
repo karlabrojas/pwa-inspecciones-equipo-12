@@ -94,7 +94,24 @@ Sin embargo, continúa implicando una infraestructura de desarrollo y mantenimie
 
 ## Decisión
 
-Selecciona una alternativa y justifica por qué satisface mejor las restricciones. Declara qué no resuelve todavía.
+Seleccionamos **PWA** como la estrategia de aplicación para este proyecto.
+
+Esta alternativa satisface mejor las restricciones del proyecto porque:
+
+- Puede instalarse en el dispositivo del técnico sin depender de una tienda de aplicaciones, lo cual simplifica la distribución dentro del alcance de 14 semanas.
+- Se desarrolla con las mismas tecnologías web (Next.js) que ya proporciona el curso, sin necesidad de introducir un stack adicional ni duplicar desarrollo para distintas plataformas.
+- Ofrece una ruta clara hacia el funcionamiento offline mediante Service Workers y almacenamiento local (IndexedDB, Cache API), lo cual responde directamente a la conectividad intermitente identificada como restricción central del proyecto.
+- Su mantenimiento está centralizado en una sola base de código web, a diferencia de una aplicación nativa o multiplataforma que exigiría mantener versiones o frameworks adicionales.
+- Es la trayectoria que ya define el curso, por lo que mantiene la reproducibilidad y el despliegue definidos desde el arranque del proyecto.
+
+**Qué NO resuelve todavía esta decisión (Semana 1):**
+
+- No se ha implementado el manifest ni el Service Worker.
+- No existe todavía almacenamiento offline ni sincronización de datos.
+- No hay notificaciones push implementadas.
+- No hay autenticación implementada.
+
+Estas capacidades se documentan como requisitos futuros (ver RF-06 y RF-07 en docs/requirements.md) y se incorporarán en semanas posteriores del curso, según corresponda a cada actividad.
 
 ## Consecuencias y riesgos
 
