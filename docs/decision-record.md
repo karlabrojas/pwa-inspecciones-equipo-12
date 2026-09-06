@@ -1,20 +1,25 @@
 # ADR-001 — Estrategia de aplicación
 
-> Completa esta decisión en Semana 1. Una decisión no es solo una preferencia: relaciona restricciones, alternativas, consecuencias y una forma de validación.
-
 ## Estado
 
 Propuesta — completar y fechar.
 
 ## Contexto y restricciones
 
-Explica la conectividad intermitente, el uso móvil, los datos sintéticos, el alcance de una materia de 14 semanas y la necesidad de despliegue reproducible.
+El proyecto consiste en desarrollar una PWA para registrar inspecciones de mantenimiento de laboratorios y espacios académicos. Una de las principales restricciones es que la conectividad puede ser intermitente durante las inspecciones, por lo que la aplicación debe considerar una evolución hacia un funcionamiento que reduzca la dependencia de Internet.
+
+El uso principal será desde dispositivos móviles por parte de técnicos de mantenimiento, aunque también debe ser posible consultar la información desde otros dispositivos. Por este motivo, la solución debe ofrecer una experiencia adecuada para pantallas pequeñas y diferentes dispositivos.
+
+Durante el desarrollo se utilizarán únicamente datos sintéticos. No se utilizarán datos reales de estudiantes, docentes, técnicos ni información institucional sensible.
+
+El proyecto tiene un alcance académico de 14 semanas, por lo que la solución debe poder desarrollarse y mantenerse dentro del tiempo disponible. Se prioriza una arquitectura que permita avanzar de manera progresiva sin introducir complejidad innecesaria.
+
+También se requiere que el desarrollo y las entregas sean reproducibles. El proyecto debe conservar el entorno proporcionado por el curso y permitir instalar, ejecutar, verificar y construir la aplicación mediante procedimientos documentados y consistentes.
 
 ## Alternativas consideradas
 
-Compara como mínimo: PWA, web tradicional, aplicación nativa y solución multiplataforma. Considera instalación, offline, distribución, costo de desarrollo, mantenimiento, acceso a capacidades del dispositivo y riesgos.
+### ¿Qué es una PWA?
 
-¿Qué es una PWA?
 Una PWA (Progressive Web App) es una aplicación web que utiliza tecnologías como Service Workers, almacenamiento local y capacidades de instalación para ofrecer una experiencia similar a la de una aplicación nativa, pudiendo funcionar parcialmente sin conexión y adaptarse a diferentes dispositivos.
 Caracteristicas de las PWA:
 
@@ -29,7 +34,8 @@ Caracteristicas de las PWA:
 - Se desarrolla con tecnologías web
 - No necesariamente necesita internet o puede reducirse mediante estrategias offline-first
 
-¿Qué es una web tradicional?
+### ¿Qué es una web tradicional?
+
 Una web tradicional es una aplicación o sitio que se ejecuta principalmente dentro de un navegador y depende del servidor y de una conexión a Internet para obtener o enviar información. A diferencia de una PWA, normalmente no incorpora mecanismos avanzados para funcionar sin conexión, instalarse como aplicación o sincronizar datos cuando se recupera la conectividad.
 
 - Se accede principalmente desde el navegador
@@ -116,6 +122,7 @@ Estas capacidades se documentan como requisitos futuros (ver RF-06 y RF-07 en do
 ## Consecuencias y riesgos
 
 **Consecuencias positivas:**
+
 - Distribución sencilla: los técnicos pueden acceder a la aplicación mediante una URL, sin depender de una tienda de aplicaciones.
 - Una sola base de código web para todos los dispositivos (móvil y escritorio).
 - Posibilidad de instalación en el dispositivo del técnico sin proceso de publicación.
@@ -123,17 +130,20 @@ Estas capacidades se documentan como requisitos futuros (ver RF-06 y RF-07 en do
 - Menor costo de mantenimiento comparado con desarrollar y mantener aplicaciones nativas separadas para Android e iOS.
 
 **Costos:**
+
 - Será necesario implementar posteriormente almacenamiento offline (IndexedDB/Cache API).
 - Será necesario implementar sincronización de datos cuando se recupere la conexión.
 - Se requerirán pruebas en diferentes navegadores y dispositivos para confirmar consistencia del comportamiento offline.
 
 **Riesgos técnicos:**
+
 - Diferencias de soporte de Service Workers y APIs offline entre navegadores.
 - Complejidad al implementar la lógica de sincronización (RF-07).
 - Posibles conflictos de datos si una inspección se registra o edita en más de un dispositivo mientras no hay conexión.
 - Limitaciones de almacenamiento local en dispositivos móviles más antiguos.
 
 **Mitigaciones:**
+
 - Probar la aplicación en distintos navegadores y dispositivos a medida que se implementen las capacidades offline.
 - Mantener el uso exclusivo de datos sintéticos durante todo el desarrollo.
 - Conservar comandos de instalación y ejecución reproducibles (`npm ci`, `npm run dev`, `npm run verify`).
