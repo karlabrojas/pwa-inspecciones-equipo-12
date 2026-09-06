@@ -216,12 +216,44 @@ Escribe requisitos numerados con formato verificable (por ejemplo, RF-01). Cada 
 
 ## 4. Requisitos no funcionales
 
-Incluye requisitos medibles de reproducibilidad, accesibilidad, seguridad, privacidad, rendimiento y operación offline futura.
+- RNF-01 (Reproducibilidad): el proyecto deberá poder instalarse y ejecutarse en un entorno limpio mediante `npm ci` seguido de `npm run dev`, sin configuración manual adicional. Verificación: ejecutar ambos comandos en una máquina distinta a la de desarrollo y confirmar que la pantalla inicial carga en http://localhost:3000.
+
+- RNF-02 (Accesibilidad): el formulario de registro de inspección deberá ser operable completamente con teclado y sus campos (espacio, fecha, descripción, hallazgos) deberán tener etiquetas asociadas. Verificación: completar el registro de una inspección usando solo Tab/Enter y revisar las etiquetas con las herramientas de accesibilidad del navegador.
+
+- RNF-03 (Seguridad): el repositorio no deberá contener credenciales, tokens ni archivos de configuración sensibles. Verificación: confirmar que `.env`, `node_modules` y `.next` están excluidos mediante `.gitignore` y no aparecen en el historial de commits.
+
+- RNF-04 (Privacidad): todos los datos de técnicos, laboratorios, fechas y hallazgos utilizados en el sistema deberán ser ficticios. Verificación: revisar `src/lib/data/` y confirmar que ningún registro corresponde a personas, laboratorios o incidentes reales.
+
+- RNF-05 (Rendimiento): la pantalla inicial con el listado de inspecciones deberá cargar en menos de 3 segundos en un entorno de desarrollo local estándar. Verificación: medir el tiempo de carga de http://localhost:3000 con las herramientas de red (DevTools) del navegador.
+
+- RNF-06 (Operación offline futura): en una versión posterior, una inspección capturada sin conexión (RF-06) deberá conservarse en el dispositivo y sincronizarse sin duplicados al recuperar la conexión (RF-07). Verificación futura: desconectar la red, registrar una inspección, reconectar y confirmar que aparece sincronizada una sola vez. Esta capacidad no se implementa en Semana 1.
 
 ## 5. Datos sintéticos y límites
 
-Explica qué datos se usarán para la actividad y qué información está prohibida.
+Este proyecto utiliza exclusivamente datos ficticios:
+
+- Técnicos de mantenimiento ficticios (nombres inventados).
+- Laboratorios y salones ficticios (identificadores inventados, no corresponden a espacios reales).
+- Fechas de inspección ficticias.
+- Descripciones y hallazgos ficticios (por ejemplo, "fuga menor en llave de agua", "equipo calibrado correctamente").
+- Cantidades de incidencias generadas para efectos de prueba.
+
+Quedan explícitamente excluidos:
+
+- Nombres o identificadores reales de estudiantes, profesores o personal técnico.
+- Información real de laboratorios, salones o equipo institucional.
+- Cualquier dato que permita identificar personas o espacios reales de la institución.
+
+Esta restricción aplica durante todo el proyecto (14 semanas), no solo en Semana 1.
 
 ## 6. Criterios de aceptación de la Semana 1
 
-Relaciona cada entrega con una prueba o comando que permita verificarla.
+| Entrega | Verificación |
+|---|---|
+| Proyecto instalable | `npm ci` |
+| Aplicación compila y corre | `npm run dev` (revisión visual en http://localhost:3000) |
+| Requisitos documentados (problema, usuarios, RF, RNF, datos) | Revisión de docs/requirements.md |
+| Decisión de estrategia PWA documentada | Revisión de docs/decision-record.md |
+| Verificación automática | `npm run verify` o `make verify` (genera reports/verification.json) |
+| Estructura del proyecto | `bash public-tests/check.sh` |
+| Evidencia individual de cada integrante | Revisión de evidence/individual.md |
