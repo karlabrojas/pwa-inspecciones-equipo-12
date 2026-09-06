@@ -6,7 +6,7 @@
 
 Describe qué problema de inspecciones de mantenimiento se quiere resolver, en qué contexto de conectividad y qué queda fuera del alcance.
 
-1.¿Qué problema tienen las inspecciones de mantenimiento?
+### 1.¿Qué problema tienen las inspecciones de mantenimiento?
 
 Las inspecciones de mantenimiento de los laboratorios y salones de clase pueden presentar problemas relacionados con el registro, seguimiento y disponibilidad de la información. Al realizar una inspección, el técnico necesita registrar qué espacio revisó, la fecha, una descripción de lo encontrado y, cuando existen problemas, el número de incidencias o hallazgos detectados.
 
@@ -21,7 +21,7 @@ Si estos registros se realizan de manera manual o dependen completamente de una 
 
 Problema principal: se necesita un mecanismo que permita registrar y conservar las inspecciones de mantenimiento de forma confiable, incluso cuando la conexión a Internet no sea estable.
 
-2.¿Quién necesita registrar las inspecciones?
+### 2.¿Quién necesita registrar las inspecciones?
 
 Principalmente, los técnicos responsables de los laboratorios y salones de clase.
 
@@ -39,7 +39,7 @@ El Técnico B realiza una inspección en el Laboratorio de Electrónica y encuen
 
 También puede existir un usuario administrativo que consulte y supervise los registros, aunque no necesariamente sea quien realiza las inspecciones.
 
-3.¿Por qué la conectividad intermitente es importante en este proyecto?
+### 3.¿Por qué la conectividad intermitente es importante en este proyecto?
 
 Es importante porque los técnicos pueden realizar las inspecciones dentro de laboratorios, salones, talleres u otras áreas donde la conexión Wi-Fi o los datos móviles no siempre sean estables.
 
@@ -49,7 +49,7 @@ Por eso, uno de los objetivos de la PWA seria implementar un funcionamiento offl
 
 Esto es especialmente importante porque tener conectividad intermitente no debería provocar que el técnico pierda una inspección ya realizada.
 
-4.¿Qué se pretende solucionar con este proyecto?
+### 4.¿Qué se pretende solucionar con este proyecto?
 
 El proyecto pretende desarrollar una PWA para registrar y consultar inspecciones de mantenimiento de laboratorios y salones de clase, permitiendo que los técnicos puedan trabajar incluso ante problemas de conectividad.
 
@@ -64,7 +64,7 @@ Se busca:
 - Facilitar la consulta del historial de inspecciones.
 - Mostrar de manera clara el estado de cada espacio.
 
-  5.¿Qué puede quedar fuera del alcance?
+### 5.¿Qué puede quedar fuera del alcance?
 
 Para evitar que el proyecto crezca demasiado, se establecen algunas funcionalidades que no serán responsabilidad de la primera versión.
 

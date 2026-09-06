@@ -2,7 +2,7 @@
 
 ## Estado
 
-Propuesta — completar y fechar.
+Aceptada - 6 de septiembre de 2026
 
 ## Contexto y restricciones
 
