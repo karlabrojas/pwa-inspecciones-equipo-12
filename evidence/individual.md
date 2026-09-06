@@ -1,6 +1,6 @@
 # Evidencia individual — completar antes de entregar
 
-- Grupo y equipo: por completar
+- Grupo y equipo: 10° B - Equipo 12
 - Repositorio del equipo:https://github.com/karlabrojas/pwa-inspecciones-equipo-12
 
 ## Integrante: Kevin Ricardo Simon Alfaro
@@ -39,6 +39,7 @@
 - **Mi contribución concreta y enlace:** Redacté el apartado de contexto, problemas y limitaciones del proyecto en `docs/requirements.md`, donde describí el problema de las inspecciones de mantenimiento, los usuarios que necesitan registrar las inspecciones, la importancia de la conectividad intermitente, los objetivos que se pretenden solucionar y las funcionalidades que quedan fuera del alcance. También elaboré en `docs/decision-record.md` el análisis comparativo entre una PWA y una web tradicional, considerando sus principales características y diferencias relacionadas con el funcionamiento sin conexión, almacenamiento local, instalación, actualizaciones y dependencia de Internet.
 
 Enlaces de commits:
+
 - (docs: Context, issues, and limitations of the project)[`1f4bdc6`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/1f4bdc67428fed0d0f3e3c387e7ae1d65842d050)
 - (docs: Analysis of PWAs and traditional web apps)[`89f1105`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/89f110524d854b61cdb8b7b1ab58b4ecb54574fb)
 - (docs: Project status update)[`b0c0afb`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/b0c0afbfdff7b4f77dd4a8e2b31a02afbff4604f)
@@ -52,7 +53,7 @@ Enlaces de commits:
   "checkedAt": "2026-09-06T16:26:42.231Z",
   "status": "pass",
   "missing": []
-}`. 
+}`.
 - **Qué verifica esa prueba y qué no verifica:** `npm ci` comprueba que las dependencias definidas en el proyecto puedan instalarse correctamente. `npm run dev` comprueba que la aplicación pueda iniciarse y ejecutarse localmente. `npm run verify` comprueba las condiciones de verificación establecidas para el starter y su estructura requerida. Estas pruebas no comprueban todavía el funcionamiento offline, la sincronización de datos, el almacenamiento mediante IndexedDB, las notificaciones ni la autenticación, ya que esas funcionalidades corresponden a etapas posteriores del proyecto.
 
 - **Limitación, dificultad o riesgo que identifiqué:** Limitación, dificultad o riesgo que identifiqué: Una de las principales dificultades identificadas es que la implementación de notificaciones push puede representar un tema complejo y poco conocido durante el desarrollo. Debido a que requiere familiarizarse con tecnologías y configuraciones específicas, existe el riesgo de que su implementación tome más tiempo del establecido inicialmente para esta etapa del proyecto. Por lo tanto, será necesario considerar tiempo adicional para investigar, realizar pruebas y resolver posibles problemas relacionados con su funcionamiento.
