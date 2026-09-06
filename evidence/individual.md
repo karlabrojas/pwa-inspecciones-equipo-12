@@ -10,3 +10,23 @@
 - **Limitación, dificultad o riesgo que identifiqué:** mi mayor riesgo no es técnico sino de contenido. Las secciones de Decisión, Consecuencias/riesgos y Validación en `docs/decision-record.md` son un análisis argumentado y una proyección de lo que se validará en semanas futuras, no algo que `npm run verify` pueda comprobar; el "pass" técnico solo confirma que la estructura del proyecto está completa, no que la profundidad del análisis sea suficiente. Si el equipo o el docente considera que falta profundidad en algún punto de la justificación de PWA o de los riesgos identificados, habría que ajustar el documento en una revisión posterior.
 - **Uso de IA:** usé un asistente de IA conversacional para estructurar y redactar un primer borrador de las secciones 4, 5 y 6 de `docs/requirements.md`, y de las secciones de multiplataforma, refuerzo de web tradicional, Decisión, Consecuencias/riesgos y Validación en `docs/decision-record.md`. Yo decidí qué contenido conservar y lo conecté con los escenarios y requisitos que ya había definido el equipo. Revisé personalmente cada sección, ejecuté los comandos de verificación y confirmé las salidas; no acepté nada sin validarlo.
 
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:** Redacté las secciones 2 (usuarios y escenarios) y 3 (requisitos funcionales) en `docs/requirements.md`. De igual manera, participé en el análisis del contexto y las restricciones del proyecto. Además, desarrollé, en la sección de alternativas de aplicación, los apartados de aplicación nativa y solución multiplataforma. También apoyé con una comparación entre las cuatro alternativas en `docs/decision-record.md`.
+  Enlaces de commits:
+- (docs: add users, scenarios and functional requirements)[`4e8d82d`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/4e8d82d05967213c88f31631cc97a2624ed33233)
+- (docs: add native, multiplatform and alternatives comparison)[`467e4ed`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/467e4ed692ed8a182a40fca32234a85d3f7672fc)
+- (docs: add ADR context and constraints)[`c46258b`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/c46258bc572a1dccd3d177203262fe2cd1103ddc).
+- **Decisión que puedo explicar y por qué:** La decisión de seleccionar una PWA como estrategia de aplicación, ya que esta se relaciona con las restricciones del proyecto, la conectividad intermitente, el alcance de 14 semanas y la necesidad de mantener un desarrollo reproducible.
+- **Comando o prueba que ejecuté:** `npm ci`, `npm run dev` y `npm run verify`.
+- **Resultado real que observé:**
+  - `npm ci`: instaló correctamente las dependencias del proyecto. Sin embargo, reportó 2 vulnerabilidades de severidad alta.
+  - `npm run dev`: inició el proyecto correctamente y el servidor quedó disponible localmente en `http://localhost:3000`.
+  - `npm run verify`: realizó la verificación y mostró el resultado `Starter verificable: PASS`. También se generó el archivo `reports/verification.json`.
+- **Qué verifica esa prueba y qué no verifica:**
+  - La ejecución de `npm ci` demuestra que las dependencias definidas en el proyecto pueden instalarse y que el entorno puede prepararse mediante el procedimiento indicado.
+  - La ejecución de `npm run dev` demuestra que la aplicación puede iniciarse correctamente en el entorno local y que el servidor de desarrollo de Next.js está disponible en `localhost:3000`.
+  - La ejecución de `npm run verify` demuestra que las verificaciones proporcionadas por el proyecto finalizaron correctamente y que el starter fue considerado verificable mediante el resultado `PASS`.
+    Estas pruebas no demuestran que las funcionalidades futuras de funcionamiento offline, sincronización, notificaciones o autenticación estén implementadas, ya que dichas capacidades corresponden a etapas posteriores del proyecto.
+- **Limitación, dificultad o riesgo que identifiqué:** Una limitación identificada durante la ejecución fue que `npm ci` reportó 2 vulnerabilidades de severidad alta en las dependencias instaladas. Aunque la instalación y la verificación terminaron correctamente, este resultado debe considerarse y revisarse posteriormente antes de utilizar la aplicación en un entorno real.
+- **Uso de IA:** Utilicé una herramienta de inteligencia artificial como apoyo, principalmente para estructurar los escenarios, las condiciones de aceptación, los requisitos y la comparación de las alternativas de aplicación. El contenido fue revisado y adaptado al contexto, las restricciones y los requisitos específicos de la actividad antes de incorporarlo al repositorio.
