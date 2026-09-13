@@ -102,3 +102,29 @@ Enlaces de commits:
   - Revisar aspectos de navegación mediante teclado y foco visible.
   - Sugerir una separación de responsabilidades entre `AppShell`, `layout.tsx` y `page.tsx`.
     La implementación final fue revisada y validada manualmente, incluyendo la ejecución local, navegación mediante teclado y verificación del proyecto.
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución concreta y enlace:** Implementé la configuración del manifest de la PWA mediante la creación y configuración del archivo `public/manifest.webmanifest.` En este archivo definí la identidad y el comportamiento de la aplicación al ser utilizada como PWA, incluyendo el nombre completo `(name)`, nombre corto `(short_name)`, página inicial `(start_url)`, alcance de la aplicación `(scope)` y modo de visualización `(display)`. También agregué los iconos correspondientes de la aplicación en los tamaños de `192x192` y `512x512`, ubicados en `public/icons/`. Los iconos fueron diseñados de acuerdo con la temática del proyecto de inspecciones de laboratorio. 
+
+  Enlaces de commits:
+  - `docs: document week 2 setup and verification` — [`fb3db52`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fb3db52d499a8c46dd5c833e82a8cb6a62aa8e6d) — ISSUE #2: Documentar README de la Semana 2
+  - `feat: add installable PWA manifest` — [`57150d0`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/57150d00843215e6c26e530f81d4b1e5a4ec826f) — ISSUE #2: Implementar manifest instalable de la PWA
+  - `ISSUE #1 — Analizar el estado actual del repositorio` — (https://github.com/karlabrojas/pwa-inspecciones-equipo-12/issues/1)
+  
+- **Decisión que puedo explicar y por qué:** Decidí utilizar un manifest con `display: "standalone"` para que la aplicación pueda presentarse como una aplicación independiente cuando sea instalada, sin depender de la interfaz normal del navegador. También establecí `start_url` y `scope en /`, ya que la aplicación se desarrolla desde la raíz del proyecto y las diferentes rutas de la PWA deben pertenecer al mismo alcance. Para los iconos seleccioné los tamaños de `192x192` y `512x512`, ya que permiten proporcionar recursos gráficos adecuados para diferentes contextos de instalación y visualización. Los iconos mantienen una temática relacionada directamente con el proyecto, utilizando elementos visuales de una lista de inspección, un matraz de laboratorio y una marca de verificación. La configuración actual puede observarse en `public/manifest.webmanifest`.
+
+- **Comando o prueba que ejecuté:**
+
+  `npm run verify`
+
+  La ejecución terminó correctamente mostrando:
+
+  `Starter verificable: `PASS`
+  Además, la verificación generó el reporte `reports/verification.json`. El script de verificación actual comprueba que exista `public/manifest.webmanifest`, además de los demás archivos requeridos por el proyecto.
+
+- **Qué verifica esa prueba y qué no verifica:** `npm run verify` comprueba que los archivos y artefactos requeridos por el proyecto estén presentes, incluyendo el manifest de la PWA y el archivo de pruebas asociado al manifest. Si todos los archivos existen, muestra el resultado `Starter verificable: PASS` y genera el reporte de verificación. Esta prueba no comprueba por sí sola que la aplicación pueda instalarse correctamente en todos los navegadores, ni que los iconos se visualicen correctamente en cada dispositivo. Tampoco comprueba el funcionamiento offline, la sincronización de información o las demás funcionalidades futuras de la PWA.
+
+- **Limitación, dificultad o riesgo que identifiqué:** Una dificultad fue seleccionar y configurar correctamente los elementos necesarios del manifest sin agregar información innecesaria o sensible. También fue necesario considerar que las rutas indicadas en el manifest debían coincidir con los archivos realmente existentes dentro de `public/`, especialmente los iconos de `192x192` y `512x512`. Un riesgo identificado es que la presencia del manifest y los iconos no garantiza por sí sola que toda la experiencia de instalación de la PWA esté completa, ya que posteriormente será necesario implementar y validar otras características relacionadas con el funcionamiento offline y la experiencia PWA.
+
+- **Uso de IA:** Utilicé una herramienta de inteligencia artificial como apoyo durante la implementación del manifest. La utilicé principalmente para comprender la función de las propiedades `name`, `short_name`, `start_url`, `scope`, `display` e `icons`, así como para organizar la estructura del archivo `manifest.webmanifest` y definir una propuesta de diseño para los iconos de la aplicación. También utilicé IA como apoyo para revisar que la configuración fuera coherente con los requisitos de la `Issue #2`. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente el comando de verificación para comprobar el estado del repositorio.
