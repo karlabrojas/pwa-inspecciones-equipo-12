@@ -3,6 +3,8 @@
 - Grupo y equipo: 10° B - Equipo 12
 - Repositorio del equipo:https://github.com/karlabrojas/pwa-inspecciones-equipo-12
 
+# SEMANA 1
+
 ## Integrante: Kevin Ricardo Simon Alfaro
 
 - **Mi contribución concreta y enlace:** redacté las secciones 4 (Requisitos no funcionales medibles: reproducibilidad, accesibilidad, seguridad, privacidad, rendimiento, offline futuro), 5 (Datos sintéticos y límites) y 6 (Criterios de aceptación de Semana 1) en `docs/requirements.md`. En `docs/decision-record.md` reforcé el análisis de "web tradicional" relacionándolo con el riesgo de conectividad intermitente, redacté la sección "Decisión" (justificación de PWA), y redacté "Consecuencias y riesgos" y "Validación" en conjunto con el resto del equipo. Commits: [`06a67ce`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/06a67ce) (RNF, datos sintéticos, criterios de aceptación y refuerzo de web tradicional), [`4cac718`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/4cac718) (sección Decisión), [`9836c12`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9836c12) (Consecuencias, riesgos y Validación).
@@ -59,3 +61,44 @@ Enlaces de commits:
 - **Limitación, dificultad o riesgo que identifiqué:** Limitación, dificultad o riesgo que identifiqué: Una de las principales dificultades identificadas es que la implementación de notificaciones push puede representar un tema complejo y poco conocido durante el desarrollo. Debido a que requiere familiarizarse con tecnologías y configuraciones específicas, existe el riesgo de que su implementación tome más tiempo del establecido inicialmente para esta etapa del proyecto. Por lo tanto, será necesario considerar tiempo adicional para investigar, realizar pruebas y resolver posibles problemas relacionados con su funcionamiento.
 
 - **Uso de IA:** Utilicé una herramienta de inteligencia artificial como apoyo para organizar y redactar algunas ideas relacionadas con el problema de las inspecciones, la conectividad intermitente, las diferencias entre una PWA y una web tradicional y las posibles limitaciones del proyecto. Posteriormente revisé y adapté el contenido para relacionarlo con los requisitos y restricciones establecidos para el proyecto. La IA se utilizó como herramienta de apoyo para la redacción y organización de la información, mientras que la selección del contenido y su incorporación al repositorio fueron realizadas y revisadas por mí.
+
+# SEMANA 2
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:** Implementé el componente reutilizable `AppShell` para establecer la estructura principal de la PWA y posteriormente lo integré con el layout raíz de Next.js. Mis cambios se realizaron principalmente en:
+  - [`src/components/app-shell.tsx`](../src/components/app-shell.tsx)
+  - [`src/app/layout.tsx`](../src/app/layout.tsx)
+  - [`src/app/page.tsx`](../src/app/page.tsx)
+  - [`src/app/globals.css`](../src/app/globals.css)
+    La implementación incluye el encabezado, navegación principal, contenido mediante `children`, pie de página, landmarks semánticos, navegación mediante teclado, indicador visual de foco y adaptación para viewport móvil y escritorio.
+    Enlaces de commits:
+  - `feat: implement accessible application shell` — [`4655da7`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/4655da7cf39470aa34af4e8b35792014698604ce) — ISSUE #3: Construir el componente App Shell
+  - `feat: integrate app shell with Next.js layout` — [`21b4e15`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/21b4e1579be36793ef4d07ee337958adb4d916b0) — ISSUE #4: Integrar App Shell con el layout de Next.js.
+
+- **Decisión que puedo explicar y por qué:** Decidí concentrar la estructura global de la aplicación en un componente `AppShell` y utilizar `children` para insertar el contenido específico de cada página.
+  Esta decisión permite separar las responsabilidades entre la estructura global de la PWA y el contenido de `page.tsx`. De esta forma, elementos como el encabezado, navegación, `<main>` y footer no necesitan repetirse en cada página.
+  También utilicé elementos HTML semánticos como `<header>`, `<nav>`, `<main>` y `<footer>` para facilitar la accesibilidad y hacer reconocibles los landmarks de la aplicación.
+  Para la navegación mediante teclado utilicé enlaces HTML (`<a>`) en lugar de elementos no semánticos con eventos personalizados. Esto permite aprovechar el comportamiento nativo del navegador con `Tab` y `Enter`, complementándolo con un indicador visual mediante `:focus-visible`.
+
+- **Comando o prueba que ejecuté:** `npm run dev`, `npm run verify` y realicé una prueba manual de navegación mediante teclado utilizando `Tab` y `Enter`.
+
+- **Resultado real que observé:** La aplicación cargó correctamente en el entorno local y mostró el App Shell alrededor del contenido de la página.
+  Durante la prueba con teclado, los elementos de navegación pudieron recorrerse mediante `Tab`, mostraron un indicador visual de foco y pudieron activarse mediante `Enter`. La estructura también se mostró correctamente al cambiar entre viewport de escritorio y móvil.
+  El comando de verificación terminó con: PASS
+
+- **Qué verifica esa prueba y qué no verifica:** La prueba manual verifica que el App Shell está integrado correctamente con la aplicación, que la navegación es operable mediante teclado y que el diseño mantiene una estructura utilizable en escritorio y móvil.
+  El comando `npm run verify` verifica las validaciones automatizadas definidas por el proyecto.
+  Estas pruebas no demuestran por sí solas que todas las funcionalidades futuras de la PWA estén implementadas, ni que exista persistencia, sincronización offline, backend o almacenamiento de datos reales.
+
+- **Limitación, dificultad o riesgo que identifiqué:** Una dificultad fue separar correctamente las responsabilidades entre `AppShell` y `page.tsx`, evitando duplicar elementos como `<main>` y `<footer>`.
+  También identifiqué que las rutas utilizadas por la navegación deben existir para que los enlaces no produzcan errores `404`. Por ello, la navegación del App Shell debe coordinarse con las páginas y rutas que se implementen posteriormente.
+  Otra consideración fue mantener la estructura existente de la Semana 1 para evitar introducir cambios innecesarios mientras se incorporaba el nuevo shell.
+
+- **Uso de IA:** Utilicé una herramienta de inteligencia artificial de apoyo durante la implementación del App Shell.
+  La IA se utilizó para:
+  - Revisar la estructura del componente `AppShell`.
+  - Proponer una organización semántica con `header`, `nav`, `main` y `footer`.
+  - Revisar aspectos de navegación mediante teclado y foco visible.
+  - Sugerir una separación de responsabilidades entre `AppShell`, `layout.tsx` y `page.tsx`.
+    La implementación final fue revisada y validada manualmente, incluyendo la ejecución local, navegación mediante teclado y verificación del proyecto.
