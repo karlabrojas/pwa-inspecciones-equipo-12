@@ -3,7 +3,7 @@
 - Grupo y equipo: 10° B - Equipo 12
 - Repositorio del equipo:https://github.com/karlabrojas/pwa-inspecciones-equipo-12
 
-# SEMANA 1
+# SEMANA 1 - WEEK 1
 
 ## Integrante: Kevin Ricardo Simon Alfaro
 
@@ -62,7 +62,7 @@ Enlaces de commits:
 
 - **Uso de IA:** Utilicé una herramienta de inteligencia artificial como apoyo para organizar y redactar algunas ideas relacionadas con el problema de las inspecciones, la conectividad intermitente, las diferencias entre una PWA y una web tradicional y las posibles limitaciones del proyecto. Posteriormente revisé y adapté el contenido para relacionarlo con los requisitos y restricciones establecidos para el proyecto. La IA se utilizó como herramienta de apoyo para la redacción y organización de la información, mientras que la selección del contenido y su incorporación al repositorio fueron realizadas y revisadas por mí.
 
-# Evidencia Week 2
+# SEMANA 2 - WEEK 2
 
 ## Integrante: Kevin Ricardo Simon Alfaro
 
@@ -74,7 +74,6 @@ Enlaces de commits:
 - **Limitación, dificultad o riesgo que identifiqué:** La implementación de esta semana simula los estados con controles de demostración y utiliza datos sintéticos en memoria. Todavía no existe un formulario persistente, almacenamiento local, Service Worker ni sincronización; por eso los estados preparados no representan todavía un flujo offline completo.
 - **Uso de IA:** Utilicé una herramienta de IA como apoyo para revisar la estructura de los estados de interfaz, los criterios de accesibilidad y la prueba del manifest. Decidí qué cambios incorporar, revisé el código dentro del repositorio, ejecuté las pruebas y confirmé personalmente sus resultados antes de documentarlos.
 - **Validación humana realizada:** Revisé manualmente la pantalla inicial, cambié entre los estados de carga, error, vacío y normal, comprobé que el botón `Reintentar` regresara al estado normal y confirmé que el proyecto conservara el funcionamiento esperado después de ejecutar las pruebas.
-# SEMANA 2
 
 ## Integrante: Karla Beatriz Rojas Rojas
 
@@ -117,13 +116,13 @@ Enlaces de commits:
 
 ## Integrante: Angel Romero Barragan
 
-- **Mi contribución concreta y enlace:** Implementé la configuración del manifest de la PWA mediante la creación y configuración del archivo `public/manifest.webmanifest.` En este archivo definí la identidad y el comportamiento de la aplicación al ser utilizada como PWA, incluyendo el nombre completo `(name)`, nombre corto `(short_name)`, página inicial `(start_url)`, alcance de la aplicación `(scope)` y modo de visualización `(display)`. También agregué los iconos correspondientes de la aplicación en los tamaños de `192x192` y `512x512`, ubicados en `public/icons/`. Los iconos fueron diseñados de acuerdo con la temática del proyecto de inspecciones de laboratorio. 
+- **Mi contribución concreta y enlace:** Implementé la configuración del manifest de la PWA mediante la creación y configuración del archivo `public/manifest.webmanifest.` En este archivo definí la identidad y el comportamiento de la aplicación al ser utilizada como PWA, incluyendo el nombre completo `(name)`, nombre corto `(short_name)`, página inicial `(start_url)`, alcance de la aplicación `(scope)` y modo de visualización `(display)`. También agregué los iconos correspondientes de la aplicación en los tamaños de `192x192` y `512x512`, ubicados en `public/icons/`. Los iconos fueron diseñados de acuerdo con la temática del proyecto de inspecciones de laboratorio.
 
   Enlaces de commits:
   - `docs: document week 2 setup and verification` — [`fb3db52`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fb3db52d499a8c46dd5c833e82a8cb6a62aa8e6d) — ISSUE #2: Documentar README de la Semana 2
   - `feat: add installable PWA manifest` — [`57150d0`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/57150d00843215e6c26e530f81d4b1e5a4ec826f) — ISSUE #2: Implementar manifest instalable de la PWA
   - `ISSUE #1 — Analizar el estado actual del repositorio` — (https://github.com/karlabrojas/pwa-inspecciones-equipo-12/issues/1)
-  
+
 - **Decisión que puedo explicar y por qué:** Decidí utilizar un manifest con `display: "standalone"` para que la aplicación pueda presentarse como una aplicación independiente cuando sea instalada, sin depender de la interfaz normal del navegador. También establecí `start_url` y `scope en /`, ya que la aplicación se desarrolla desde la raíz del proyecto y las diferentes rutas de la PWA deben pertenecer al mismo alcance. Para los iconos seleccioné los tamaños de `192x192` y `512x512`, ya que permiten proporcionar recursos gráficos adecuados para diferentes contextos de instalación y visualización. Los iconos mantienen una temática relacionada directamente con el proyecto, utilizando elementos visuales de una lista de inspección, un matraz de laboratorio y una marca de verificación. La configuración actual puede observarse en `public/manifest.webmanifest`.
 
 - **Comando o prueba que ejecuté:**
@@ -132,8 +131,7 @@ Enlaces de commits:
 
   La ejecución terminó correctamente mostrando:
 
-  `Starter verificable: `PASS`
-  Además, la verificación generó el reporte `reports/verification.json`. El script de verificación actual comprueba que exista `public/manifest.webmanifest`, además de los demás archivos requeridos por el proyecto.
+  `Starter verificable: `PASS`Además, la verificación generó el reporte`reports/verification.json`. El script de verificación actual comprueba que exista `public/manifest.webmanifest`, además de los demás archivos requeridos por el proyecto.
 
 - **Qué verifica esa prueba y qué no verifica:** `npm run verify` comprueba que los archivos y artefactos requeridos por el proyecto estén presentes, incluyendo el manifest de la PWA y el archivo de pruebas asociado al manifest. Si todos los archivos existen, muestra el resultado `Starter verificable: PASS` y genera el reporte de verificación. Esta prueba no comprueba por sí sola que la aplicación pueda instalarse correctamente en todos los navegadores, ni que los iconos se visualicen correctamente en cada dispositivo. Tampoco comprueba el funcionamiento offline, la sincronización de información o las demás funcionalidades futuras de la PWA.
 
