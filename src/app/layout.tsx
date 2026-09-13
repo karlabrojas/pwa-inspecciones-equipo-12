@@ -5,6 +5,11 @@ import { AppShell } from "@/components/app-shell";
 export const metadata: Metadata = {
   title: "Inspecciones de laboratorio",
   description: "Proyecto base de Aplicaciones Web Progresivas",
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport = {
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({

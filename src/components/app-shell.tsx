@@ -13,6 +13,10 @@ const navigationItems = [
 export function AppShell({ children }: AppShellProps) {
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Saltar al contenido principal
+      </a>
+
       <header className="app-header">
         <div className="app-header-content">
           <a className="app-brand" href="/">
