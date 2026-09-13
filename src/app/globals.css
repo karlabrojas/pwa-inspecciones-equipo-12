@@ -117,6 +117,85 @@ dt { color: var(--muted); font-size: .82rem; }
 dd { font-size: .82rem; font-weight: 700; margin: 0; text-align: right; }
 .footer { color: var(--muted); font-size: .85rem; padding: 25px 0 0; }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: #2563eb;
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
+.state-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.state-switcher button {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+.state-switcher button:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.state-switcher button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.state-switcher button.active {
+  background: #ffffff;
+  color: #2563eb;
+  border-color: #ffffff;
+}
+
+.state-message {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.state-error {
+  border-color: #f3c6c6;
+  background: #fdf2f2;
+  color: #9b2c2c;
+}
+
+.state-error button {
+  margin-top: 14px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.state-error button:hover {
+  background: #2745b8;
+}
+
 @media (max-width: 760px) {
   .page-shell { padding: 20px 16px; }
   .hero { padding: 28px 22px; }
