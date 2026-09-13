@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+﻿import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -9,9 +9,12 @@ const required = [
   "src/app/page.tsx",
   "src/app/globals.css",
   "src/lib/data/inspections.ts",
+  "src/components/app-shell.tsx",
+  "public/manifest.webmanifest",
   "docs/requirements.md",
   "docs/decision-record.md",
   "tests/starter.spec.mjs",
+  "tests/manifest.spec.ts",
   "evidence/individual.md"
 ];
 
@@ -34,4 +37,3 @@ if (missing.length > 0) {
 
 console.log("Starter verificable: PASS");
 console.log(`Reporte: ${report}`);
-
