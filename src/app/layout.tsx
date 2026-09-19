@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+
 import { AppShell } from "@/components/app-shell";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 
 export const metadata: Metadata = {
   title: "Inspecciones de laboratorio",
@@ -14,10 +16,14 @@ export const viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{ 
+  children: React.ReactNode; 
+}>) {
   return (
     <html lang="es-MX">
       <body>
+        <ServiceWorkerRegistration />
+        
         <AppShell>{children}</AppShell>
       </body>
     </html>
