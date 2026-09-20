@@ -138,3 +138,38 @@ Enlaces de commits:
 - **Limitación, dificultad o riesgo que identifiqué:** Una dificultad fue seleccionar y configurar correctamente los elementos necesarios del manifest sin agregar información innecesaria o sensible. También fue necesario considerar que las rutas indicadas en el manifest debían coincidir con los archivos realmente existentes dentro de `public/`, especialmente los iconos de `192x192` y `512x512`. Un riesgo identificado es que la presencia del manifest y los iconos no garantiza por sí sola que toda la experiencia de instalación de la PWA esté completa, ya que posteriormente será necesario implementar y validar otras características relacionadas con el funcionamiento offline y la experiencia PWA.
 
 - **Uso de IA:** Utilicé una herramienta de inteligencia artificial como apoyo durante la implementación del manifest. La utilicé principalmente para comprender la función de las propiedades `name`, `short_name`, `start_url`, `scope`, `display` e `icons`, así como para organizar la estructura del archivo `manifest.webmanifest` y definir una propuesta de diseño para los iconos de la aplicación. También utilicé IA como apoyo para revisar que la configuración fuera coherente con los requisitos de la `Issue #2`. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente el comando de verificación para comprobar el estado del repositorio.
+
+# SEMANA 3 - WEEK 3
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+  Implementé y consolidé el registro del Service Worker en `src/lib/pwa/register-service-worker.ts`. La función verifica que el código se ejecute en el navegador y que el navegador soporte Service Workers antes de realizar el registro de `public/sw.js`. Además, configuré el registro para ejecutarse después de la carga de la página, evitando bloquear la carga inicial de la aplicación. También documenté las estrategias de caché utilizadas en `docs/cache-strategy.md`, incluyendo Cache First, Stale While Revalidate, Network First y Network Only, así como su comportamiento en escenarios con y sin conexión.
+
+  Enlaces de commits:
+  - `feat: register service worker and document cache strategy` — [`a4bdf6e`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/a4bdf6ec0f7fed9c5584a817fed764c9105355cf) — ISSUE #13: Registrar Service Worker y documentar estrategia de caché
+  - `fix: consolidate service worker registration` — [`de33767`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/de3376733be1b5d04602a5145a16db7bf8de9053)
+  - `fix: update service worker registration test` — [`9544d46`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9544d461941244aaad22aa32bc6b16dad37e16aa)
+  - `Add Week 3 offline checks and workflow` — [`6eb684e`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/6eb684ef35014733e213304aed91940f7d4b8a0a)
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí realizar el registro del Service Worker después de la carga inicial de la página mediante el evento `load`. Esto permite que el Service Worker se registre sin bloquear innecesariamente la carga inicial de la aplicación. También mantuve la comprobación de `window` y de `navigator.serviceWorker` para evitar errores cuando el código se ejecute fuera del navegador o en un entorno que no soporte Service Workers.
+
+- **Comando o prueba que ejecuté:**
+  Ejecuté:
+  `npm test`
+
+  También revisé específicamente los archivos y la integración del registro del Service Worker y ejecuté las pruebas automatizadas relacionadas con el Service Worker y el funcionamiento offline.
+
+- **Resultado real que observé:**
+  `npm test` terminó correctamente. Las pruebas del Service Worker reportaron **8 pruebas exitosas y 0 fallidas**, mientras que las pruebas de funcionamiento offline reportaron **10 pruebas exitosas y 0 fallidas**. También se ejecutaron correctamente las pruebas existentes del starter y del manifest.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  La prueba verifica que el registro y la implementación del Service Worker sean compatibles con los casos automatizados definidos en el proyecto, incluyendo el ciclo de vida, las estrategias de caché, el comportamiento ante pérdida de conexión, el fallback offline y algunos casos de regresión.
+  No verifica por sí sola todos los aspectos de una instalación real de la PWA en diferentes navegadores ni sustituye la comprobación manual en DevTools. Tampoco demuestra por sí sola que GitHub Actions o el proceso completo de build hayan terminado correctamente.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Una dificultad fue consolidar el registro del Service Worker para evitar tener implementaciones duplicadas. También fue necesario actualizar la prueba de registro para que apuntara al archivo definitivo `src/lib/pwa/register-service-worker.ts`. Identifiqué como riesgo que una modificación futura de `public/sw.js` o de las rutas de caché no se refleje en la documentación, por lo que ambas partes deben mantenerse sincronizadas.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para revisar la estructura del registro del Service Worker, analizar posibles problemas de integración y mejorar la documentación de las estrategias de caché. La implementación final fue revisada y validada manualmente, verificando los archivos modificados y ejecutando las pruebas automatizadas del proyecto. La decisión de registrar el Service Worker después de la carga inicial y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
