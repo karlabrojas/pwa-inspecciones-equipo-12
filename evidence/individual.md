@@ -173,3 +173,79 @@ Enlaces de commits:
 
 - **Uso de IA:**
   Utilicé IA como apoyo para revisar la estructura del registro del Service Worker, analizar posibles problemas de integración y mejorar la documentación de las estrategias de caché. La implementación final fue revisada y validada manualmente, verificando los archivos modificados y ejecutando las pruebas automatizadas del proyecto. La decisión de registrar el Service Worker después de la carga inicial y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
+
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución concreta y enlace:**
+  Implementé y ajusté el Service Worker de la PWA en `public/sw.js`, incluyendo su ciclo de vida de instalación `(install)` y activación `(activate)`. También incorporé el precache de recursos principales, el versionado de cachés y la eliminación de versiones anteriores.
+
+  Además, implementé las estrategias de caché definidas para el proyecto:
+
+  - Cache First: para los recursos estáticos, iconos y archivos de Next.js.
+
+  - Stale While Revalidate: para recursos que pueden actualizarse periódicamente.
+
+  - Network First: para los datos de inspecciones y las solicitudes de navegación.
+
+  - Network Only: para solicitudes que no deben almacenarse en caché.
+
+  También modifiqué la forma en que se guardan los recursos de `/_next/static/`, eliminando los parámetros de consulta como `?v=..`. mediante la función `getCacheKey`. Esto evita que se generen varias entradas del mismo recurso debido a diferentes parámetros de versión.
+
+  Finalmente, agregué y ajusté la prueba automatizada `tests/service-worker.spec.ts` para comprobar la estructura y las características principales del Service Worker.
+
+  Enlaces de commits:
+
+  - `feat: implement service worker v1 and cache strategies` — [`f0a8c73`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f0a8c7347bcb8a576438a2b157d869e28ca2c14f) — ISSUE #12: Implementar Service Worker y ciclo de vida
+
+  - `test: update service worker tests for cache normalization` — [`6219cfc`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/6219cfceb8ab2abf9b85805ff001a5520adafdba) — ISSUE #12: Implementar Service Worker y ciclo de vida
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí utilizar cachés versionadas, como inspecciones-static-v1 e inspecciones-runtime-v1, para controlar las actualizaciones del Service Worker y evitar que los recursos antiguos permanezcan indefinidamente almacenados.
+
+  También decidí normalizar las URLs de los recursos ubicados en /_next/static/ eliminando sus parámetros de consulta. Durante las pruebas observé que un mismo archivo podía almacenarse con diferentes valores, por ejemplo, main-app.js?v=.... Esto provocaba que, al perder la conexión, el navegador buscara una URL diferente a la que estaba guardada en la caché.
+
+  Por esta razón, implementé la función getCacheKey, que utiliza la ruta del recurso sin los parámetros de consulta para mejorar la reutilización de los archivos almacenados y favorecer el funcionamiento de la aplicación cuando no existe conexión. 
+
+- **Comando o prueba que ejecuté:**
+  `npm test`
+
+  También realicé pruebas manuales desde las herramientas de desarrollador de Brave, revisando el estado del Service Worker y el contenido de Cache Storage mediante:
+  - `await caches.keys()`
+  - `navigator.serviceWorker.controller?.scriptURL`
+  - `const cache = await caches.open("inspecciones-static-v1");`
+
+    `(await cache.keys()).map(request => request.url);`
+
+- **Resultado real que observé:**
+  El Service Worker se registró correctamente y desde `Brave DevTools` se observó que se encontraba activo mediante el estado `activated and is running.`
+
+  En Cache Storage observé que se almacenaban los recursos principales de la aplicación, como:
+  - /
+  - /manifest.webmanifest
+  - /icons/icon-192.png
+  - /icons/icon-512.png
+  - Archivos CSS y JavaScript de /_next/static/
+
+- **Qué verifica esa prueba y qué no verifica:**
+  La prueba automatizada del Service Worker verifica que existan los eventos principales del ciclo de vida `(install, activate y fetch)`, el versionado de cachés, los recursos precargados, las estrategias de caché, la eliminación de cachés antiguas y la normalización de las URLs de los recursos de Next.js.
+
+  También comprueba que el registro del Service Worker apunte a `/sw.js` y que exista un manejo de errores durante el registro.
+
+  Estas pruebas verifican principalmente la estructura del código y la presencia de las características esperadas. No demuestran por sí solas que la aplicación funcione correctamente sin conexión en todos los navegadores o dispositivos.
+
+  Tampoco comprueban completamente la sincronización de datos, el almacenamiento mediante IndexedDB, la autenticación, el funcionamiento de un backend real ni la instalación definitiva de la PWA. La prueba manual en Brave DevTools es necesaria para complementar las pruebas automatizadas.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Una de las principales dificultades fue comprobar que los archivos estáticos de Next.js se recuperaran correctamente cuando se perdía la conexión. Aunque los recursos se guardaban en Cache Storage, los parámetros de consulta de las URLs podían provocar que el navegador buscara una entrada diferente a la almacenada.
+
+  También identifiqué el riesgo de que una actualización de las versiones de caché o de las rutas utilizadas por el Service Worker no se refleje correctamente en las pruebas y en la documentación. Por este motivo, es necesario mantener sincronizados el código del Service Worker, las pruebas automatizadas y la estrategia de caché documentada.
+
+  Otra limitación es que el funcionamiento offline actual depende de los recursos que hayan sido almacenados previamente. No toda la aplicación está disponible automáticamente sin conexión, ya que solamente se guardan los recursos definidos por las estrategias implementadas.
+
+- **Uso de IA:**
+  Utilicé una herramienta de inteligencia artificial como apoyo para estructurar la implementación del Service Worker, revisar las estrategias de caché y analizar el problema relacionado con los parámetros ?v=... de los archivos estáticos de Next.js.
+
+  También utilicé IA para proponer y revisar la prueba automatizada `tests/service-worker.spec.ts`, así como para identificar el motivo por el que la expresión regular del registro del Service Worker no coincidía con el código que contenía un salto de línea.
+
+  La implementación final fue revisada y adaptada al contexto del proyecto. Realicé pruebas manuales desde Brave DevTools para comprobar el registro del Service Worker, su estado de activación y los recursos almacenados en Cache Storage. La selección de los cambios y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
