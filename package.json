@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts",
+    "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts && node --experimental-strip-types tests/service-worker-behavior.spec.ts && node --experimental-strip-types tests/offline.spec.ts",
     "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
