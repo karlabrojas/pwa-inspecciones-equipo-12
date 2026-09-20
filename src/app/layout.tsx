@@ -3,7 +3,6 @@ import "./globals.css";
 
 import { AppShell } from "@/components/app-shell";
 import { PwaRegister } from "@/components/pwa-register";
-import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 
 export const metadata: Metadata = {
   title: "Inspecciones de laboratorio",
@@ -17,15 +16,14 @@ export const viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ 
-  children: React.ReactNode; 
+}: Readonly<{
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="es-MX">
       <body>
         <PwaRegister />
-        <ServiceWorkerRegistration />
-        
+
         <AppShell>{children}</AppShell>
       </body>
     </html>

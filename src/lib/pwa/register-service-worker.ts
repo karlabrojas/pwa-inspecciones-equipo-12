@@ -7,7 +7,7 @@ export function registerServiceWorker(): void {
     return;
   }
 
-  window.addEventListener("load", () => {
+  const register = () => {
     navigator.serviceWorker
       .register("/sw.js")
       .then((registration) => {
@@ -16,5 +16,11 @@ export function registerServiceWorker(): void {
       .catch((error) => {
         console.error("[PWA] Error al registrar el Service Worker:", error);
       });
-  });
+  };
+
+  if (document.readyState === "complete") {
+    register();
+  } else {
+    window.addEventListener("load", register, { once: true });
+  }
 }
