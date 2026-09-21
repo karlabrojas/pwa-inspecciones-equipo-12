@@ -138,3 +138,179 @@ Enlaces de commits:
 - **Limitación, dificultad o riesgo que identifiqué:** Una dificultad fue seleccionar y configurar correctamente los elementos necesarios del manifest sin agregar información innecesaria o sensible. También fue necesario considerar que las rutas indicadas en el manifest debían coincidir con los archivos realmente existentes dentro de `public/`, especialmente los iconos de `192x192` y `512x512`. Un riesgo identificado es que la presencia del manifest y los iconos no garantiza por sí sola que toda la experiencia de instalación de la PWA esté completa, ya que posteriormente será necesario implementar y validar otras características relacionadas con el funcionamiento offline y la experiencia PWA.
 
 - **Uso de IA:** Utilicé una herramienta de inteligencia artificial como apoyo durante la implementación del manifest. La utilicé principalmente para comprender la función de las propiedades `name`, `short_name`, `start_url`, `scope`, `display` e `icons`, así como para organizar la estructura del archivo `manifest.webmanifest` y definir una propuesta de diseño para los iconos de la aplicación. También utilicé IA como apoyo para revisar que la configuración fuera coherente con los requisitos de la `Issue #2`. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente el comando de verificación para comprobar el estado del repositorio.
+
+# SEMANA 3 - WEEK 3
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+  Implementé y consolidé el registro del Service Worker en `src/lib/pwa/register-service-worker.ts`. La función verifica que el código se ejecute en el navegador y que el navegador soporte Service Workers antes de realizar el registro de `public/sw.js`. Además, configuré el registro para ejecutarse después de la carga de la página, evitando bloquear la carga inicial de la aplicación. También documenté las estrategias de caché utilizadas en `docs/cache-strategy.md`, incluyendo Cache First, Stale While Revalidate, Network First y Network Only, así como su comportamiento en escenarios con y sin conexión.
+
+  Enlaces de commits:
+  - `feat: register service worker and document cache strategy` — [`a4bdf6e`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/a4bdf6ec0f7fed9c5584a817fed764c9105355cf) — ISSUE #13: Registrar Service Worker y documentar estrategia de caché
+  - `fix: consolidate service worker registration` — [`de33767`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/de3376733be1b5d04602a5145a16db7bf8de9053)
+  - `fix: update service worker registration test` — [`9544d46`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9544d461941244aaad22aa32bc6b16dad37e16aa)
+  - `Add Week 3 offline checks and workflow` — [`6eb684e`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/6eb684ef35014733e213304aed91940f7d4b8a0a)
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí realizar el registro del Service Worker después de la carga inicial de la página mediante el evento `load`. Esto permite que el Service Worker se registre sin bloquear innecesariamente la carga inicial de la aplicación. También mantuve la comprobación de `window` y de `navigator.serviceWorker` para evitar errores cuando el código se ejecute fuera del navegador o en un entorno que no soporte Service Workers.
+
+- **Comando o prueba que ejecuté:**
+  Ejecuté:
+  `npm test`
+
+  También revisé específicamente los archivos y la integración del registro del Service Worker y ejecuté las pruebas automatizadas relacionadas con el Service Worker y el funcionamiento offline.
+
+- **Resultado real que observé:**
+  `npm test` terminó correctamente. Las pruebas del Service Worker reportaron **8 pruebas exitosas y 0 fallidas**, mientras que las pruebas de funcionamiento offline reportaron **10 pruebas exitosas y 0 fallidas**. También se ejecutaron correctamente las pruebas existentes del starter y del manifest.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  La prueba verifica que el registro y la implementación del Service Worker sean compatibles con los casos automatizados definidos en el proyecto, incluyendo el ciclo de vida, las estrategias de caché, el comportamiento ante pérdida de conexión, el fallback offline y algunos casos de regresión.
+  No verifica por sí sola todos los aspectos de una instalación real de la PWA en diferentes navegadores ni sustituye la comprobación manual en DevTools. Tampoco demuestra por sí sola que GitHub Actions o el proceso completo de build hayan terminado correctamente.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Una dificultad fue consolidar el registro del Service Worker para evitar tener implementaciones duplicadas. También fue necesario actualizar la prueba de registro para que apuntara al archivo definitivo `src/lib/pwa/register-service-worker.ts`. Identifiqué como riesgo que una modificación futura de `public/sw.js` o de las rutas de caché no se refleje en la documentación, por lo que ambas partes deben mantenerse sincronizadas.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para revisar la estructura del registro del Service Worker, analizar posibles problemas de integración y mejorar la documentación de las estrategias de caché. La implementación final fue revisada y validada manualmente, verificando los archivos modificados y ejecutando las pruebas automatizadas del proyecto. La decisión de registrar el Service Worker después de la carga inicial y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
+
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución concreta y enlace:**
+  Implementé y ajusté el Service Worker de la PWA en `public/sw.js`, incluyendo su ciclo de vida de instalación `(install)` y activación `(activate)`. También incorporé el precache de recursos principales, el versionado de cachés y la eliminación de versiones anteriores.
+
+  Además, implementé las estrategias de caché definidas para el proyecto:
+
+  - Cache First: para los recursos estáticos, iconos y archivos de Next.js.
+
+  - Stale While Revalidate: para recursos que pueden actualizarse periódicamente.
+
+  - Network First: para los datos de inspecciones y las solicitudes de navegación.
+
+  - Network Only: para solicitudes que no deben almacenarse en caché.
+
+  También modifiqué la forma en que se guardan los recursos de `/_next/static/`, eliminando los parámetros de consulta como `?v=..`. mediante la función `getCacheKey`. Esto evita que se generen varias entradas del mismo recurso debido a diferentes parámetros de versión.
+
+  Finalmente, agregué y ajusté la prueba automatizada `tests/service-worker.spec.ts` para comprobar la estructura y las características principales del Service Worker.
+
+  Enlaces de commits:
+
+  - `feat: implement service worker v1 and cache strategies` — [`f0a8c73`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f0a8c7347bcb8a576438a2b157d869e28ca2c14f) — ISSUE #12: Implementar Service Worker y ciclo de vida
+
+  - `test: update service worker tests for cache normalization` — [`6219cfc`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/6219cfceb8ab2abf9b85805ff001a5520adafdba) — ISSUE #12: Implementar Service Worker y ciclo de vida
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí utilizar cachés versionadas, como inspecciones-static-v1 e inspecciones-runtime-v1, para controlar las actualizaciones del Service Worker y evitar que los recursos antiguos permanezcan indefinidamente almacenados.
+
+  También decidí normalizar las URLs de los recursos ubicados en /_next/static/ eliminando sus parámetros de consulta. Durante las pruebas observé que un mismo archivo podía almacenarse con diferentes valores, por ejemplo, main-app.js?v=.... Esto provocaba que, al perder la conexión, el navegador buscara una URL diferente a la que estaba guardada en la caché.
+
+  Por esta razón, implementé la función getCacheKey, que utiliza la ruta del recurso sin los parámetros de consulta para mejorar la reutilización de los archivos almacenados y favorecer el funcionamiento de la aplicación cuando no existe conexión. 
+
+- **Comando o prueba que ejecuté:**
+  `npm test`
+
+  También realicé pruebas manuales desde las herramientas de desarrollador de Brave, revisando el estado del Service Worker y el contenido de Cache Storage mediante:
+  - `await caches.keys()`
+  - `navigator.serviceWorker.controller?.scriptURL`
+  - `const cache = await caches.open("inspecciones-static-v1");`
+
+    `(await cache.keys()).map(request => request.url);`
+
+- **Resultado real que observé:**
+  El Service Worker se registró correctamente y desde `Brave DevTools` se observó que se encontraba activo mediante el estado `activated and is running.`
+
+  En Cache Storage observé que se almacenaban los recursos principales de la aplicación, como:
+  - /
+  - /manifest.webmanifest
+  - /icons/icon-192.png
+  - /icons/icon-512.png
+  - Archivos CSS y JavaScript de /_next/static/
+
+- **Qué verifica esa prueba y qué no verifica:**
+  La prueba automatizada del Service Worker verifica que existan los eventos principales del ciclo de vida `(install, activate y fetch)`, el versionado de cachés, los recursos precargados, las estrategias de caché, la eliminación de cachés antiguas y la normalización de las URLs de los recursos de Next.js.
+
+  También comprueba que el registro del Service Worker apunte a `/sw.js` y que exista un manejo de errores durante el registro.
+
+  Estas pruebas verifican principalmente la estructura del código y la presencia de las características esperadas. No demuestran por sí solas que la aplicación funcione correctamente sin conexión en todos los navegadores o dispositivos.
+
+  Tampoco comprueban completamente la sincronización de datos, el almacenamiento mediante IndexedDB, la autenticación, el funcionamiento de un backend real ni la instalación definitiva de la PWA. La prueba manual en Brave DevTools es necesaria para complementar las pruebas automatizadas.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Una de las principales dificultades fue comprobar que los archivos estáticos de Next.js se recuperaran correctamente cuando se perdía la conexión. Aunque los recursos se guardaban en Cache Storage, los parámetros de consulta de las URLs podían provocar que el navegador buscara una entrada diferente a la almacenada.
+
+  También identifiqué el riesgo de que una actualización de las versiones de caché o de las rutas utilizadas por el Service Worker no se refleje correctamente en las pruebas y en la documentación. Por este motivo, es necesario mantener sincronizados el código del Service Worker, las pruebas automatizadas y la estrategia de caché documentada.
+
+  Otra limitación es que el funcionamiento offline actual depende de los recursos que hayan sido almacenados previamente. No toda la aplicación está disponible automáticamente sin conexión, ya que solamente se guardan los recursos definidos por las estrategias implementadas.
+
+- **Uso de IA:**
+  Utilicé una herramienta de inteligencia artificial como apoyo para estructurar la implementación del Service Worker, revisar las estrategias de caché y analizar el problema relacionado con los parámetros ?v=... de los archivos estáticos de Next.js.
+
+  También utilicé IA para proponer y revisar la prueba automatizada `tests/service-worker.spec.ts`, así como para identificar el motivo por el que la expresión regular del registro del Service Worker no coincidía con el código que contenía un salto de línea.
+
+  La implementación final fue revisada y adaptada al contexto del proyecto. Realicé pruebas manuales desde Brave DevTools para comprobar el registro del Service Worker, su estado de activación y los recursos almacenados en Cache Storage. La selección de los cambios y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
+
+  ## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+  Implementé las pruebas automatizadas del comportamiento crítico del Service Worker y del funcionamiento offline de la PWA, correspondientes al Issue #14 (#19 en GitHub). Como la prueba existente `tests/service-worker.spec.ts` revisa principalmente que ciertas líneas existan en el código, agregué pruebas que ejecutan el `public/sw.js` real y verifican su comportamiento.
+
+  Mi trabajo incluye:
+
+  - `tests/helpers/sw-harness.mjs`: entorno de pruebas que carga el `public/sw.js` real en un sandbox de Node (`node:vm`) con `CacheStorage`, `fetch` y `clients` simulados, usando solo datos sintéticos y sin red real.
+
+  - `tests/service-worker-behavior.spec.ts` (8 pruebas): precache de los recursos base, eliminación de cachés viejas al activar, peticiones POST y de otro origen sin almacenarse, normalización de los parámetros `?v=` de `/_next/static/`, revalidación del manifest en segundo plano y ausencia de secretos en `sw.js`.
+
+  - `tests/offline.spec.ts` (10 pruebas): navegación sin conexión con fallback a la página inicial precacheada, página "Sin conexión" con estado 503 cuando no hay nada en caché, íconos, manifest y `/api/inspections` disponibles sin red, una regresión para que las respuestas 500 no se almacenen y dos límites conocidos.
+
+  - `package.json`: agregué ambas pruebas al script `test` para que se ejecuten con `npm test`.
+
+  Trabajé en la rama `feat/w03-offline-tests` mediante el Pull Request #25.
+
+  Enlaces de commits:
+
+  - `test: add behavior and offline tests for service worker` — [`7e05ded`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e05ded) — ISSUE #14: Crear pruebas offline
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí probar el Service Worker ejecutando su código real dentro de un sandbox de Node, en lugar de depender de un navegador o de nuevas dependencias. El sandbox simula `CacheStorage`, `fetch`, `clients` y `self`, y permite controlar la conexión (con y sin red) para reproducir los escenarios offline.
+
+  Elegí esta opción porque el Issue #14 pide verificar comportamiento y no solamente la existencia de archivos, y porque las pruebas debían ser reproducibles, deterministas y no depender de servicios privados. Además, funcionan con `node:test`, que ya viene con Node, así que se ejecutan con `npm test` sin instalar nada y de la misma forma en GitHub Actions.
+
+  También decidí incluir una regresión relevante: que una respuesta de error (500) no se guarde en caché, porque de lo contrario la aplicación podría seguir mostrando un error aunque el servidor ya se hubiera recuperado. El trade-off es que el sandbox no reproduce el ciclo de vida real del navegador, por lo que no reemplaza una revisión manual en DevTools.
+
+- **Comando o prueba que ejecuté:**
+  - `npm ci`
+  - `npm test`
+  - `npm run verify`
+  - Prueba de mutación sobre `public/sw.js`: quité temporalmente el filtro `response.ok` de la función `networkFirst`, ejecuté `node --experimental-strip-types tests/offline.spec.ts` y restauré el archivo con `git checkout public/sw.js`.
+
+- **Resultado real que observé:**
+  `npm test` terminó correctamente: `starter.spec.mjs`, `manifest.spec.ts` y `service-worker.spec.ts` en PASS, `service-worker-behavior.spec.ts` con 8 pruebas y 0 fallos, y `offline.spec.ts` con 10 pruebas y 0 fallos.
+
+  `npm run verify` terminó con `Starter verificable: PASS` y generó `reports/verification.json`.
+
+  En la prueba de mutación, con `sw.js` modificado falló únicamente la prueba "regresion: una respuesta 500 no se guarda ni se sirve despues sin conexion" (`500 !== 200`, `fail 1`), mientras las otras 9 pruebas de offline seguían pasando. Después de restaurar el archivo, `git status` ya no mostró `public/sw.js` como modificado.
+
+  Tras subir la rama, GitHub Actions mostró los checks en verde (4/4) para `feat/w03-offline-tests` y el Pull Request #25.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas verifican que la instalación precachea exactamente los cuatro recursos base (`/`, `/manifest.webmanifest`, `/icons/icon-192.png` y `/icons/icon-512.png`); que al activarse se eliminan solo las cachés antiguas de `inspecciones-*`, se conservan las vigentes y las de otras aplicaciones, y se llama a `clients.claim()`; que las peticiones POST y las de otro origen van directamente a la red sin almacenarse; que los recursos de `/_next/static/` ignoran el parámetro `?v=`; que el manifest responde desde caché y se revalida en segundo plano; y que `public/sw.js` no contiene secretos ni tokens.
+
+  En modo offline verifican que la navegación a la raíz y a una ruta nunca visitada devuelve la página inicial precacheada, que sin caché se muestra la página "Sin conexión" con estado 503, que los íconos, el manifest y `/api/inspections` siguen disponibles después de haberse consultado con conexión, y que una respuesta 500 no se guarda en caché.
+
+  Estas pruebas no verifican el ciclo de vida real del Service Worker en un navegador (estado waiting, varias pestañas o cuotas de almacenamiento), la instalación de la PWA en un dispositivo, ni la sincronización de datos, IndexedDB o autenticación, que corresponden a etapas posteriores.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Al leer `public/sw.js` para escribir las pruebas, tuve que ajustar mis primeras suposiciones: por ejemplo, el Service Worker no tiene un archivo `offline.html`, sino que devuelve la página inicial precacheada y, como último recurso, una respuesta HTML con estado 503. Las pruebas se corrigieron para reflejar el comportamiento real.
+
+  Identifiqué dos límites del comportamiento actual, que dejé documentados como pruebas: los recursos estáticos que no están precacheados no tienen fallback y fallan sin conexión, y las peticiones POST sin conexión fallan porque todavía no existe una cola offline.
+
+  También detecté un posible riesgo al analizar el código, que aún no confirmé en el navegador: el manifest se revalida y la versión nueva se guarda en `inspecciones-runtime-v1`, pero `caches.match` busca las cachés en orden de creación y encuentra primero la copia guardada en `inspecciones-static-v1`, por lo que la versión actualizada podría no llegar a servirse. Por último, como el sandbox simula el Service Worker, es necesario complementarlo con una revisión manual en DevTools.
+
+- **Uso de IA:**
+  Utilicé una herramienta de inteligencia artificial como apoyo para diseñar el sandbox de pruebas, redactar los casos de `tests/service-worker-behavior.spec.ts` y `tests/offline.spec.ts` a partir del código de `public/sw.js`, proponer la prueba de mutación y guiarme en los comandos de Git y en la redacción de esta evidencia.
+
+  Los fragmentos influenciados por IA son `tests/helpers/sw-harness.mjs`, `tests/service-worker-behavior.spec.ts`, `tests/offline.spec.ts` y el borrador de esta sección. Adapté las pruebas después de revisar el código real del Service Worker y corregí las que no coincidían con su comportamiento.
+
+- **Validación humana realizada:**
+  Copié los archivos al proyecto, ejecuté `npm test` y `npm run verify` en mi equipo y comprobé que todas las pruebas pasaran. Realicé yo mismo la prueba de mutación en `public/sw.js` para confirmar que las pruebas detectan un error real, restauré el archivo con `git checkout` y revisé con `git diff` que en `package.json` solo cambiara la línea `test`. Finalmente, subí los cambios a `feat/w03-offline-tests`, abrí el Pull Request #25 y verifiqué que los checks de GitHub Actions estuvieran en verde.
