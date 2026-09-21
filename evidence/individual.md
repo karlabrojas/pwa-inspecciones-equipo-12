@@ -249,3 +249,68 @@ Enlaces de commits:
   También utilicé IA para proponer y revisar la prueba automatizada `tests/service-worker.spec.ts`, así como para identificar el motivo por el que la expresión regular del registro del Service Worker no coincidía con el código que contenía un salto de línea.
 
   La implementación final fue revisada y adaptada al contexto del proyecto. Realicé pruebas manuales desde Brave DevTools para comprobar el registro del Service Worker, su estado de activación y los recursos almacenados en Cache Storage. La selección de los cambios y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
+
+  ## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+  Implementé las pruebas automatizadas del comportamiento crítico del Service Worker y del funcionamiento offline de la PWA, correspondientes al Issue #14 (#19 en GitHub). Como la prueba existente `tests/service-worker.spec.ts` revisa principalmente que ciertas líneas existan en el código, agregué pruebas que ejecutan el `public/sw.js` real y verifican su comportamiento.
+
+  Mi trabajo incluye:
+
+  - `tests/helpers/sw-harness.mjs`: entorno de pruebas que carga el `public/sw.js` real en un sandbox de Node (`node:vm`) con `CacheStorage`, `fetch` y `clients` simulados, usando solo datos sintéticos y sin red real.
+
+  - `tests/service-worker-behavior.spec.ts` (8 pruebas): precache de los recursos base, eliminación de cachés viejas al activar, peticiones POST y de otro origen sin almacenarse, normalización de los parámetros `?v=` de `/_next/static/`, revalidación del manifest en segundo plano y ausencia de secretos en `sw.js`.
+
+  - `tests/offline.spec.ts` (10 pruebas): navegación sin conexión con fallback a la página inicial precacheada, página "Sin conexión" con estado 503 cuando no hay nada en caché, íconos, manifest y `/api/inspections` disponibles sin red, una regresión para que las respuestas 500 no se almacenen y dos límites conocidos.
+
+  - `package.json`: agregué ambas pruebas al script `test` para que se ejecuten con `npm test`.
+
+  Trabajé en la rama `feat/w03-offline-tests` mediante el Pull Request #25.
+
+  Enlaces de commits:
+
+  - `test: add behavior and offline tests for service worker` — [`7e05ded`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e05ded) — ISSUE #14: Crear pruebas offline
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí probar el Service Worker ejecutando su código real dentro de un sandbox de Node, en lugar de depender de un navegador o de nuevas dependencias. El sandbox simula `CacheStorage`, `fetch`, `clients` y `self`, y permite controlar la conexión (con y sin red) para reproducir los escenarios offline.
+
+  Elegí esta opción porque el Issue #14 pide verificar comportamiento y no solamente la existencia de archivos, y porque las pruebas debían ser reproducibles, deterministas y no depender de servicios privados. Además, funcionan con `node:test`, que ya viene con Node, así que se ejecutan con `npm test` sin instalar nada y de la misma forma en GitHub Actions.
+
+  También decidí incluir una regresión relevante: que una respuesta de error (500) no se guarde en caché, porque de lo contrario la aplicación podría seguir mostrando un error aunque el servidor ya se hubiera recuperado. El trade-off es que el sandbox no reproduce el ciclo de vida real del navegador, por lo que no reemplaza una revisión manual en DevTools.
+
+- **Comando o prueba que ejecuté:**
+  - `npm ci`
+  - `npm test`
+  - `npm run verify`
+  - Prueba de mutación sobre `public/sw.js`: quité temporalmente el filtro `response.ok` de la función `networkFirst`, ejecuté `node --experimental-strip-types tests/offline.spec.ts` y restauré el archivo con `git checkout public/sw.js`.
+
+- **Resultado real que observé:**
+  `npm test` terminó correctamente: `starter.spec.mjs`, `manifest.spec.ts` y `service-worker.spec.ts` en PASS, `service-worker-behavior.spec.ts` con 8 pruebas y 0 fallos, y `offline.spec.ts` con 10 pruebas y 0 fallos.
+
+  `npm run verify` terminó con `Starter verificable: PASS` y generó `reports/verification.json`.
+
+  En la prueba de mutación, con `sw.js` modificado falló únicamente la prueba "regresion: una respuesta 500 no se guarda ni se sirve despues sin conexion" (`500 !== 200`, `fail 1`), mientras las otras 9 pruebas de offline seguían pasando. Después de restaurar el archivo, `git status` ya no mostró `public/sw.js` como modificado.
+
+  Tras subir la rama, GitHub Actions mostró los checks en verde (4/4) para `feat/w03-offline-tests` y el Pull Request #25.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas verifican que la instalación precachea exactamente los cuatro recursos base (`/`, `/manifest.webmanifest`, `/icons/icon-192.png` y `/icons/icon-512.png`); que al activarse se eliminan solo las cachés antiguas de `inspecciones-*`, se conservan las vigentes y las de otras aplicaciones, y se llama a `clients.claim()`; que las peticiones POST y las de otro origen van directamente a la red sin almacenarse; que los recursos de `/_next/static/` ignoran el parámetro `?v=`; que el manifest responde desde caché y se revalida en segundo plano; y que `public/sw.js` no contiene secretos ni tokens.
+
+  En modo offline verifican que la navegación a la raíz y a una ruta nunca visitada devuelve la página inicial precacheada, que sin caché se muestra la página "Sin conexión" con estado 503, que los íconos, el manifest y `/api/inspections` siguen disponibles después de haberse consultado con conexión, y que una respuesta 500 no se guarda en caché.
+
+  Estas pruebas no verifican el ciclo de vida real del Service Worker en un navegador (estado waiting, varias pestañas o cuotas de almacenamiento), la instalación de la PWA en un dispositivo, ni la sincronización de datos, IndexedDB o autenticación, que corresponden a etapas posteriores.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Al leer `public/sw.js` para escribir las pruebas, tuve que ajustar mis primeras suposiciones: por ejemplo, el Service Worker no tiene un archivo `offline.html`, sino que devuelve la página inicial precacheada y, como último recurso, una respuesta HTML con estado 503. Las pruebas se corrigieron para reflejar el comportamiento real.
+
+  Identifiqué dos límites del comportamiento actual, que dejé documentados como pruebas: los recursos estáticos que no están precacheados no tienen fallback y fallan sin conexión, y las peticiones POST sin conexión fallan porque todavía no existe una cola offline.
+
+  También detecté un posible riesgo al analizar el código, que aún no confirmé en el navegador: el manifest se revalida y la versión nueva se guarda en `inspecciones-runtime-v1`, pero `caches.match` busca las cachés en orden de creación y encuentra primero la copia guardada en `inspecciones-static-v1`, por lo que la versión actualizada podría no llegar a servirse. Por último, como el sandbox simula el Service Worker, es necesario complementarlo con una revisión manual en DevTools.
+
+- **Uso de IA:**
+  Utilicé una herramienta de inteligencia artificial como apoyo para diseñar el sandbox de pruebas, redactar los casos de `tests/service-worker-behavior.spec.ts` y `tests/offline.spec.ts` a partir del código de `public/sw.js`, proponer la prueba de mutación y guiarme en los comandos de Git y en la redacción de esta evidencia.
+
+  Los fragmentos influenciados por IA son `tests/helpers/sw-harness.mjs`, `tests/service-worker-behavior.spec.ts`, `tests/offline.spec.ts` y el borrador de esta sección. Adapté las pruebas después de revisar el código real del Service Worker y corregí las que no coincidían con su comportamiento.
+
+- **Validación humana realizada:**
+  Copié los archivos al proyecto, ejecuté `npm test` y `npm run verify` en mi equipo y comprobé que todas las pruebas pasaran. Realicé yo mismo la prueba de mutación en `public/sw.js` para confirmar que las pruebas detectan un error real, restauré el archivo con `git checkout` y revisé con `git diff` que en `package.json` solo cambiara la línea `test`. Finalmente, subí los cambios a `feat/w03-offline-tests`, abrí el Pull Request #25 y verifiqué que los checks de GitHub Actions estuvieran en verde.
