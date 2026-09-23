@@ -6,7 +6,7 @@ type AppShellProps = {
 
 const navigationItems = [
   { href: "/", label: "Inicio" },
-  { href: "/inspections", label: "Inspecciones" },
+  { href: "/inspecciones", label: "Inspecciones" },
   { href: "/laboratories", label: "Laboratorios" },
 ];
 
