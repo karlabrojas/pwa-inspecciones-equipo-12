@@ -1,5 +1,8 @@
 import { inspections } from "../../lib/data/inspections";
 
+// Le indica a Next.js que la ruta debe renderizarse dinámicamente en el servidor en lugar de tratarla como una página estática.
+export const dynamic = "force-dynamic";
+
 function formatDateTime(value: string) {
 	const [date, time] = value.split("T");
 	const [year, month, day] = date.split("-");
