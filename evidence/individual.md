@@ -423,9 +423,29 @@ Enlaces de commits:
 ## Integrante: Kevin Ricardo Simon Alfaro
 
 - **Mi contribución concreta y enlace:**
+
+ Fui responsable del Issue #20 (Actividad 4). Completé/corregí docs/rendering-decision.md, agregué 2 pruebas estructurales nuevas a tests/rendering.spec.ts, actualicé README.md (instalación, ejecución, verificación y reproducción de la evidencia), y verifiqué que todo el proceso (build, tests, verify) funcionara en un entorno limpio. Rama: fix/w04-rendering-decision. PR: "fix: align rendering-decision.md and tests with the real SSR listado (Issue #20 ".
+Enlace de commits:
+  - `fix: align rendering-decision.md and tests with the actual merged SSR listado + CSR detalle` — [`f423cbf`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f423cbff73e98a5b6fabb5e156dbc3f1d6207320) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
+  - `fix: add missing First Load JS numbers to rendering-decision.md (lost in earlier heredoc paste)` — [`5266ad5`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/5266ad5cc54a8ac4079c0565c2cb7cedda32b65b) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
+  - `Merge pull request #36 from karlabrojas/fix/w04-rendering-decision` — [`14a80a1`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/14a80a1) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
 - **Decisión que puedo explicar y por qué:**
+
+ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "force-dynamic" (SSR real) y que el detalle (/inspecciones/[id]) es CSR, corrigiendo la versión anterior de la documentación que ubicaba el listado en / y lo describía como CSR. La parte de trade-offs, complejidad, supuestos y riesgos del documento la desarrollé en conjunto con el trabajo previo del equipo, ajustándola para que fuera consistente con el código real ya mergeado (PRs #33, #34, #35).
+
 - **Comando o prueba que ejecuté:**
+  npm ci
+  npm test
+  npm run verify
+  npm run build
+  git add docs\rendering-decision.md README.md
+  git commit -m "fix: add missing First Load JS numbers to rendering-decision.md (lost in earlier heredoc paste)"
+  git push origin fix/w04-rendering-decision
+
 - **Resultado real que observé:**
-- **Qué verifica esa prueba y qué no verifica:**
-- **Limitación, dificultad o riesgo que identifiqué:**
-- **Uso de IA:**
+ npm test dio PASS, incluyendo 9/9 en rendering.spec.ts (7 casos existentes de comportamiento — listado, detalle, loading, error e id inexistente — más 2 estructurales nuevas que agregué yo); npm run verify dio PASS; npm run build compiló sin errores, confirmando First Load JS de 87.4 kB (SSR) en /inspecciones y 89.9 kB (CSR) en /inspecciones/[id]. El push se completó correctamente (f423cbf..5266ad5).
+Qué verifica esa prueba y qué no verifica: Las 7 pruebas de comportamiento cubren el listado, el detalle, un estado de carga, un estado de error y el caso de un id inexistente. Las 2 pruebas estructurales que agregué verifican, leyendo directamente el código fuente, que /inspecciones/[id] contiene "use client" y que /inspecciones contiene dynamic = "force-dynamic" — es decir, que la implementación real sigue siendo SSR/CSR tal como se documenta, para detectar una regresión si alguien cambia esa decisión sin actualizar la documentación. Ninguna de las pruebas verifica el comportamiento real de loading.tsx/error.tsx en producción, ya que page.tsx todavía lee los datos de forma síncrona y esos archivos no tienen un disparador real.
+Limitación, dificultad o riesgo que identifiqué: No tengo certeza de quién escribió originalmente los 7 casos de prueba de comportamiento (posiblemente Ángel o Karla), por lo que no puedo dar detalle técnico de su implementación interna, solo confirmar que pasan. Además, la documentación técnica se había desalineado del código porque los PRs de implementación (#33-#35) se mergearon a dev sin actualizarla en el mismo ciclo; el riesgo es que esto vuelva a pasar, por lo que las pruebas estructurales que agregué buscan convertir un futuro desalineamiento en una falla de CI detectable en vez de un error silencioso.
+
+ - **Uso de IA:**
+   Se utilizó IA como apoyo durante el desarrollo para esta actividad: para corregir y redactar `docs/rendering-decision.md`, generar las pruebas estructurales agregadas a `tests/rendering.spec.ts`, actualizar `README.md`, definir el flujo correcto de Git (verificar rama activa, no commitear directo sobre `dev`), redactar el título y la descripción del PR, y estructurar esta evidencia individual. Antes de integrar los cambios, ejecuté las pruebas y el build localmente para confirmar que el código propuesto por la IA funcionara correctamente en el proyecto.
