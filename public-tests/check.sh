@@ -6,6 +6,7 @@ set -euo pipefail
 test -e 'docs/requirements.md'
 test -e 'docs/decision-record.md'
 test -e 'docs/cache-strategy.md'
+test -e 'docs/rendering-decision.md'
 
 # Project configuration
 test -e 'package.json'
@@ -22,10 +23,17 @@ test -e 'src/components/app-shell.tsx'
 test -e 'public/sw.js'
 test -e 'src/lib/pwa/register-service-worker.ts'
 
+# CSR/SSR
+test -e 'src/app/inspecciones/page.tsx'
+test -e 'src/app/inspecciones/[id]/page.tsx'
+test -e 'src/components/loading-state.tsx'
+
 # Tests
 test -e 'tests/manifest.spec.ts'
 test -e 'tests/service-worker.spec.ts'
+test -e 'tests/service-worker-behavior.spec.ts'
 test -e 'tests/offline.spec.ts'
+test -e 'tests/rendering.spec.ts'
 
 # README
 test -f README.md
