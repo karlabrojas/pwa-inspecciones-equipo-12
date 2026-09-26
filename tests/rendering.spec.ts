@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Issue #20 - Pruebas de renderizado (listado y detalle de inspecciones).
  *
  * No existe jsdom ni Playwright instalados en el proyecto, asi que estas
@@ -107,4 +107,40 @@ test("carga con id inexistente resuelve status 'not-found'", async () => {
 
   assert.equal(resultado.status, "not-found");
   assert.equal(resultado.inspection, null);
+});
+
+
+// --- Verificacion estructural: confirma que el codigo real coincide con lo
+// documentado en docs/rendering-decision.md (listado SSR, detalle CSR). ---
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const listadoPagePath = resolve(__dirname, "../src/app/inspecciones/page.tsx");
+const detallePagePath = resolve(__dirname, "../src/app/inspecciones/[id]/page.tsx");
+
+test("estructural: el listado (/inspecciones) es un Server Component SSR real", () => {
+  const codigo = readFileSync(listadoPagePath, "utf-8");
+
+  assert.doesNotMatch(
+    codigo,
+    /"use client"/,
+    "page.tsx del listado no deberia tener 'use client' (debe ser Server Component)"
+  );
+  assert.match(
+    codigo,
+    /dynamic\s*=\s*["']force-dynamic["']/,
+    "page.tsx del listado debe forzar renderizado dinamico (SSR real, no SSG)"
+  );
+});
+
+test("estructural: el detalle (/inspecciones/[id]) es un Client Component CSR", () => {
+  const codigo = readFileSync(detallePagePath, "utf-8");
+
+  assert.match(
+    codigo,
+    /"use client"/,
+    "page.tsx del detalle debe tener 'use client' (CSR)"
+  );
 });

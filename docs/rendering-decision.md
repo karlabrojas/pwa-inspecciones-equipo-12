@@ -4,180 +4,172 @@
 
 El proyecto usa Next.js 14 (App Router). Las dos rutas relevantes son:
 
-- `/` (listado de inspecciones) - `src/app/page.tsx`
+- `/inspecciones` (listado de inspecciones) - `src/app/inspecciones/page.tsx`
 - `/inspecciones/[id]` (detalle de una inspeccion) - `src/app/inspecciones/[id]/page.tsx`
 
-Ambas paginas estan marcadas como Client Components (`"use client"`) e
-implementan sus propios estados de interfaz (`loading`, `error`, `empty`/`not-found`,
-`normal`) mediante `useState`/`useEffect` con retardos simulados (`setTimeout`),
-sobre datos 100% sinteticos definidos en `src/lib/data/inspections.ts`.
+## Lo que implementa cada ruta
 
-Un detalle importante confirmado con `npm run build`: aunque ambas paginas son
-Client Components, Next.js igual genera su HTML en el servidor antes de
-enviarlo al navegador:
+### Listado (`/inspecciones`) - SSR real
 
+`src/app/inspecciones/page.tsx` no tiene la directiva `"use client"`: es un
+Server Component. Ademas declara:
 
-Es decir: el proyecto **no usa CSR puro** (no es un SPA sin HTML inicial). Usa
-el modelo hibrido de Next.js: HTML generado en el servidor (SSG para `/`,
-SSR por request para `/inspecciones/[id]`) + hidratacion en el cliente, y a
-partir de ahi toda la logica de estados (loading/error/detalle) ocurre en el
-cliente con JavaScript.
+```ts
+export const dynamic = "force-dynamic";
+```
+
+Esto le indica a Next.js que la ruta no debe prerenderizarse como pagina
+estatica (SSG) sino renderizarse en el servidor en cada solicitud (SSR real
+por request). Los datos se leen de forma sincrona desde
+`src/lib/data/inspections.ts` (arreglo en memoria) al momento de construir el
+HTML en el servidor.
+
+La carpeta tambien incluye, siguiendo la convencion de Next.js App Router:
+
+- `loading.tsx`: UI que Next.js muestra automaticamente mientras `page.tsx`
+  esta resolviendo sus datos.
+- `error.tsx`: boundary de error (debe ser Client Component por requisito de
+  Next.js) que Next.js muestra automaticamente si `page.tsx` lanza una
+  excepcion durante el render en el servidor.
+
+### Detalle (`/inspecciones/[id]`) - CSR
+
+`src/app/inspecciones/[id]/page.tsx` si tiene `"use client"`: es un Client
+Component. Usa `useState`/`useEffect` con un `setTimeout` para simular una
+carga asincrona, y maneja en el cliente los estados `loading`, `error` (boton
+"Simular error") y "no encontrado" (id inexistente).
 
 ## Comparacion CSR vs SSR en este dominio
 
-| Aspecto | CSR (cliente renderiza todo) | SSR (servidor renderiza HTML) | Lo que usa este proyecto |
+| Aspecto | CSR (cliente renderiza) | SSR (servidor renderiza) | Ruta que lo usa aqui |
 |---|---|---|---|
-| HTML inicial | Vacio o "shell"; contenido aparece tras ejecutar JS | HTML completo desde el primer response | HTML con el "shell" del estado inicial (loading), generado por el servidor |
-| Dependencia de red por navegacion | Ninguna si los assets ya estan cacheados (bueno para conectividad intermitente) | Cada navegacion normalmente requiere ida y vuelta al servidor | El SW ya intercepta navegaciones con Network First + fallback offline (ver docs/cache-strategy.md); el listado ademas es 100% estatico (prerenderizado en build, sin llamar servidor en cada visita) |
-| Interactividad (botones de estado, "Simular error") | Nativa: el estado vive en el cliente | Requiere hidratacion o revalidacion para actualizar UI | Se necesita el cliente si o si, porque los controles de demostracion (cambiar de estado, simular error) son interaccion pura de UI |
-| Complejidad de implementacion | Baja con datos sinteticos en memoria; no requiere data-fetching en servidor | Requiere logica de fetch en servidor (route handlers, `fetch` con cache tags, etc.) | Baja: no se agrego logica de servidor nueva; los datos siguen siendo un arreglo en memoria importado directamente |
-| Rendimiento offline | Bueno si los recursos estan precacheados (que es el caso, ver Service Worker) | Depende de que el servidor este disponible en cada navegacion, lo cual choca con "conectividad intermitente" | Favorece CSR con Service Worker: la navegacion ya cae al fallback offline documentado en `docs/cache-strategy.md` |
+| Donde corre la logica de datos | En el navegador, tras hidratar | En el servidor, antes de enviar el HTML | Listado: SSR. Detalle: CSR |
+| Estados de carga/error | Se controlan con estado de React (`useState`) | Se controlan con `loading.tsx`/`error.tsx` de Next.js | Listado usa las convenciones de Next.js; detalle usa estado de React |
+| Dependencia de red por navegacion | Ninguna si el JS ya esta cacheado | Requiere que el servidor responda en cada solicitud (agravado por `force-dynamic`) | El listado SSR es mas sensible a la conectividad intermitente que el detalle CSR una vez cacheado por el Service Worker |
+| Interactividad | Nativa | Requiere Client Component aparte para cualquier interaccion | El detalle necesita CSR porque tiene botones de interaccion (mostrar/ocultar resumen, simular error) |
+| Complejidad | Baja con datos en memoria | Requiere pensar en el ciclo de vida servidor (`dynamic`, `loading.tsx`, `error.tsx`) | El listado asume mas complejidad de configuracion de Next.js a cambio de HTML ya resuelto en el primer response |
 
 ## Decision tecnica
 
-**Se mantienen ambas rutas como Client Components (CSR con pre-render inicial
-de Next.js), y no se migran a Server Components / fetching en servidor.**
+El equipo implemento una division deliberada: el listado usa SSR real
+(`force-dynamic`) y el detalle usa CSR, en lugar de que ambas rutas usen la
+misma estrategia. Razones:
 
-Razones:
-
-1. **Conectividad intermitente es la restriccion central del proyecto**
-   (ver `docs/decision-record.md`, ADR-001). Un modelo que dependiera de que
-   el servidor responda en cada navegacion es mas fragil ante esa restriccion
-   que un modelo donde el Service Worker puede servir HTML/JS ya cacheado y
-   la logica de datos corre en el cliente.
-2. La listado (`/`) ya se beneficia de SSG (prerenderizado en build, ○), que
-   es la variante de "renderizado en servidor" mas barata posible: no hay
-   servidor que consultar en cada visita, solo archivos estaticos servibles
-   incluso por el Service Worker via Cache First/Network First.
-3. Los datos son sinteticos y estan en memoria (`src/lib/data/inspections.ts`);
-   no existe una razon de negocio para mover ese arreglo a un data-fetch de
-   servidor en esta etapa del proyecto (14 semanas de alcance).
-4. La interactividad requerida (cambiar entre estados de demostracion, boton
-   "Simular error", boton "Mostrar/Ocultar resumen") es inherentemente de
-   cliente; convertir las paginas a Server Components obligaria a mover esa
-   logica a un componente cliente aparte de todas formas, agregando
-   complejidad sin beneficio claro para el alcance actual.
+1. El listado es la pagina de entrada mas visitada; renderizarla en el
+   servidor entrega HTML con contenido ya resuelto en el primer response, sin
+   esperar a que el JS del cliente se hidrate.
+2. El detalle necesita interaccion pura de cliente (mostrar/ocultar resumen,
+   boton de simular error para pruebas de UI), lo cual es mas simple de
+   implementar como Client Component.
+3. Esto permite comparar en un mismo proyecto ambas estrategias con datos
+   sinteticos identicos, que es el proposito explicito de la actividad
+   (Semana 4: "Implementar y comparar rutas CSR y SSR para listado y
+   detalle").
 
 ## Trade-offs
 
-- **A favor de la decision:** menor complejidad (no hay route handlers ni
-  revalidacion de cache de datos que mantener), compatibilidad directa con
-  la estrategia offline-first ya implementada (Semana 3), y el listado ya
-  tiene el mejor caso posible de carga inicial (estatico).
-- **En contra / costo asumido:** el detalle (`/inspecciones/[id]`) es
-  dinamico por request (ƒ), lo que significa que sin Service Worker activo
-  (primera visita) depende de que el servidor responda; y el "First Load JS"
-  (87.2 kB compartido + 1.4-1.7 kB por ruta) se descarga siempre, incluso
-  aunque el contenido pudiera haberse mostrado sin JS en un modelo SSR puro
-  sin hidratacion.
-- Si en el futuro el proyecto reemplaza los datos sinteticos por un backend
-  real, esta decision deberia revisarse: en ese escenario, Server Components
-  con fetch en servidor podrian reducir el JS enviado al cliente para el
-  listado inicial.
+- A favor de SSR en el listado: el HTML ya contiene los datos al llegar al
+  navegador; no depende de que el JS del cliente se ejecute para mostrar
+  contenido.
+- En contra de SSR en el listado: `force-dynamic` deshabilita la posibilidad
+  de servir el listado como pagina estatica; cada visita requiere que el
+  servidor este disponible y ejecute el render, lo cual es mas fragil ante la
+  conectividad intermitente que es la restriccion central del proyecto (ver
+  `docs/decision-record.md`, ADR-001), salvo que el Service Worker ya tenga
+  una copia cacheada de una visita anterior (estrategia Network First
+  documentada en `docs/cache-strategy.md`).
+- A favor de CSR en el detalle: la interaccion (mostrar/ocultar resumen,
+  simular error) es simple de implementar con estado de React, sin logica de
+  servidor adicional.
+- En contra de CSR en el detalle: el contenido no esta disponible hasta que
+  el JS se ejecuta y la promesa simulada se resuelve (500ms).
 
 ## Impacto esperado/observado en la carga
 
-Metrica utilizada: **First Load JS** reportado por `next build` (tabla de
-rutas), complementado con el tamano de pagina individual.
+Metrica utilizada: First Load JS reportado por `next build` (tabla de
+rutas).
 
-Resultado observado (ver "Procedimiento reproducible" abajo para repetirlo):
+Resultado obtenido en una ejecucion reciente de `npm run build`:
 
-- `/` (listado): 1.45 kB de pagina, **88.7 kB** First Load JS. Estatica.
-- `/inspecciones/[id]` (detalle): 1.69 kB de pagina, **88.9 kB** First Load JS. Dinamica.
-- JS compartido entre todas las rutas: 87.2 kB.
+- `/inspecciones`: Size 140 B, First Load JS **87.4 kB** (Dynamic, SSR real)
+- `/inspecciones/[id]`: Size 2.7 kB, First Load JS **89.9 kB** (Dynamic, CSR)
+- JS compartido entre todas las rutas: 87.2 kB
 
-Interpretacion: el costo de JS es practicamente el mismo entre listado y
-detalle (la diferencia es de ~0.2 kB), porque ambas dependen del mismo
-runtime compartido de React/Next. El "loading" simulado con `setTimeout`
-(800ms en el listado, 500ms en el detalle) es un retardo artificial de
-demostracion, no una medicion real de red; se documenta como tal en
-"Supuestos" mas abajo.
+Interpretacion: el listado SSR tiene el First Load JS mas bajo de las dos
+rutas (87.4 kB, practicamente solo el runtime compartido), porque al ser un
+Server Component no envia al cliente la logica de estados que si necesita el
+detalle CSR (2.7 kB adicionales de componente propio). Esto es evidencia
+directa de que, en este proyecto, SSR reduce el JavaScript enviado al
+navegador respecto a CSR para una pagina equivalente.
 
 ## Accesibilidad
 
-- Los estados de carga y error usan `role="status"` / `role="alert"` y
-  `aria-live="polite"` (ver `src/components/loading-state.tsx` y
-  `src/app/page.tsx`), para que lectores de pantalla anuncien los cambios
-  de estado sin depender de percepcion visual.
-- El boton "Mostrar/Ocultar resumen" en el detalle usa `aria-expanded` para
-  comunicar su estado.
-- Al ser renderizado en cliente, estos anuncios dependen de que el JS se
-  haya hidratado; en una perdida de conexion durante la hidratacion inicial
-  (antes de que el Service Worker tome control), la accesibilidad de estos
-  estados podria degradarse. No se ha medido este caso especifico con
-  lectores de pantalla reales (ver Limites).
+- El estado de carga del listado (`src/app/inspecciones/loading.tsx`) usa
+  `role="status"` y `aria-live="polite"`.
+- El estado de error del listado (`src/app/inspecciones/error.tsx`) no
+  declara `role="alert"` actualmente; se documenta como limite a corregir.
+- El detalle usa `role="status"`/`role="alert"` (via
+  `src/components/loading-state.tsx`) y `aria-expanded` en el boton de
+  resumen.
 
 ## Complejidad
 
-Baja. No se introdujo:
-- Logica de data-fetching en servidor (route handlers, `fetch` con opciones
-  de cache de Next.js).
-- Revalidacion incremental (`revalidate`, `ISR`).
-- Streaming SSR / `Suspense` con datos asincronos del servidor.
-
-La unica pieza nueva de logica extraida para este issue es
-`src/lib/data/inspection-view.ts`, que replica (para fines de prueba) la
-logica de busqueda/carga que ya usan `page.tsx` y `[id]/page.tsx`.
+- El listado SSR requiere entender tres archivos coordinados por convencion
+  de carpeta (`page.tsx`, `loading.tsx`, `error.tsx`) y la directiva
+  `dynamic = "force-dynamic"`.
+- El detalle CSR concentra toda la logica de estados en un solo componente
+  cliente con `useState`/`useEffect`.
 
 ## Limites
 
-- Las pruebas automatizadas de este issue (`tests/rendering.spec.ts`) no
-  renderizan JSX real: el proyecto no tiene instalado jsdom, Testing Library
-  ni Playwright. Las pruebas ejercitan la logica de datos/carga extraida en
-  `src/lib/data/inspection-view.ts`, que refleja el comportamiento de las
-  paginas pero no reemplaza una prueba visual/DOM real.
-- El retardo de "loading" (500ms/800ms) es fijo y simulado en el codigo, no
-  una medicion de una peticion de red real, porque no existe backend: los
-  datos son un arreglo en memoria.
-- El First Load JS reportado por `next build` es una metrica de tamano de
-  bundle, no una medicion de tiempo real en un dispositivo/red concretos
-  (no se ejecuto Lighthouse ni un profiling de red en este issue).
+- `page.tsx` del listado lee los datos de forma sincrona (sin `await` ni
+  delay simulado) y no lanza ninguna excepcion en su logica actual. Esto
+  significa que, en la practica, `loading.tsx` casi nunca llega a mostrarse
+  (el render del servidor es practicamente instantaneo) y `error.tsx` no
+  tiene ningun disparador real en el codigo actual: existen porque siguen la
+  convencion de Next.js, pero no estan siendo ejercitados por una condicion
+  de carga lenta o de fallo real todavia.
+- Las pruebas automatizadas de `tests/rendering.spec.ts` ejercitan la logica
+  de `src/lib/data/inspection-view.ts` (un modulo con `loadInspectionsList`,
+  `findInspectionById`, etc., creado para permitir pruebas deterministas sin
+  jsdom/Playwright). Ese modulo no esta importado actualmente por
+  `src/app/inspecciones/page.tsx` (que usa datos sincronos directos), asi que
+  esas pruebas validan un comportamiento equivalente/de referencia, no la
+  ejecucion linea por linea del Server Component real. Para cerrar esa
+  brecha, se agregaron pruebas estructurales que verifican directamente el
+  codigo fuente (`"use client"`, `dynamic = "force-dynamic"`).
+- No se ejecuto Lighthouse ni profiling de red real; el First Load JS es una
+  metrica de tamano de bundle, no de tiempo real en un dispositivo concreto.
 
 ## Riesgos
 
-- Si el equipo agrega mas dependencias de cliente (por ejemplo, una libreria
-  de UI pesada), el First Load JS compartido (87.2 kB) crecera y afectara
-  ambas rutas por igual, ya que comparten el mismo runtime.
-- El detalle es dinamico por request (ƒ); si el servidor no esta disponible
-  en la primera visita (antes de que el Service Worker haya precacheado
-  nada), la navegacion dependera del fallback offline documentado en
-  `docs/cache-strategy.md` (respuesta 503 "Sin conexion" si no hay nada en
-  cache).
+- Si el listado (SSR, `force-dynamic`) no logra cachearse por el Service
+  Worker antes de perder la conexion, la navegacion dependera del fallback
+  offline documentado en `docs/cache-strategy.md` (503 "Sin conexion").
+- Al no existir un disparador real de error en el listado, un fallo real de
+  datos en el futuro (por ejemplo, si se conecta a un backend real) podria
+  no estar cubierto por una prueba que lo reproduzca, hasta que se agregue
+  logica de manejo de errores real a `page.tsx`.
 
 ## Supuestos
 
 - Se asume que el volumen de datos sinteticos seguira siendo pequeno
-  (arreglo en memoria) durante el alcance de 14 semanas del proyecto; si
-  esto cambia, la decision de mantener CSR/Client Components deberia
-  revisarse.
-- Se asume Node.js 22.x y Next.js 14.2.35 como entorno de referencia (las
-  metricas de First Load JS pueden variar entre versiones).
-- Se asume que los criterios de "loading"/"error" que pide el issue se
-  refieren a los estados de interfaz ya implementados (spinner, mensaje de
-  error, id inexistente), y no a un estado de carga de red real medido con
-  herramientas de profiling.
+  (arreglo en memoria) durante el alcance de 14 semanas del proyecto.
+- Se asume Node.js 22.x y Next.js 14.2.35 como entorno de referencia.
+- Se asume que el proposito de comparar CSR y SSR en esta actividad se
+  cumple mostrando ambas estrategias implementadas con datos sinteticos
+  identicos, no necesariamente con metricas de produccion.
 
 ## Metrica de carga utilizada y procedimiento reproducible
 
-**Metrica:** First Load JS por ruta, tal como la reporta el propio
-compilador de Next.js (`next build`). Se eligio esta metrica porque:
+Metrica: First Load JS por ruta, reportada por `next build`.
 
-1. No requiere instalar herramientas adicionales (Lighthouse, Playwright).
-2. Es determinista: el mismo codigo produce el mismo tamano de bundle.
-3. Se genera automaticamente en cada build, incluyendo en CI.
-
-**Procedimiento para reproducirla:**
+Procedimiento:
 
 ```bash
 npm ci
 npm run build
 ```
 
-El resultado aparece en la salida estandar, en la tabla bajo el encabezado
-`Route (app)`, columna `First Load JS`. Ese mismo build tambien queda
-disponible en `.next/` para inspeccion adicional si se requiere.
-
-Para complementar esta metrica con una medicion de experiencia real en
-navegador (no incluida en este issue por no requerir herramientas nuevas),
-se recomienda como trabajo futuro ejecutar Lighthouse (Chrome DevTools >
-pestana Lighthouse > Performance) sobre `npm run build && npm run start`.
+El resultado aparece en la tabla `Route (app)`, columna `First Load JS`, para
+las rutas `/inspecciones` y `/inspecciones/[id]`.
