@@ -314,3 +314,118 @@ Enlaces de commits:
 
 - **Validación humana realizada:**
   Copié los archivos al proyecto, ejecuté `npm test` y `npm run verify` en mi equipo y comprobé que todas las pruebas pasaran. Realicé yo mismo la prueba de mutación en `public/sw.js` para confirmar que las pruebas detectan un error real, restauré el archivo con `git checkout` y revisé con `git diff` que en `package.json` solo cambiara la línea `test`. Finalmente, subí los cambios a `feat/w03-offline-tests`, abrí el Pull Request #25 y verifiqué que los checks de GitHub Actions estuvieran en verde.
+
+
+  # SEMANA 4 - WEEK 4 
+
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+- **Decisión que puedo explicar y por qué:**
+- **Comando o prueba que ejecuté:**
+- **Resultado real que observé:**
+- **Qué verifica esa prueba y qué no verifica:**
+- **Limitación, dificultad o riesgo que identifiqué:**
+- **Uso de IA:**
+
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución concreta y enlace:**
+
+  Implementé la sección de inspecciones del proyecto, incluyendo la creación de la ruta `src/app/inspecciones/page.tsx` y la incorporación de información de seguimiento, responsables, fechas, prioridad, riesgo, impacto, resolución y actualizaciones, la ampliación de los datos sintéticos en `lib/data/inspections.ts` utilizados para representar los reportes, los cuales son:
+  - title: string;
+  - category: "infraestructura" | "equipo" | "mantenimiento";
+  - reporterIdentifier: string | null;
+  - reportedAt: string;
+  - detectedAt: string | null;
+  - assetId: string | null;
+  - attachments: string[];
+  - affectedScope: string;
+  - impact: string;
+  - priority: "baja" | "media" | "alta" | "urgente";
+  - riskLevel: "ninguno" | "bajo" | "medio" | "alto";
+  - responsibleArea: string | null;
+  - assignedTo: string | null;
+  - updates: { dateTime: string; author: string; comment: string }[];
+  - resolution: string | null;
+  - resolvedAt: string | null;
+  - reporterConfirmed: boolean;
+
+  También configuré el renderizado dinámico de la página mediante `export const dynamic = "force-dynamic"` y agregué los estados de carga y error mediante `loading.tsx` y `error.tsx`.
+
+
+  Enlace de commits:
+
+  - `feat(inspecciones): enable dynamic SSR and loading and error states` — [`7ee73aa`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7ee73aa19dbe51e89c8d33b3300001ac2fd72076) — Issue #18: Implementar listado de inspecciones con SSR
+  - `feat(inspecciones): Create an inspections screen with a list, details, and tracking.` — [`e7455e5`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/e7455e5b43cb122407c7af1738822759f379b966) — Issue #18: Implementar listado de inspecciones con SSR
+  - `feat(inspecciones): expand reports and fix navigation` — [`4711e39`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/4711e39fc8e75dfd7bbc094baf4cf10f5c556210) — Issue #18: Implementar listado de inspecciones con SSR
+
+- **Decisión que puedo explicar y por qué:**
+
+  Decidí utilizar `export const dynamic = "force-dynamic"` en `src/app/inspecciones/page.tsx` para indicar explícitamente que la ruta debe renderizarse dinámicamente en el servidor.
+
+  También mantuve los datos de inspecciones en un archivo separado (`src/lib/data/inspections.ts`) utilizando únicamente datos sintéticos. Esto permite que la página se encargue de la presentación y que los datos utilizados por el listado permanezcan separados de la interfaz.
+
+  Para los estados de navegación se utilizaron los mecanismos de Next.js mediante `loading.tsx` y `error.tsx`, permitiendo mostrar un mensaje de carga y una opción para reintentar cuando ocurre un error.
+
+- **Comando o prueba que ejecuté:**
+  `npm run test`
+
+- **Resultado real que observé:**
+
+  La ejecución completó correctamente todas las pruebas incluidas en el comando.
+
+  Los resultados fueron:
+
+  - starter.spec.mjs: `PASS`
+  - manifest.spec.ts: `PASS`
+  - service-worker.spec.ts: `8/8 pruebas PASS`
+  - offline.spec.ts: `10/10 pruebas PASS`
+  - rendering.spec.ts: `7/7 pruebas PASS`
+  - 0 pruebas fallidas
+  - 0 pruebas canceladas
+  - 0 pruebas omitidas
+
+  En total, las pruebas verificaron aspectos relacionados con el Service Worker, funcionamiento offline, caché, manifest, datos de inspecciones y estados de carga/error. También se comprobó que no existieran IDs duplicados y que una inspección inexistente devolviera null correctamente.
+
+  La ejecución terminó sin errores.
+
+- **Qué verifica esa prueba y qué no verifica:**
+
+  La ejecución de npm run test verifica mediante pruebas automatizadas que las funcionalidades contempladas por los archivos de prueba se comportan como se espera.
+
+  En particular, permitió comprobar:
+
+  - Que existe y funciona la configuración básica del proyecto y el manifest.
+  - Que `public/sw.js` implementa correctamente los eventos install, activate y fetch.
+  - Que las estrategias de caché y el comportamiento offline funcionan según los casos definidos.
+  - Que las peticiones POST y a otros orígenes no se almacenan en caché.
+  - Que los recursos y la página inicial pueden estar disponibles sin conexión.
+  - Que las inspecciones sintéticas contienen los campos requeridos y no tienen IDs duplicados.
+  - Que se puede obtener una inspección existente y manejar correctamente una inexistente.
+  - Que los estados de carga, error y not-found funcionan según los escenarios definidos.
+
+  La prueba no verifica por sí sola todos los aspectos visuales de la interfaz ni la experiencia completa de usuario en un navegador real. Tampoco garantiza que no existan errores en escenarios que no estén contemplados por estos casos de prueba.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+
+  La principal limitación fue que los datos utilizados para el listado son sintéticos y se encuentran definidos localmente, por lo que todavía no representan información proveniente de una fuente de datos real.
+
+  También existe el riesgo de que el comportamiento observado manualmente no cubra todos los posibles escenarios de error o carga de la aplicación, debido a que no se realizaron pruebas automatizadas específicas para esta implementación.
+
+- **Uso de IA:**
+  Se utilizó IA como apoyo durante el desarrollo para consultar y comprender la implementación de SSR en Next.js, especialmente el uso de `dynamic = "force-dynamic"`, así como para recibir orientación sobre la estructura de la página y los estados de carga y error.
+
+  La implementación, integración de los cambios y revisión del funcionamiento se realizaron sobre el proyecto de la rama `feat/w04-ssr-listado`.
+
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+- **Decisión que puedo explicar y por qué:**
+- **Comando o prueba que ejecuté:**
+- **Resultado real que observé:**
+- **Qué verifica esa prueba y qué no verifica:**
+- **Limitación, dificultad o riesgo que identifiqué:**
+- **Uso de IA:**
