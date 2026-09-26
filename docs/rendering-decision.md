@@ -45,7 +45,7 @@ Razones:
    el servidor responda en cada navegacion es mas fragil ante esa restriccion
    que un modelo donde el Service Worker puede servir HTML/JS ya cacheado y
    la logica de datos corre en el cliente.
-2. La listado (`/`) ya se beneficia de SSG (prerenderizado en build, ○), que
+2. La listado (`/`) ya se beneficia de SSG (prerenderizado en build, â—‹), que
    es la variante de "renderizado en servidor" mas barata posible: no hay
    servidor que consultar en cada visita, solo archivos estaticos servibles
    incluso por el Service Worker via Cache First/Network First.
@@ -65,7 +65,7 @@ Razones:
   la estrategia offline-first ya implementada (Semana 3), y el listado ya
   tiene el mejor caso posible de carga inicial (estatico).
 - **En contra / costo asumido:** el detalle (`/inspecciones/[id]`) es
-  dinamico por request (ƒ), lo que significa que sin Service Worker activo
+  dinamico por request (Æ’), lo que significa que sin Service Worker activo
   (primera visita) depende de que el servidor responda; y el "First Load JS"
   (87.2 kB compartido + 1.4-1.7 kB por ruta) se descarga siempre, incluso
   aunque el contenido pudiera haberse mostrado sin JS en un modelo SSR puro
@@ -138,7 +138,7 @@ logica de busqueda/carga que ya usan `page.tsx` y `[id]/page.tsx`.
 - Si el equipo agrega mas dependencias de cliente (por ejemplo, una libreria
   de UI pesada), el First Load JS compartido (87.2 kB) crecera y afectara
   ambas rutas por igual, ya que comparten el mismo runtime.
-- El detalle es dinamico por request (ƒ); si el servidor no esta disponible
+- El detalle es dinamico por request (Æ’); si el servidor no esta disponible
   en la primera visita (antes de que el Service Worker haya precacheado
   nada), la navegacion dependera del fallback offline documentado en
   `docs/cache-strategy.md` (respuesta 503 "Sin conexion" si no hay nada en
