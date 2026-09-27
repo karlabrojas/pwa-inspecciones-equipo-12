@@ -174,14 +174,12 @@ Enlaces de commits:
 - **Uso de IA:**
   Utilicé IA como apoyo para revisar la estructura del registro del Service Worker, analizar posibles problemas de integración y mejorar la documentación de las estrategias de caché. La implementación final fue revisada y validada manualmente, verificando los archivos modificados y ejecutando las pruebas automatizadas del proyecto. La decisión de registrar el Service Worker después de la carga inicial y la validación de los resultados fueron realizadas sobre la implementación concreta del repositorio.
 
-
 ## Integrante: Angel Romero Barragan
 
 - **Mi contribución concreta y enlace:**
   Implementé y ajusté el Service Worker de la PWA en `public/sw.js`, incluyendo su ciclo de vida de instalación `(install)` y activación `(activate)`. También incorporé el precache de recursos principales, el versionado de cachés y la eliminación de versiones anteriores.
 
   Además, implementé las estrategias de caché definidas para el proyecto:
-
   - Cache First: para los recursos estáticos, iconos y archivos de Next.js.
 
   - Stale While Revalidate: para recursos que pueden actualizarse periódicamente.
@@ -195,7 +193,6 @@ Enlaces de commits:
   Finalmente, agregué y ajusté la prueba automatizada `tests/service-worker.spec.ts` para comprobar la estructura y las características principales del Service Worker.
 
   Enlaces de commits:
-
   - `feat: implement service worker v1 and cache strategies` — [`f0a8c73`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f0a8c7347bcb8a576438a2b157d869e28ca2c14f) — ISSUE #12: Implementar Service Worker y ciclo de vida
 
   - `test: update service worker tests for cache normalization` — [`6219cfc`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/6219cfceb8ab2abf9b85805ff001a5520adafdba) — ISSUE #12: Implementar Service Worker y ciclo de vida
@@ -203,9 +200,9 @@ Enlaces de commits:
 - **Decisión que puedo explicar y por qué:**
   Decidí utilizar cachés versionadas, como inspecciones-static-v1 e inspecciones-runtime-v1, para controlar las actualizaciones del Service Worker y evitar que los recursos antiguos permanezcan indefinidamente almacenados.
 
-  También decidí normalizar las URLs de los recursos ubicados en /_next/static/ eliminando sus parámetros de consulta. Durante las pruebas observé que un mismo archivo podía almacenarse con diferentes valores, por ejemplo, main-app.js?v=.... Esto provocaba que, al perder la conexión, el navegador buscara una URL diferente a la que estaba guardada en la caché.
+  También decidí normalizar las URLs de los recursos ubicados en /\_next/static/ eliminando sus parámetros de consulta. Durante las pruebas observé que un mismo archivo podía almacenarse con diferentes valores, por ejemplo, main-app.js?v=.... Esto provocaba que, al perder la conexión, el navegador buscara una URL diferente a la que estaba guardada en la caché.
 
-  Por esta razón, implementé la función getCacheKey, que utiliza la ruta del recurso sin los parámetros de consulta para mejorar la reutilización de los archivos almacenados y favorecer el funcionamiento de la aplicación cuando no existe conexión. 
+  Por esta razón, implementé la función getCacheKey, que utiliza la ruta del recurso sin los parámetros de consulta para mejorar la reutilización de los archivos almacenados y favorecer el funcionamiento de la aplicación cuando no existe conexión.
 
 - **Comando o prueba que ejecuté:**
   `npm test`
@@ -225,7 +222,7 @@ Enlaces de commits:
   - /manifest.webmanifest
   - /icons/icon-192.png
   - /icons/icon-512.png
-  - Archivos CSS y JavaScript de /_next/static/
+  - Archivos CSS y JavaScript de /\_next/static/
 
 - **Qué verifica esa prueba y qué no verifica:**
   La prueba automatizada del Service Worker verifica que existan los eventos principales del ciclo de vida `(install, activate y fetch)`, el versionado de cachés, los recursos precargados, las estrategias de caché, la eliminación de cachés antiguas y la normalización de las URLs de los recursos de Next.js.
@@ -256,7 +253,6 @@ Enlaces de commits:
   Implementé las pruebas automatizadas del comportamiento crítico del Service Worker y del funcionamiento offline de la PWA, correspondientes al Issue #14 (#19 en GitHub). Como la prueba existente `tests/service-worker.spec.ts` revisa principalmente que ciertas líneas existan en el código, agregué pruebas que ejecutan el `public/sw.js` real y verifican su comportamiento.
 
   Mi trabajo incluye:
-
   - `tests/helpers/sw-harness.mjs`: entorno de pruebas que carga el `public/sw.js` real en un sandbox de Node (`node:vm`) con `CacheStorage`, `fetch` y `clients` simulados, usando solo datos sintéticos y sin red real.
 
   - `tests/service-worker-behavior.spec.ts` (8 pruebas): precache de los recursos base, eliminación de cachés viejas al activar, peticiones POST y de otro origen sin almacenarse, normalización de los parámetros `?v=` de `/_next/static/`, revalidación del manifest en segundo plano y ausencia de secretos en `sw.js`.
@@ -268,7 +264,6 @@ Enlaces de commits:
   Trabajé en la rama `feat/w03-offline-tests` mediante el Pull Request #25.
 
   Enlaces de commits:
-
   - `test: add behavior and offline tests for service worker` — [`7e05ded`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e05ded) — ISSUE #14: Crear pruebas offline
 
 - **Decisión que puedo explicar y por qué:**
@@ -315,20 +310,39 @@ Enlaces de commits:
 - **Validación humana realizada:**
   Copié los archivos al proyecto, ejecuté `npm test` y `npm run verify` en mi equipo y comprobé que todas las pruebas pasaran. Realicé yo mismo la prueba de mutación en `public/sw.js` para confirmar que las pruebas detectan un error real, restauré el archivo con `git checkout` y revisé con `git diff` que en `package.json` solo cambiara la línea `test`. Finalmente, subí los cambios a `feat/w03-offline-tests`, abrí el Pull Request #25 y verifiqué que los checks de GitHub Actions estuvieran en verde.
 
-
-  # SEMANA 4 - WEEK 4 
-
+  # SEMANA 4 - WEEK 4
 
 ## Integrante: Karla Beatriz Rojas Rojas
 
 - **Mi contribución concreta y enlace:**
-- **Decisión que puedo explicar y por qué:**
-- **Comando o prueba que ejecuté:**
-- **Resultado real que observé:**
-- **Qué verifica esa prueba y qué no verifica:**
-- **Limitación, dificultad o riesgo que identifiqué:**
-- **Uso de IA:**
+  Implementé la funcionalidad correspondiente al incremento de la Semana 4 para el listado y detalle de inspecciones, enfocándome en la ruta de detalle src/app/inspecciones/[id]/page.tsx. Implementé el comportamiento de renderizado del lado del cliente (CSR), incluyendo estados de carga, error y registro no encontrado mediante datos sintéticos. También agregué el componente reutilizable src/components/loading-state.tsx.
+  Enlaces de commits:
+  - `feat: implement CSR inspection detail and verifiable states` — [`ef9e939`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/ef9e9399a6d3738c597709c88ebf92038550de2c) — ISSUE #19: Implementar detalle CSR y estados verificables
 
+- **Decisión que puedo explicar y por qué:**
+  Decidí utilizar CSR para la pantalla de detalle de una inspección porque permite controlar explícitamente los estados de carga y error durante la obtención de los datos en el cliente. La implementación utiliza useEffect y estados de React para representar estos escenarios de manera determinista con datos sintéticos. La comparación con SSR quedó documentada para justificar el uso de cada estrategia de renderizado según las necesidades de la aplicación.
+
+- **Comando o prueba que ejecuté:**
+  `npm test`, `npm run build`, `bash public-tests/check.sh`
+
+- **Resultado real que observé:**
+  - npm test terminó correctamente con 25 pruebas aprobadas y 0 fallidas, incluyendo las pruebas específicas de renderizado de la Semana 4, que reportaron 7/7 pruebas aprobadas.
+  - npm run build terminó correctamente y Next.js generó las rutas:
+    ○ /
+    ○ /\_not-found
+    ƒ /inspecciones
+    ƒ /inspecciones/[id]
+  - La verificación pública también terminó correctamente mostrando:
+    PUBLIC_OK
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas verifican que existan los artefactos requeridos, que el comportamiento esperado de las rutas CSR/SSR y sus estados de carga/error sea reproducible y que el proyecto pueda compilarse correctamente. La prueba de build confirma la compilación y el tipado del proyecto. La verificación pública comprueba la estructura y ciertas condiciones de seguridad definidas por el proyecto. Estas pruebas no sustituyen una evaluación visual completa de la interfaz ni garantizan por sí solas el comportamiento en todos los navegadores o dispositivos reales.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Durante la validación encontré un problema de hidratación al ejecutar la aplicación en una ventana normal de Microsoft Edge. Al comprobar el mismo proyecto en Edge InPrivate y Chrome en modo incógnito, el problema no se reprodujo. Esto permitió identificar que el comportamiento probablemente estaba relacionado con una modificación externa del DOM, como una extensión del navegador, en lugar de un problema reproducible de la aplicación. Por ello no se agregó suppressHydrationWarning como solución artificial.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para revisar la implementación, analizar errores, proponer formas de verificar el comportamiento y revisar la organización de las pruebas y documentación. La implementación fue validada ejecutando los comandos y pruebas en el repositorio, y las decisiones técnicas fueron revisadas con base en los resultados reales obtenidos.
 
 ## Integrante: Angel Romero Barragan
 
@@ -355,9 +369,7 @@ Enlaces de commits:
 
   También configuré el renderizado dinámico de la página mediante `export const dynamic = "force-dynamic"` y agregué los estados de carga y error mediante `loading.tsx` y `error.tsx`.
 
-
   Enlace de commits:
-
   - `feat(inspecciones): enable dynamic SSR and loading and error states` — [`7ee73aa`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7ee73aa19dbe51e89c8d33b3300001ac2fd72076) — Issue #18: Implementar listado de inspecciones con SSR
   - `feat(inspecciones): Create an inspections screen with a list, details, and tracking.` — [`e7455e5`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/e7455e5b43cb122407c7af1738822759f379b966) — Issue #18: Implementar listado de inspecciones con SSR
   - `feat(inspecciones): expand reports and fix navigation` — [`4711e39`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/4711e39fc8e75dfd7bbc094baf4cf10f5c556210) — Issue #18: Implementar listado de inspecciones con SSR
@@ -378,7 +390,6 @@ Enlaces de commits:
   La ejecución completó correctamente todas las pruebas incluidas en el comando.
 
   Los resultados fueron:
-
   - starter.spec.mjs: `PASS`
   - manifest.spec.ts: `PASS`
   - service-worker.spec.ts: `8/8 pruebas PASS`
@@ -397,7 +408,6 @@ Enlaces de commits:
   La ejecución de npm run test verifica mediante pruebas automatizadas que las funcionalidades contempladas por los archivos de prueba se comportan como se espera.
 
   En particular, permitió comprobar:
-
   - Que existe y funciona la configuración básica del proyecto y el manifest.
   - Que `public/sw.js` implementa correctamente los eventos install, activate y fetch.
   - Que las estrategias de caché y el comportamiento offline funcionan según los casos definidos.
@@ -424,14 +434,15 @@ Enlaces de commits:
 
 - **Mi contribución concreta y enlace:**
 
- Fui responsable del Issue #20 (Actividad 4). Completé/corregí docs/rendering-decision.md, agregué 2 pruebas estructurales nuevas a tests/rendering.spec.ts, actualicé README.md (instalación, ejecución, verificación y reproducción de la evidencia), y verifiqué que todo el proceso (build, tests, verify) funcionara en un entorno limpio. Rama: fix/w04-rendering-decision. PR: "fix: align rendering-decision.md and tests with the real SSR listado (Issue #20 ".
+Fui responsable del Issue #20 (Actividad 4). Completé/corregí docs/rendering-decision.md, agregué 2 pruebas estructurales nuevas a tests/rendering.spec.ts, actualicé README.md (instalación, ejecución, verificación y reproducción de la evidencia), y verifiqué que todo el proceso (build, tests, verify) funcionara en un entorno limpio. Rama: fix/w04-rendering-decision. PR: "fix: align rendering-decision.md and tests with the real SSR listado (Issue #20 ".
 Enlace de commits:
-  - `fix: align rendering-decision.md and tests with the actual merged SSR listado + CSR detalle` — [`f423cbf`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f423cbff73e98a5b6fabb5e156dbc3f1d6207320) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
-  - `fix: add missing First Load JS numbers to rendering-decision.md (lost in earlier heredoc paste)` — [`5266ad5`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/5266ad5cc54a8ac4079c0565c2cb7cedda32b65b) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
-  - `Merge pull request #36 from karlabrojas/fix/w04-rendering-decision` — [`14a80a1`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/14a80a1) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
+
+- `fix: align rendering-decision.md and tests with the actual merged SSR listado + CSR detalle` — [`f423cbf`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f423cbff73e98a5b6fabb5e156dbc3f1d6207320) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
+- `fix: add missing First Load JS numbers to rendering-decision.md (lost in earlier heredoc paste)` — [`5266ad5`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/5266ad5cc54a8ac4079c0565c2cb7cedda32b65b) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
+- `Merge pull request #36 from karlabrojas/fix/w04-rendering-decision` — [`14a80a1`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/14a80a1) — Issue #20: Pruebas, documentación y reproducibilidad de la Actividad 4
 - **Decisión que puedo explicar y por qué:**
 
- Documenté que el listado (/inspecciones) es un Server Component con dynamic = "force-dynamic" (SSR real) y que el detalle (/inspecciones/[id]) es CSR, corrigiendo la versión anterior de la documentación que ubicaba el listado en / y lo describía como CSR. La parte de trade-offs, complejidad, supuestos y riesgos del documento la desarrollé en conjunto con el trabajo previo del equipo, ajustándola para que fuera consistente con el código real ya mergeado (PRs #33, #34, #35).
+Documenté que el listado (/inspecciones) es un Server Component con dynamic = "force-dynamic" (SSR real) y que el detalle (/inspecciones/[id]) es CSR, corrigiendo la versión anterior de la documentación que ubicaba el listado en / y lo describía como CSR. La parte de trade-offs, complejidad, supuestos y riesgos del documento la desarrollé en conjunto con el trabajo previo del equipo, ajustándola para que fuera consistente con el código real ya mergeado (PRs #33, #34, #35).
 
 - **Comando o prueba que ejecuté:**
   npm ci
@@ -443,9 +454,9 @@ Enlace de commits:
   git push origin fix/w04-rendering-decision
 
 - **Resultado real que observé:**
- npm test dio PASS, incluyendo 9/9 en rendering.spec.ts (7 casos existentes de comportamiento — listado, detalle, loading, error e id inexistente — más 2 estructurales nuevas que agregué yo); npm run verify dio PASS; npm run build compiló sin errores, confirmando First Load JS de 87.4 kB (SSR) en /inspecciones y 89.9 kB (CSR) en /inspecciones/[id]. El push se completó correctamente (f423cbf..5266ad5).
-Qué verifica esa prueba y qué no verifica: Las 7 pruebas de comportamiento cubren el listado, el detalle, un estado de carga, un estado de error y el caso de un id inexistente. Las 2 pruebas estructurales que agregué verifican, leyendo directamente el código fuente, que /inspecciones/[id] contiene "use client" y que /inspecciones contiene dynamic = "force-dynamic" — es decir, que la implementación real sigue siendo SSR/CSR tal como se documenta, para detectar una regresión si alguien cambia esa decisión sin actualizar la documentación. Ninguna de las pruebas verifica el comportamiento real de loading.tsx/error.tsx en producción, ya que page.tsx todavía lee los datos de forma síncrona y esos archivos no tienen un disparador real.
-Limitación, dificultad o riesgo que identifiqué: No tengo certeza de quién escribió originalmente los 7 casos de prueba de comportamiento (posiblemente Ángel o Karla), por lo que no puedo dar detalle técnico de su implementación interna, solo confirmar que pasan. Además, la documentación técnica se había desalineado del código porque los PRs de implementación (#33-#35) se mergearon a dev sin actualizarla en el mismo ciclo; el riesgo es que esto vuelva a pasar, por lo que las pruebas estructurales que agregué buscan convertir un futuro desalineamiento en una falla de CI detectable en vez de un error silencioso.
+  npm test dio PASS, incluyendo 9/9 en rendering.spec.ts (7 casos existentes de comportamiento — listado, detalle, loading, error e id inexistente — más 2 estructurales nuevas que agregué yo); npm run verify dio PASS; npm run build compiló sin errores, confirmando First Load JS de 87.4 kB (SSR) en /inspecciones y 89.9 kB (CSR) en /inspecciones/[id]. El push se completó correctamente (f423cbf..5266ad5).
+  Qué verifica esa prueba y qué no verifica: Las 7 pruebas de comportamiento cubren el listado, el detalle, un estado de carga, un estado de error y el caso de un id inexistente. Las 2 pruebas estructurales que agregué verifican, leyendo directamente el código fuente, que /inspecciones/[id] contiene "use client" y que /inspecciones contiene dynamic = "force-dynamic" — es decir, que la implementación real sigue siendo SSR/CSR tal como se documenta, para detectar una regresión si alguien cambia esa decisión sin actualizar la documentación. Ninguna de las pruebas verifica el comportamiento real de loading.tsx/error.tsx en producción, ya que page.tsx todavía lee los datos de forma síncrona y esos archivos no tienen un disparador real.
+  Limitación, dificultad o riesgo que identifiqué: No tengo certeza de quién escribió originalmente los 7 casos de prueba de comportamiento (posiblemente Ángel o Karla), por lo que no puedo dar detalle técnico de su implementación interna, solo confirmar que pasan. Además, la documentación técnica se había desalineado del código porque los PRs de implementación (#33-#35) se mergearon a dev sin actualizarla en el mismo ciclo; el riesgo es que esto vuelva a pasar, por lo que las pruebas estructurales que agregué buscan convertir un futuro desalineamiento en una falla de CI detectable en vez de un error silencioso.
 
- - **Uso de IA:**
-   Se utilizó IA como apoyo durante el desarrollo para esta actividad: para corregir y redactar `docs/rendering-decision.md`, generar las pruebas estructurales agregadas a `tests/rendering.spec.ts`, actualizar `README.md`, definir el flujo correcto de Git (verificar rama activa, no commitear directo sobre `dev`), redactar el título y la descripción del PR, y estructurar esta evidencia individual. Antes de integrar los cambios, ejecuté las pruebas y el build localmente para confirmar que el código propuesto por la IA funcionara correctamente en el proyecto.
+- **Uso de IA:**
+  Se utilizó IA como apoyo durante el desarrollo para esta actividad: para corregir y redactar `docs/rendering-decision.md`, generar las pruebas estructurales agregadas a `tests/rendering.spec.ts`, actualizar `README.md`, definir el flujo correcto de Git (verificar rama activa, no commitear directo sobre `dev`), redactar el título y la descripción del PR, y estructurar esta evidencia individual. Antes de integrar los cambios, ejecuté las pruebas y el build localmente para confirmar que el código propuesto por la IA funcionara correctamente en el proyecto.
