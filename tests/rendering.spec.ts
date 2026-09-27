@@ -3,7 +3,7 @@
  *
  * No existe jsdom ni Playwright instalados en el proyecto, asi que estas
  * pruebas no renderizan JSX. En su lugar ejercitan la logica de carga y
- * busqueda que usan src/app/page.tsx y src/app/inspecciones/[id]/page.tsx,
+ * busqueda que usan src/app/inspecciones/page.tsx y src/app/inspecciones/[id]/page.tsx,
  * extraida en src/lib/data/inspection-view.ts. Son deterministas, no usan
  * red ni servicios privados y usan solo datos sinteticos.
  *
@@ -32,7 +32,7 @@ test("listado: devuelve todas las inspecciones sinteticas con campos requeridos"
     assert.ok(inspection.inspector, "cada inspeccion debe tener inspector");
     assert.ok(
       inspection.status === "ok" || inspection.status === "attention",
-      "status debe ser 'ok' o 'attention'"
+      "status debe ser 'ok' o 'attention'",
     );
   }
 });
@@ -47,7 +47,7 @@ test("regresion: no existen ids duplicados en el listado", () => {
   assert.equal(
     idsUnicos.size,
     ids.length,
-    "se encontraron ids duplicados en las inspecciones sinteticas"
+    "se encontraron ids duplicados en las inspecciones sinteticas",
   );
 });
 
@@ -109,7 +109,6 @@ test("carga con id inexistente resuelve status 'not-found'", async () => {
   assert.equal(resultado.inspection, null);
 });
 
-
 // --- Verificacion estructural: confirma que el codigo real coincide con lo
 // documentado en docs/rendering-decision.md (listado SSR, detalle CSR). ---
 import { readFileSync } from "node:fs";
@@ -118,7 +117,10 @@ import { dirname, resolve } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const listadoPagePath = resolve(__dirname, "../src/app/inspecciones/page.tsx");
-const detallePagePath = resolve(__dirname, "../src/app/inspecciones/[id]/page.tsx");
+const detallePagePath = resolve(
+  __dirname,
+  "../src/app/inspecciones/[id]/page.tsx",
+);
 
 test("estructural: el listado (/inspecciones) es un Server Component SSR real", () => {
   const codigo = readFileSync(listadoPagePath, "utf-8");
@@ -126,12 +128,12 @@ test("estructural: el listado (/inspecciones) es un Server Component SSR real", 
   assert.doesNotMatch(
     codigo,
     /"use client"/,
-    "page.tsx del listado no deberia tener 'use client' (debe ser Server Component)"
+    "page.tsx del listado no deberia tener 'use client' (debe ser Server Component)",
   );
   assert.match(
     codigo,
     /dynamic\s*=\s*["']force-dynamic["']/,
-    "page.tsx del listado debe forzar renderizado dinamico (SSR real, no SSG)"
+    "page.tsx del listado debe forzar renderizado dinamico (SSR real, no SSG)",
   );
 });
 
@@ -141,6 +143,6 @@ test("estructural: el detalle (/inspecciones/[id]) es un Client Component CSR", 
   assert.match(
     codigo,
     /"use client"/,
-    "page.tsx del detalle debe tener 'use client' (CSR)"
+    "page.tsx del detalle debe tener 'use client' (CSR)",
   );
 });

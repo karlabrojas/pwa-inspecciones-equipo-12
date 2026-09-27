@@ -1,14 +1,18 @@
 // Logica de carga/busqueda de inspecciones, extraida para permitir pruebas
 // deterministas sin depender de un renderer de React (no hay jsdom/Playwright
 // instalados en el proyecto). Refleja el comportamiento usado por
-// src/app/page.tsx y src/app/inspecciones/[id]/page.tsx.
+// src/app/inspecciones/page.tsx y src/app/inspecciones/[id]/page.tsx.
 //
 // Ver docs/rendering-decision.md para el detalle de esta decision (limite:
 // esto prueba la logica, no el DOM renderizado).
 
 import { inspections, type Inspection } from "./inspections.ts";
 
-export type InspectionLoadStatus = "loading" | "success" | "not-found" | "error";
+export type InspectionLoadStatus =
+  | "loading"
+  | "success"
+  | "not-found"
+  | "error";
 
 export type InspectionLoadResult = {
   status: InspectionLoadStatus;
@@ -33,7 +37,7 @@ export function findInspectionById(id: string): Inspection | null {
  */
 export function loadInspectionById(
   id: string,
-  delayMs: number = DEFAULT_DELAY_MS
+  delayMs: number = DEFAULT_DELAY_MS,
 ): Promise<InspectionLoadResult> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -48,7 +52,7 @@ export function loadInspectionById(
 
 /** Simula el estado de error activado por el boton "Simular error" de la UI. */
 export function loadInspectionWithError(
-  delayMs: number = DEFAULT_DELAY_MS
+  delayMs: number = DEFAULT_DELAY_MS,
 ): Promise<InspectionLoadResult> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -56,4 +60,3 @@ export function loadInspectionWithError(
     }, delayMs);
   });
 }
-

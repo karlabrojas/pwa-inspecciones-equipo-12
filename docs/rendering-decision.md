@@ -41,13 +41,13 @@ carga asincrona, y maneja en el cliente los estados `loading`, `error` (boton
 
 ## Comparacion CSR vs SSR en este dominio
 
-| Aspecto | CSR (cliente renderiza) | SSR (servidor renderiza) | Ruta que lo usa aqui |
-|---|---|---|---|
-| Donde corre la logica de datos | En el navegador, tras hidratar | En el servidor, antes de enviar el HTML | Listado: SSR. Detalle: CSR |
-| Estados de carga/error | Se controlan con estado de React (`useState`) | Se controlan con `loading.tsx`/`error.tsx` de Next.js | Listado usa las convenciones de Next.js; detalle usa estado de React |
-| Dependencia de red por navegacion | Ninguna si el JS ya esta cacheado | Requiere que el servidor responda en cada solicitud (agravado por `force-dynamic`) | El listado SSR es mas sensible a la conectividad intermitente que el detalle CSR una vez cacheado por el Service Worker |
-| Interactividad | Nativa | Requiere Client Component aparte para cualquier interaccion | El detalle necesita CSR porque tiene botones de interaccion (mostrar/ocultar resumen, simular error) |
-| Complejidad | Baja con datos en memoria | Requiere pensar en el ciclo de vida servidor (`dynamic`, `loading.tsx`, `error.tsx`) | El listado asume mas complejidad de configuracion de Next.js a cambio de HTML ya resuelto en el primer response |
+| Aspecto                           | CSR (cliente renderiza)                       | SSR (servidor renderiza)                                                             | Ruta que lo usa aqui                                                                                                    |
+| --------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Donde corre la logica de datos    | En el navegador, tras hidratar                | En el servidor, antes de enviar el HTML                                              | Listado: SSR. Detalle: CSR                                                                                              |
+| Estados de carga/error            | Se controlan con estado de React (`useState`) | Se controlan con `loading.tsx`/`error.tsx` de Next.js                                | Listado usa las convenciones de Next.js; detalle usa estado de React                                                    |
+| Dependencia de red por navegacion | Ninguna si el JS ya esta cacheado             | Requiere que el servidor responda en cada solicitud (agravado por `force-dynamic`)   | El listado SSR es mas sensible a la conectividad intermitente que el detalle CSR una vez cacheado por el Service Worker |
+| Interactividad                    | Nativa                                        | Requiere Client Component aparte para cualquier interaccion                          | El detalle necesita CSR porque tiene botones de interaccion (mostrar/ocultar resumen, simular error)                    |
+| Complejidad                       | Baja con datos en memoria                     | Requiere pensar en el ciclo de vida servidor (`dynamic`, `loading.tsx`, `error.tsx`) | El listado asume mas complejidad de configuracion de Next.js a cambio de HTML ya resuelto en el primer response         |
 
 ## Decision tecnica
 
@@ -62,7 +62,7 @@ misma estrategia. Razones:
    boton de simular error para pruebas de UI), lo cual es mas simple de
    implementar como Client Component.
 3. Esto permite comparar en un mismo proyecto ambas estrategias con datos
-   sinteticos identicos, que es el proposito explicito de la actividad
+   sinteticos del mismo conjunto, que es el proposito explicito de la actividad
    (Semana 4: "Implementar y comparar rutas CSR y SSR para listado y
    detalle").
 
@@ -98,16 +98,15 @@ Resultado obtenido en una ejecucion reciente de `npm run build`:
 Interpretacion: el listado SSR tiene el First Load JS mas bajo de las dos
 rutas (87.4 kB, practicamente solo el runtime compartido), porque al ser un
 Server Component no envia al cliente la logica de estados que si necesita el
-detalle CSR (2.7 kB adicionales de componente propio). Esto es evidencia
-directa de que, en este proyecto, SSR reduce el JavaScript enviado al
-navegador respecto a CSR para una pagina equivalente.
+detalle CSR (2.7 kB adicionales de componente propio). En esta ejecución de next build, la ruta SSR reportó menor First Load JS que la ruta CSR. La diferencia observada corresponde al tamaño del bundle reportado por Next.js y no permite por sí sola concluir diferencias de tiempo de carga en dispositivos reales.
 
 ## Accesibilidad
 
 - El estado de carga del listado (`src/app/inspecciones/loading.tsx`) usa
   `role="status"` y `aria-live="polite"`.
-- El estado de error del listado (`src/app/inspecciones/error.tsx`) no
-  declara `role="alert"` actualmente; se documenta como limite a corregir.
+- El estado de error del listado (`src/app/inspecciones/error.tsx`) utiliza
+  `role="alert"` y proporciona un botón "Reintentar" mediante el mecanismo
+  `reset` de Next.js.
 - El detalle usa `role="status"`/`role="alert"` (via
   `src/components/loading-state.tsx`) y `aria-expanded` en el boton de
   resumen.
@@ -129,15 +128,16 @@ navegador respecto a CSR para una pagina equivalente.
   tiene ningun disparador real en el codigo actual: existen porque siguen la
   convencion de Next.js, pero no estan siendo ejercitados por una condicion
   de carga lenta o de fallo real todavia.
-- Las pruebas automatizadas de `tests/rendering.spec.ts` ejercitan la logica
-  de `src/lib/data/inspection-view.ts` (un modulo con `loadInspectionsList`,
-  `findInspectionById`, etc., creado para permitir pruebas deterministas sin
-  jsdom/Playwright). Ese modulo no esta importado actualmente por
-  `src/app/inspecciones/page.tsx` (que usa datos sincronos directos), asi que
+- Las pruebas automatizadas de `tests/rendering.spec.ts` ejercitan la lógica de
+  `src/lib/data/inspection-view.ts` (un módulo con `getInspectionsList`,
+  `findInspectionById`, `loadInspectionById` y `loadInspectionWithError`, creado para permitir pruebas deterministas sin
+  jsdom/Playwright). Ese módulo no está importado actualmente por
+  `src/app/inspecciones/page.tsx` (que usa datos síncronos directos), así que
   esas pruebas validan un comportamiento equivalente/de referencia, no la
-  ejecucion linea por linea del Server Component real. Para cerrar esa
-  brecha, se agregaron pruebas estructurales que verifican directamente el
-  codigo fuente (`"use client"`, `dynamic = "force-dynamic"`).
+  ejecución línea por línea del Server Component real. Para cerrar esa
+  brecha, se agregaron pruebas estructurales que verifican directamente
+  el código fuente (`"use client"`, `dynamic = "force-dynamic"`).
+
 - No se ejecuto Lighthouse ni profiling de red real; el First Load JS es una
   metrica de tamano de bundle, no de tiempo real en un dispositivo concreto.
 
@@ -158,7 +158,7 @@ navegador respecto a CSR para una pagina equivalente.
 - Se asume Node.js 22.x y Next.js 14.2.35 como entorno de referencia.
 - Se asume que el proposito de comparar CSR y SSR en esta actividad se
   cumple mostrando ambas estrategias implementadas con datos sinteticos
-  identicos, no necesariamente con metricas de produccion.
+  del mismo conjunto, no necesariamente con metricas de produccion.
 
 ## Metrica de carga utilizada y procedimiento reproducible
 
