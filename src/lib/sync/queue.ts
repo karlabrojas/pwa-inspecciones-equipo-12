@@ -18,6 +18,8 @@ export type SyncOperation = {
   attemptId: string | null;
   createdAt: string;
   updatedAt: string;
+  lastAttemptAt: string | null;
+  nextAttemptAt: string | null;
   lastError: string | null;
 };
 
@@ -54,8 +56,8 @@ function createAttemptId(): string {
 /**
  * Cola de sincronización offline.
  *
- * La cola no depende directamente de IndexedDB ni de una implementación
- * concreta de almacenamiento. Recibe un adaptador mediante QueueStorage.
+ * La cola no depende directamente de IndexedDB.
+ * Recibe un adaptador mediante QueueStorage.
  */
 export class SyncQueue {
   private readonly storage: QueueStorage;
@@ -65,6 +67,10 @@ export class SyncQueue {
    * procesen simultáneamente la misma operación.
    */
   private readonly activeOperations = new Set<string>();
+
+  /**
+   * Serializa las llamadas a process() dentro de la misma instancia.
+   */
   private processLock: Promise<void> = Promise.resolve();
 
   public constructor(storage: QueueStorage) {
@@ -95,6 +101,8 @@ export class SyncQueue {
       attemptId: null,
       createdAt: timestamp,
       updatedAt: timestamp,
+      lastAttemptAt: null,
+      nextAttemptAt: null,
       lastError: null,
     };
 
@@ -114,14 +122,6 @@ export class SyncQueue {
         operation.status === "pending" || operation.status === "failed",
     );
   }
-
-  /**
-   * Procesa las operaciones pendientes.
-   *
-   * Cada ejecución obtiene un attemptId único. La respuesta del handler
-   * solamente puede modificar la operación si ese attemptId sigue siendo
-   * el intento activo.
-   */
 
   private async processInternal(
     handler: SyncHandler,
@@ -151,13 +151,16 @@ export class SyncQueue {
       }
 
       const attemptId = createAttemptId();
+      const attemptTime = now();
 
       const processing: SyncOperation = {
         ...current,
         status: "processing",
         attempts: current.attempts + 1,
         attemptId,
-        updatedAt: now(),
+        updatedAt: attemptTime,
+        lastAttemptAt: attemptTime,
+        nextAttemptAt: null,
         lastError: null,
       };
 
@@ -171,9 +174,8 @@ export class SyncQueue {
         const latest = await this.storage.get(operation.operationId);
 
         /**
-         * Si la operación cambió mientras el handler estaba ejecutándose,
-         * esta respuesta ya no representa el intento vigente y no debe
-         * sobrescribir el estado más reciente.
+         * Una respuesta solamente puede completar el intento
+         * que continúa siendo el intento vigente.
          */
         if (
           !latest ||
@@ -189,6 +191,7 @@ export class SyncQueue {
           status: "completed",
           updatedAt: now(),
           lastError: null,
+          nextAttemptAt: null,
         };
 
         await this.storage.put(completed);
@@ -200,8 +203,8 @@ export class SyncQueue {
         const latest = await this.storage.get(operation.operationId);
 
         /**
-         * Un error de un intento antiguo tampoco puede sobrescribir
-         * un estado producido por un intento posterior.
+         * Un error de un intento antiguo no puede sobrescribir
+         * el estado producido por un intento posterior.
          */
         if (
           !latest ||
@@ -217,6 +220,7 @@ export class SyncQueue {
           status: "failed",
           updatedAt: now(),
           lastError: message,
+          nextAttemptAt: null,
         };
 
         await this.storage.put(failedOperation);
