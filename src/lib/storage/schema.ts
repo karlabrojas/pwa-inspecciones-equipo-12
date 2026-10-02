@@ -5,11 +5,7 @@ export const INSPECTION_DATABASE_VERSION = 1;
 export const INSPECTIONS_STORE = "inspections";
 export const SYNC_OPERATIONS_STORE = "syncOperations";
 
-export type InspectionSyncStatus =
-  | "pending"
-  | "synced"
-  | "conflict"
-  | "failed";
+export type InspectionSyncStatus = "pending" | "synced" | "conflict" | "failed";
 
 export type SyncOperationStatus =
   | "pending"
@@ -42,6 +38,7 @@ export type StoredInspection = Inspection & {
 export type SyncOperation = {
   operationId: string;
   idempotencyKey: string;
+  attemptId: string | null;
   inspectionId: string;
   type: SyncOperationType;
   payload: Inspection;
