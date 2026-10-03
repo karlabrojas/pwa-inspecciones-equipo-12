@@ -310,7 +310,7 @@ Enlaces de commits:
 - **Validación humana realizada:**
   Copié los archivos al proyecto, ejecuté `npm test` y `npm run verify` en mi equipo y comprobé que todas las pruebas pasaran. Realicé yo mismo la prueba de mutación en `public/sw.js` para confirmar que las pruebas detectan un error real, restauré el archivo con `git checkout` y revisé con `git diff` que en `package.json` solo cambiara la línea `test`. Finalmente, subí los cambios a `feat/w03-offline-tests`, abrí el Pull Request #25 y verifiqué que los checks de GitHub Actions estuvieran en verde.
 
-  # SEMANA 4 - WEEK 4
+# SEMANA 4 - WEEK 4
 
 ## Integrante: Karla Beatriz Rojas Rojas
 
@@ -460,3 +460,75 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 
 - **Uso de IA:**
   Se utilizó IA como apoyo durante el desarrollo para esta actividad: para corregir y redactar `docs/rendering-decision.md`, generar las pruebas estructurales agregadas a `tests/rendering.spec.ts`, actualizar `README.md`, definir el flujo correcto de Git (verificar rama activa, no commitear directo sobre `dev`), redactar el título y la descripción del PR, y estructurar esta evidencia individual. Antes de integrar los cambios, ejecuté las pruebas y el build localmente para confirmar que el código propuesto por la IA funcionara correctamente en el proyecto.
+
+# SEMANA 5 - WEEK 5
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+  Implementación de la cola de sincronización offline en `src/lib/sync/queue.ts`.
+  La cola permite mantener operaciones pendientes para su posterior sincronización, procesar operaciones `create` y `update`, conservar operaciones que fallan para permitir reintentos, evitar duplicaciones mediante `operationId` y proteger el estado de una operación mediante `attemptId`.
+  También se incorporó un mecanismo `processLock` para evitar que dos llamadas concurrentes sobre la misma instancia procesen dos veces una misma operación.
+  Enlaces de commits:
+  - `feat: implement offline sync queue` — [`fbfb46e`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fbfb46e950da233bdcc03e6aacc2efafee28cdb2) — Issue #24 — Cola offline, reintentos e idempotencia.
+  - `merge: integrate local storage with sync queue` — [`8811b3c`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8811b3c24bfcafd4e030bf20e144aec5ce340a92)
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí separar la lógica de sincronización en una `SyncQueue` que trabaja mediante un contrato `QueueStorage`, en lugar de acoplarla directamente a IndexedDB.
+  Esta decisión permite que la cola gestione el ciclo de vida de las operaciones (`pending`, `processing`, `failed` y `completed`) independientemente de la implementación concreta del almacenamiento.
+  Para evitar duplicaciones, `operationId` funciona como identificador de la operación. Si una operación con el mismo identificador ya existe, volver a encolarla no crea una segunda operación.
+  Para protegerse contra respuestas fuera de orden se genera un `attemptId` diferente para cada intento. Antes de marcar una operación como `completed` o `failed`, se verifica que el intento que responde todavía corresponda al estado almacenado.
+  Además, `processLock` serializa llamadas concurrentes a `process()` sobre la misma instancia de la cola, evitando que una misma operación sea enviada dos veces por invocaciones concurrentes.
+
+- **Comando o prueba que ejecuté:**
+  `npm test`, `npm run verify`
+
+- **Resultado real que observé:**
+  `npm test` terminó correctamente.
+  Las pruebas de `tests/sync.spec.ts` reportaron:
+
+  ```text
+  # tests 9
+  # pass 9
+  # fail 0
+  ```
+
+  Se verificaron casos de:
+  - persistencia de una operación encolada;
+  - sincronización de una operación pendiente;
+  - reintento después de un error temporal;
+  - prevención de duplicados;
+  - idempotencia de operaciones completadas;
+  - respuestas fuera de orden;
+  - detección de conflictos;
+  - ausencia de conflicto cuando el contenido es igual;
+  - protección mediante `processLock`.
+
+  `npm run verify` también terminó correctamente con:
+
+  ```text
+  Starter verificable: PASS
+  ```
+
+  El reporte `reports/verification.json` indicó:
+
+  ```json
+  {
+    "status": "pass",
+    "missing": []
+  }
+  ```
+
+- **Qué verifica esa prueba y qué no verifica:**
+  `tests/sync.spec.ts` verifica de forma reproducible el comportamiento de la cola respecto a persistencia mediante el `QueueStorage` utilizado en las pruebas, sincronización, reintentos, duplicación, idempotencia, respuestas fuera de orden, conflictos y concurrencia.
+  `npm run verify` verifica que los archivos y artefactos requeridos por el verificador del proyecto estén presentes.
+  Las pruebas de sincronización utilizan un almacenamiento en memoria (`createMemoryStorage()`), por lo que no prueban directamente las transacciones de IndexedDB en un navegador real.
+  Tampoco se realiza una prueba de navegador real que cierre y vuelva a abrir una pestaña utilizando IndexedDB; la prueba de persistencia comprueba la conservación de las operaciones al crear una nueva instancia de `SyncQueue` sobre el mismo almacenamiento.
+
+* **Limitación, dificultad o riesgo que identifiqué:**
+  Una limitación es que las pruebas automatizadas de sincronización utilizan almacenamiento en memoria y no IndexedDB real. La implementación de producción utiliza `createSyncQueueStorage()` para conectar la cola con IndexedDB, pero el comportamiento de las transacciones reales del navegador no está cubierto por estas pruebas.
+  Otro riesgo considerado fue que una respuesta de sincronización antigua pudiera sobrescribir el estado producido por un intento más nuevo. Para reducir este riesgo se incorporó `attemptId` y se valida el estado de la operación antes de marcarla como completada o fallida.
+
+* **Uso de IA:**
+  Utilicé inteligencia artificial como herramienta de apoyo durante el desarrollo para revisar la implementación, proponer estructuras de la cola de sincronización, analizar casos de idempotencia, reintentos, concurrencia y respuestas fuera de orden, y apoyar la revisión de las pruebas y documentación.
+  La implementación fue revisada y ejecutada en el repositorio del proyecto, verificando los resultados mediante las pruebas automatizadas y `npm run verify`.
