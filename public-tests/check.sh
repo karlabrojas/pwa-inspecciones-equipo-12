@@ -7,6 +7,7 @@ test -e 'docs/requirements.md'
 test -e 'docs/decision-record.md'
 test -e 'docs/cache-strategy.md'
 test -e 'docs/rendering-decision.md'
+test -e 'docs/sync-policy.md'
 
 # Project configuration
 test -e 'package.json'
@@ -28,12 +29,18 @@ test -e 'src/app/inspecciones/page.tsx'
 test -e 'src/app/inspecciones/[id]/page.tsx'
 test -e 'src/components/loading-state.tsx'
 
+# Offline-first synchronization
+test -e 'src/lib/sync/queue.ts'
+test -e 'src/lib/storage/schema.ts'
+test -e 'src/lib/sync/conflict-policy.ts'
+
 # Tests
 test -e 'tests/manifest.spec.ts'
 test -e 'tests/service-worker.spec.ts'
 test -e 'tests/service-worker-behavior.spec.ts'
 test -e 'tests/offline.spec.ts'
 test -e 'tests/rendering.spec.ts'
+test -e 'tests/sync.spec.ts'
 
 # README
 test -f README.md
