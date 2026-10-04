@@ -588,3 +588,38 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Uso de IA:**
   Utilicé una herramienta de inteligencia artificial como apoyo para redactar los borradores de `conflict-policy.ts`, `tests/sync.spec.ts`, `tests/sync-test-helpers.mjs` y `docs/sync-policy.md`, proponer la prueba de mutación y guiarme con los comandos de terminal y de Git. Los fragmentos influenciados por IA son esos cuatro archivos y el borrador de esta sección. Decidí la política `manual` y su justificación, y adapté las pruebas a la implementación real de `SyncQueue` y del esquema.
 
+## Integrante: Angel
+
+- **Mi contribución concreta y enlace:**
+  Implementé el esquema de persistencia local para inspecciones y la capa de almacenamiento con IndexedDB en `src/lib/storage/schema.ts` y `src/lib/storage/indexed-db.ts`. La solución define la estructura de una inspección, su identificador único, el identificador de operación para sincronización, los estados de sincronización, la clave de deduplicación, la versión, los metadatos de conflicto y los timestamps necesarios para conservar la información incluso con pérdida temporal de conexión y cierre/reapertura de la aplicación.
+
+  Enlaces de commits:
+  - `feat(storage): define schema and offline persistence with IndexedDB` — [`8ae5aa9`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8ae5aa958d8c0af6bb196c23685b3acc03959ebb) — Issue #23 — Persistencia local y esquema de datos
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí modelar la inspección como un registro persistente con metadata explícita para sincronización, en lugar de guardar solo el contenido de la inspección. Esto permite distinguir entre inspecciones ya sincronizadas, pendientes, con conflicto o fallidas, y deja preparado el flujo para una futura cola de sincronización (`queue.ts`).
+
+  También incorporé una clave de deduplicación basada en los datos relevantes del reporte, junto con `version`, `serverVersion`, `createdAt`, `updatedAt`, `syncedAt` y `conflict`, porque esa combinación ayuda a evitar duplicados, controlar versiones y preparar una política de resolución de conflictos sin duplicar tipos entre almacenamiento y negocio.
+
+- **Comando o prueba que ejecuté:**
+  - `npm run build`
+  - `npm test`
+
+- **Resultado real que observé:**
+  - `npm run build` terminó correctamente con `✓ Compiled successfully` y `✓ Generating static pages (5/5)`.
+  - `npm test` terminó correctamente y todas las pruebas del proyecto pasaron: `starter.spec.mjs: PASS`, `manifest.spec.ts: PASS`, `service-worker.spec.ts: PASS`, `service-worker-behavior.spec.ts: PASS`, `offline.spec.ts: PASS` y `rendering.spec.ts: PASS`.
+  - La compilación confirmó además que la ruta `/inspecciones` continúa siendo válida y que el proyecto reconoce la nueva capa de almacenamiento sin romper la estructura existente.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  - La prueba verifica que la aplicación compila correctamente y que la capa de almacenamiento local no introduce errores de tipos ni regresiones con las pruebas de la PWA.
+  - También confirma que la estructura del repositorio y la integración del proyecto siguen funcionando con la implementación reciente.
+  - No verifica por sí sola la persistencia real de IndexedDB en un navegador real con cierre/reapertura de pestaña ni la sincronización end-to-end con un backend externo. Eso requiere validación manual en navegador o pruebas específicas de navegador con un almacenamiento real.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  - La limitación principal es que la validación automatizada no reemplaza una prueba real en el navegador con IndexedDB, por lo que la persistencia debe confirmar también en un entorno real.
+  - Otro riesgo es que la evolución futura de `Inspection` o de la política de conflictos pueda requerir ajustes en los campos de deduplicación y versiones para evitar falsos positivos en conflictos.
+  - También es necesario asegurar que `queue.ts` consuma exactamente el mismo contrato de almacenamiento sin duplicar modelos o tipos, para mantener el diseño coherente.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para diseñar la estructura del esquema de almacenamiento, pensar en los campos necesarios para sincronización y deduplicación, y revisar cómo encajar el contrato de almacenamiento con la futura cola de sincronización. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente `npm run build` y `npm test` para validar que el resultado fuera consistente con la estructura real del repositorio.
+
