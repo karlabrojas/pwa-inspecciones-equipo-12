@@ -532,3 +532,59 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 * **Uso de IA:**
   Utilicé inteligencia artificial como herramienta de apoyo durante el desarrollo para revisar la implementación, proponer estructuras de la cola de sincronización, analizar casos de idempotencia, reintentos, concurrencia y respuestas fuera de orden, y apoyar la revisión de las pruebas y documentación.
   La implementación fue revisada y ejecutada en el repositorio del proyecto, verificando los resultados mediante las pruebas automatizadas y `npm run verify`.
+
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+  Fui responsable del Issue #25 (#39 en GitHub): definir la política de resolución de conflictos de la sincronización y construir las pruebas que demuestran su comportamiento crítico. Mi trabajo incluye:
+  - `src/lib/sync/conflict-policy.ts`: política `manual` con `detectConflict()` y `resolveConflict()`.
+  - `docs/sync-policy.md`: política documentada y justificada (qué es un conflicto, cómo se detecta, qué versión prevalece, cómo se evita perder información, operaciones repetidas, respuestas fuera de orden, errores de red y límites).
+  - `tests/sync.spec.ts` (9 pruebas) y `tests/sync-test-helpers.mjs` (almacenamiento en memoria y datos sintéticos).
+  - `package.json`: agregué `tests/sync.spec.ts` al script `test` para que se ejecute con `npm test`.
+  - `.gitignore`: agregué `tsconfig.tsbuildinfo`, que generó `npx tsc --noEmit`.
+
+  Las pruebas de integración usan `SyncQueue` (`src/lib/sync/queue.ts`) y los tipos del esquema (`src/lib/storage/schema.ts`), que son los componentes de Ángel y Karla.
+
+  Rama: `feat/w05-conflict-tests-docs`. Pull Request: #42 hacia `dev` (ya fusionado).
+
+  Enlaces de commits:
+  - `feat(sync): add conflict policy, docs and sync.spec.ts for T-25` — [`c987436`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/c987436) — ISSUE #25: Resolución de conflictos, pruebas y documentación
+  - `Merge pull request #42 from karlabrojas/feat/w05-conflict-tests-docs` — [`9537ebb`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9537ebb)
+
+- **Decisión que puedo explicar y por qué:**
+  Elegí la política `manual`. Hay conflicto solo cuando se cumplen dos condiciones: la versión del servidor avanzó desde la última que conoció el cliente y el contenido local y el remoto son distintos. Cuando se detecta, se conserva el cambio local, no se sobrescribe con el remoto y se guarda un registro `InspectionConflict` (`detectedAt`, `serverVersion`, `serverUpdatedAt`, `resolutionPolicy`) para que una persona decida.
+
+  Lo decidí así porque una inspección de laboratorio es un reporte de seguridad: sobrescribir un cambio local o remoto sin revisión puede borrar una observación real, y el costo de una revisión manual es menor que el riesgo de perder información. Si el servidor avanzó pero el contenido es idéntico, no se marca conflicto, para evitar falsos positivos.
+
+  También decidí probar con un almacenamiento en memoria y datos sintéticos para que las pruebas fueran deterministas y no dependieran de servicios privados ni de un navegador. El trade-off es que no se prueba IndexedDB real.
+
+- **Comando o prueba que ejecuté:**
+  - `npx tsc --noEmit`
+  - `node --experimental-strip-types --test tests/sync.spec.ts`
+  - `npm test`
+  - Prueba de mutación sobre `src/lib/sync/queue.ts`: reemplacé temporalmente el cuerpo de `process()` para quitar la serialización con `processLock`, ejecuté `node --experimental-strip-types --test tests/sync.spec.ts` y restauré el archivo con `git checkout src\lib\sync\queue.ts`.
+
+- **Resultado real que observé:**
+  - `npx tsc --noEmit` terminó sin errores.
+  - `tests/sync.spec.ts`: 9 pruebas, 9 aprobadas, 0 fallidas (persistencia offline, sincronización, reintentos, duplicación, idempotencia, respuestas fuera de orden, 2 de conflicto y 1 de regresión).
+  - `npm test` terminó en verde con todos los archivos de prueba, incluido `sync.spec.ts` al final del script.
+  - Al principio `sync.spec.ts` falló con `ERR_MODULE_NOT_FOUND` porque los imports no tenían extensión `.ts`; agregué `.ts` en los imports de `conflict-policy.ts` y `sync.spec.ts` y las 9 pruebas pasaron.
+  - En la prueba de mutación, con `queue.ts` modificado falló únicamente la prueba de regresión con `2 !== 1` (el handler se ejecutó dos veces) y las otras 8 siguieron pasando. Después de restaurar el archivo, `git status` ya no mostró `queue.ts` como modificado y las 9 pruebas volvieron a pasar.
+  - Después de subir la rama, GitHub mostró los checks en verde (10/10) para `feat/w05-conflict-tests-docs` y el Pull Request #42 se fusionó a `dev`.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas verifican que una operación encolada sigue disponible al crear una instancia nueva de `SyncQueue` sobre el mismo almacenamiento (cierre y reapertura); que una operación pendiente se procesa y queda `completed`; que un error temporal la marca `failed` y una llamada posterior la reintenta; que encolar dos veces el mismo `operationId` no crea una segunda operación; que una operación `completed` no se vuelve a enviar; que cambios locales y remotos distintos se detectan como conflicto y no se pierde el cambio local; que un avance de versión con contenido igual no se marca como conflicto; y que dos llamadas paralelas a `process()` no envían la misma operación dos veces.
+
+  No verifican el comportamiento con IndexedDB real en un navegador, ni varias pestañas reales, ni un servidor real o una resolución de conflictos hecha por una persona en la interfaz, que corresponden a etapas posteriores.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  - La resolución automática (`local-wins` / `server-wins`) está definida en el tipo `ConflictResolutionPolicy`, pero no se usa por defecto.
+  - `detectConflict()` compara el objeto `Inspection` completo; si se agregan campos derivados podrían generar falsos conflictos.
+  - La prueba de respuestas fuera de orden simula dos pestañas escribiendo directamente en el almacenamiento con un `attemptId` distinto; no reproduce una respuesta tardía llegando dentro de un `process()` en curso, así que cubre ese caso de forma parcial.
+  - La protección contra respuestas fuera de orden depende de que todos los que escriben en el mismo `QueueStorage` respeten el contrato `attemptId`/`status`.
+  - Las pruebas usan almacenamiento en memoria; el adaptador real de IndexedDB no se prueba automáticamente en este hito.
+  - Dificultad: el nombre de mi prueba de regresión decía `attemptId` pero lo que realmente verifica es el candado `processLock`, así que lo corregí en la prueba y en la documentación.
+
+- **Uso de IA:**
+  Utilicé una herramienta de inteligencia artificial como apoyo para redactar los borradores de `conflict-policy.ts`, `tests/sync.spec.ts`, `tests/sync-test-helpers.mjs` y `docs/sync-policy.md`, proponer la prueba de mutación y guiarme con los comandos de terminal y de Git. Los fragmentos influenciados por IA son esos cuatro archivos y el borrador de esta sección. Decidí la política `manual` y su justificación, y adapté las pruebas a la implementación real de `SyncQueue` y del esquema.
+
