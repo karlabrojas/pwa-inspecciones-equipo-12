@@ -310,7 +310,7 @@ Enlaces de commits:
 - **Validación humana realizada:**
   Copié los archivos al proyecto, ejecuté `npm test` y `npm run verify` en mi equipo y comprobé que todas las pruebas pasaran. Realicé yo mismo la prueba de mutación en `public/sw.js` para confirmar que las pruebas detectan un error real, restauré el archivo con `git checkout` y revisé con `git diff` que en `package.json` solo cambiara la línea `test`. Finalmente, subí los cambios a `feat/w03-offline-tests`, abrí el Pull Request #25 y verifiqué que los checks de GitHub Actions estuvieran en verde.
 
-  # SEMANA 4 - WEEK 4
+# SEMANA 4 - WEEK 4
 
 ## Integrante: Karla Beatriz Rojas Rojas
 
@@ -460,3 +460,166 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 
 - **Uso de IA:**
   Se utilizó IA como apoyo durante el desarrollo para esta actividad: para corregir y redactar `docs/rendering-decision.md`, generar las pruebas estructurales agregadas a `tests/rendering.spec.ts`, actualizar `README.md`, definir el flujo correcto de Git (verificar rama activa, no commitear directo sobre `dev`), redactar el título y la descripción del PR, y estructurar esta evidencia individual. Antes de integrar los cambios, ejecuté las pruebas y el build localmente para confirmar que el código propuesto por la IA funcionara correctamente en el proyecto.
+
+# SEMANA 5 - WEEK 5
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+  Implementación de la cola de sincronización offline en `src/lib/sync/queue.ts`.
+  La cola permite mantener operaciones pendientes para su posterior sincronización, procesar operaciones `create` y `update`, conservar operaciones que fallan para permitir reintentos, evitar duplicaciones mediante `operationId` y proteger el estado de una operación mediante `attemptId`.
+  También se incorporó un mecanismo `processLock` para evitar que dos llamadas concurrentes sobre la misma instancia procesen dos veces una misma operación.
+  Enlaces de commits:
+  - `feat: implement offline sync queue` — [`fbfb46e`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fbfb46e950da233bdcc03e6aacc2efafee28cdb2) — Issue #24 — Cola offline, reintentos e idempotencia.
+  - `merge: integrate local storage with sync queue` — [`8811b3c`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8811b3c24bfcafd4e030bf20e144aec5ce340a92)
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí separar la lógica de sincronización en una `SyncQueue` que trabaja mediante un contrato `QueueStorage`, en lugar de acoplarla directamente a IndexedDB.
+  Esta decisión permite que la cola gestione el ciclo de vida de las operaciones (`pending`, `processing`, `failed` y `completed`) independientemente de la implementación concreta del almacenamiento.
+  Para evitar duplicaciones, `operationId` funciona como identificador de la operación. Si una operación con el mismo identificador ya existe, volver a encolarla no crea una segunda operación.
+  Para protegerse contra respuestas fuera de orden se genera un `attemptId` diferente para cada intento. Antes de marcar una operación como `completed` o `failed`, se verifica que el intento que responde todavía corresponda al estado almacenado.
+  Además, `processLock` serializa llamadas concurrentes a `process()` sobre la misma instancia de la cola, evitando que una misma operación sea enviada dos veces por invocaciones concurrentes.
+
+- **Comando o prueba que ejecuté:**
+  `npm test`, `npm run verify`
+
+- **Resultado real que observé:**
+  `npm test` terminó correctamente.
+  Las pruebas de `tests/sync.spec.ts` reportaron:
+
+  ```text
+  # tests 9
+  # pass 9
+  # fail 0
+  ```
+
+  Se verificaron casos de:
+  - persistencia de una operación encolada;
+  - sincronización de una operación pendiente;
+  - reintento después de un error temporal;
+  - prevención de duplicados;
+  - idempotencia de operaciones completadas;
+  - respuestas fuera de orden;
+  - detección de conflictos;
+  - ausencia de conflicto cuando el contenido es igual;
+  - protección mediante `processLock`.
+
+  `npm run verify` también terminó correctamente con:
+
+  ```text
+  Starter verificable: PASS
+  ```
+
+  El reporte `reports/verification.json` indicó:
+
+  ```json
+  {
+    "status": "pass",
+    "missing": []
+  }
+  ```
+
+- **Qué verifica esa prueba y qué no verifica:**
+  `tests/sync.spec.ts` verifica de forma reproducible el comportamiento de la cola respecto a persistencia mediante el `QueueStorage` utilizado en las pruebas, sincronización, reintentos, duplicación, idempotencia, respuestas fuera de orden, conflictos y concurrencia.
+  `npm run verify` verifica que los archivos y artefactos requeridos por el verificador del proyecto estén presentes.
+  Las pruebas de sincronización utilizan un almacenamiento en memoria (`createMemoryStorage()`), por lo que no prueban directamente las transacciones de IndexedDB en un navegador real.
+  Tampoco se realiza una prueba de navegador real que cierre y vuelva a abrir una pestaña utilizando IndexedDB; la prueba de persistencia comprueba la conservación de las operaciones al crear una nueva instancia de `SyncQueue` sobre el mismo almacenamiento.
+
+* **Limitación, dificultad o riesgo que identifiqué:**
+  Una limitación es que las pruebas automatizadas de sincronización utilizan almacenamiento en memoria y no IndexedDB real. La implementación de producción utiliza `createSyncQueueStorage()` para conectar la cola con IndexedDB, pero el comportamiento de las transacciones reales del navegador no está cubierto por estas pruebas.
+  Otro riesgo considerado fue que una respuesta de sincronización antigua pudiera sobrescribir el estado producido por un intento más nuevo. Para reducir este riesgo se incorporó `attemptId` y se valida el estado de la operación antes de marcarla como completada o fallida.
+
+* **Uso de IA:**
+  Utilicé inteligencia artificial como herramienta de apoyo durante el desarrollo para revisar la implementación, proponer estructuras de la cola de sincronización, analizar casos de idempotencia, reintentos, concurrencia y respuestas fuera de orden, y apoyar la revisión de las pruebas y documentación.
+  La implementación fue revisada y ejecutada en el repositorio del proyecto, verificando los resultados mediante las pruebas automatizadas y `npm run verify`.
+
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+  Fui responsable del Issue #25 (#39 en GitHub): definir la política de resolución de conflictos de la sincronización y construir las pruebas que demuestran su comportamiento crítico. Mi trabajo incluye:
+  - `src/lib/sync/conflict-policy.ts`: política `manual` con `detectConflict()` y `resolveConflict()`.
+  - `docs/sync-policy.md`: política documentada y justificada (qué es un conflicto, cómo se detecta, qué versión prevalece, cómo se evita perder información, operaciones repetidas, respuestas fuera de orden, errores de red y límites).
+  - `tests/sync.spec.ts` (9 pruebas) y `tests/sync-test-helpers.mjs` (almacenamiento en memoria y datos sintéticos).
+  - `package.json`: agregué `tests/sync.spec.ts` al script `test` para que se ejecute con `npm test`.
+  - `.gitignore`: agregué `tsconfig.tsbuildinfo`, que generó `npx tsc --noEmit`.
+
+  Las pruebas de integración usan `SyncQueue` (`src/lib/sync/queue.ts`) y los tipos del esquema (`src/lib/storage/schema.ts`), que son los componentes de Ángel y Karla.
+
+  Rama: `feat/w05-conflict-tests-docs`. Pull Request: #42 hacia `dev` (ya fusionado).
+
+  Enlaces de commits:
+  - `feat(sync): add conflict policy, docs and sync.spec.ts for T-25` — [`c987436`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/c987436) — ISSUE #25: Resolución de conflictos, pruebas y documentación
+  - `Merge pull request #42 from karlabrojas/feat/w05-conflict-tests-docs` — [`9537ebb`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9537ebb)
+
+- **Decisión que puedo explicar y por qué:**
+  Elegí la política `manual`. Hay conflicto solo cuando se cumplen dos condiciones: la versión del servidor avanzó desde la última que conoció el cliente y el contenido local y el remoto son distintos. Cuando se detecta, se conserva el cambio local, no se sobrescribe con el remoto y se guarda un registro `InspectionConflict` (`detectedAt`, `serverVersion`, `serverUpdatedAt`, `resolutionPolicy`) para que una persona decida.
+
+  Lo decidí así porque una inspección de laboratorio es un reporte de seguridad: sobrescribir un cambio local o remoto sin revisión puede borrar una observación real, y el costo de una revisión manual es menor que el riesgo de perder información. Si el servidor avanzó pero el contenido es idéntico, no se marca conflicto, para evitar falsos positivos.
+
+  También decidí probar con un almacenamiento en memoria y datos sintéticos para que las pruebas fueran deterministas y no dependieran de servicios privados ni de un navegador. El trade-off es que no se prueba IndexedDB real.
+
+- **Comando o prueba que ejecuté:**
+  - `npx tsc --noEmit`
+  - `node --experimental-strip-types --test tests/sync.spec.ts`
+  - `npm test`
+  - Prueba de mutación sobre `src/lib/sync/queue.ts`: reemplacé temporalmente el cuerpo de `process()` para quitar la serialización con `processLock`, ejecuté `node --experimental-strip-types --test tests/sync.spec.ts` y restauré el archivo con `git checkout src\lib\sync\queue.ts`.
+
+- **Resultado real que observé:**
+  - `npx tsc --noEmit` terminó sin errores.
+  - `tests/sync.spec.ts`: 9 pruebas, 9 aprobadas, 0 fallidas (persistencia offline, sincronización, reintentos, duplicación, idempotencia, respuestas fuera de orden, 2 de conflicto y 1 de regresión).
+  - `npm test` terminó en verde con todos los archivos de prueba, incluido `sync.spec.ts` al final del script.
+  - Al principio `sync.spec.ts` falló con `ERR_MODULE_NOT_FOUND` porque los imports no tenían extensión `.ts`; agregué `.ts` en los imports de `conflict-policy.ts` y `sync.spec.ts` y las 9 pruebas pasaron.
+  - En la prueba de mutación, con `queue.ts` modificado falló únicamente la prueba de regresión con `2 !== 1` (el handler se ejecutó dos veces) y las otras 8 siguieron pasando. Después de restaurar el archivo, `git status` ya no mostró `queue.ts` como modificado y las 9 pruebas volvieron a pasar.
+  - Después de subir la rama, GitHub mostró los checks en verde (10/10) para `feat/w05-conflict-tests-docs` y el Pull Request #42 se fusionó a `dev`.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas verifican que una operación encolada sigue disponible al crear una instancia nueva de `SyncQueue` sobre el mismo almacenamiento (cierre y reapertura); que una operación pendiente se procesa y queda `completed`; que un error temporal la marca `failed` y una llamada posterior la reintenta; que encolar dos veces el mismo `operationId` no crea una segunda operación; que una operación `completed` no se vuelve a enviar; que cambios locales y remotos distintos se detectan como conflicto y no se pierde el cambio local; que un avance de versión con contenido igual no se marca como conflicto; y que dos llamadas paralelas a `process()` no envían la misma operación dos veces.
+
+  No verifican el comportamiento con IndexedDB real en un navegador, ni varias pestañas reales, ni un servidor real o una resolución de conflictos hecha por una persona en la interfaz, que corresponden a etapas posteriores.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  - La resolución automática (`local-wins` / `server-wins`) está definida en el tipo `ConflictResolutionPolicy`, pero no se usa por defecto.
+  - `detectConflict()` compara el objeto `Inspection` completo; si se agregan campos derivados podrían generar falsos conflictos.
+  - La prueba de respuestas fuera de orden simula dos pestañas escribiendo directamente en el almacenamiento con un `attemptId` distinto; no reproduce una respuesta tardía llegando dentro de un `process()` en curso, así que cubre ese caso de forma parcial.
+  - La protección contra respuestas fuera de orden depende de que todos los que escriben en el mismo `QueueStorage` respeten el contrato `attemptId`/`status`.
+  - Las pruebas usan almacenamiento en memoria; el adaptador real de IndexedDB no se prueba automáticamente en este hito.
+  - Dificultad: el nombre de mi prueba de regresión decía `attemptId` pero lo que realmente verifica es el candado `processLock`, así que lo corregí en la prueba y en la documentación.
+
+- **Uso de IA:**
+  Utilicé una herramienta de inteligencia artificial como apoyo para redactar los borradores de `conflict-policy.ts`, `tests/sync.spec.ts`, `tests/sync-test-helpers.mjs` y `docs/sync-policy.md`, proponer la prueba de mutación y guiarme con los comandos de terminal y de Git. Los fragmentos influenciados por IA son esos cuatro archivos y el borrador de esta sección. Decidí la política `manual` y su justificación, y adapté las pruebas a la implementación real de `SyncQueue` y del esquema.
+
+## Integrante: Angel
+
+- **Mi contribución concreta y enlace:**
+  Implementé el esquema de persistencia local para inspecciones y la capa de almacenamiento con IndexedDB en `src/lib/storage/schema.ts` y `src/lib/storage/indexed-db.ts`. La solución define la estructura de una inspección, su identificador único, el identificador de operación para sincronización, los estados de sincronización, la clave de deduplicación, la versión, los metadatos de conflicto y los timestamps necesarios para conservar la información incluso con pérdida temporal de conexión y cierre/reapertura de la aplicación.
+
+  Enlaces de commits:
+  - `feat(storage): define schema and offline persistence with IndexedDB` — [`8ae5aa9`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8ae5aa958d8c0af6bb196c23685b3acc03959ebb) — Issue #23 — Persistencia local y esquema de datos
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí modelar la inspección como un registro persistente con metadata explícita para sincronización, en lugar de guardar solo el contenido de la inspección. Esto permite distinguir entre inspecciones ya sincronizadas, pendientes, con conflicto o fallidas, y deja preparado el flujo para una futura cola de sincronización (`queue.ts`).
+
+  También incorporé una clave de deduplicación basada en los datos relevantes del reporte, junto con `version`, `serverVersion`, `createdAt`, `updatedAt`, `syncedAt` y `conflict`, porque esa combinación ayuda a evitar duplicados, controlar versiones y preparar una política de resolución de conflictos sin duplicar tipos entre almacenamiento y negocio.
+
+- **Comando o prueba que ejecuté:**
+  - `npm run build`
+  - `npm test`
+
+- **Resultado real que observé:**
+  - `npm run build` terminó correctamente con `✓ Compiled successfully` y `✓ Generating static pages (5/5)`.
+  - `npm test` terminó correctamente y todas las pruebas del proyecto pasaron: `starter.spec.mjs: PASS`, `manifest.spec.ts: PASS`, `service-worker.spec.ts: PASS`, `service-worker-behavior.spec.ts: PASS`, `offline.spec.ts: PASS` y `rendering.spec.ts: PASS`.
+  - La compilación confirmó además que la ruta `/inspecciones` continúa siendo válida y que el proyecto reconoce la nueva capa de almacenamiento sin romper la estructura existente.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  - La prueba verifica que la aplicación compila correctamente y que la capa de almacenamiento local no introduce errores de tipos ni regresiones con las pruebas de la PWA.
+  - También confirma que la estructura del repositorio y la integración del proyecto siguen funcionando con la implementación reciente.
+  - No verifica por sí sola la persistencia real de IndexedDB en un navegador real con cierre/reapertura de pestaña ni la sincronización end-to-end con un backend externo. Eso requiere validación manual en navegador o pruebas específicas de navegador con un almacenamiento real.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  - La limitación principal es que la validación automatizada no reemplaza una prueba real en el navegador con IndexedDB, por lo que la persistencia debe confirmar también en un entorno real.
+  - Otro riesgo es que la evolución futura de `Inspection` o de la política de conflictos pueda requerir ajustes en los campos de deduplicación y versiones para evitar falsos positivos en conflictos.
+  - También es necesario asegurar que `queue.ts` consuma exactamente el mismo contrato de almacenamiento sin duplicar modelos o tipos, para mantener el diseño coherente.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para diseñar la estructura del esquema de almacenamiento, pensar en los campos necesarios para sincronización y deduplicación, y revisar cómo encajar el contrato de almacenamiento con la futura cola de sincronización. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente `npm run build` y `npm test` para validar que el resultado fuera consistente con la estructura real del repositorio.
+

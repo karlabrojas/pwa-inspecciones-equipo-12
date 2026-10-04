@@ -830,3 +830,207 @@ Las funcionalidades implementadas durante las semanas anteriores (App Shell, man
 - Existe `docs/rendering-decision.md`, que compara CSR y SSR, documenta trade-offs, complejidad, impacto en la carga, accesibilidad, límites, riesgos y supuestos, e incluye una métrica de carga repetible con su procedimiento (`npm run build`).
 - `README.md` documenta instalación, ejecución, verificación y cómo reproducir la evidencia de esta actividad.
 - `npm ci`, `npm test`, `make verify` (o `npm run verify`) y `npm run build` deben ejecutarse correctamente en un entorno limpio.
+
+# Semana 5 — Persistencia offline, sincronización y conflictos
+
+En esta semana se implementó el incremento de sincronización offline para permitir que las inspecciones se mantengan en una cola local, se procesen posteriormente y se eviten duplicados y respuestas desactualizadas.
+
+## Objetivo
+
+El incremento de la semana 5 permite:
+
+- Guardar inspecciones localmente cuando no existe conexión.
+- Mantener operaciones de sincronización pendientes.
+- Reintentar operaciones que hayan fallado.
+- Evitar operaciones duplicadas mediante una clave de idempotencia.
+- Proteger el estado de una operación frente a respuestas fuera de orden.
+- Detectar conflictos entre una versión local y una versión remota.
+- Mantener los conflictos pendientes para revisión manual.
+- Persistir las inspecciones y operaciones mediante IndexedDB.
+
+## Archivos principales
+
+La implementación de la semana 5 se encuentra principalmente en:
+
+- `src/lib/sync/queue.ts`
+  - Implementa la cola de sincronización.
+  - Soporta operaciones `create` y `update`.
+  - Mantiene los estados `pending`, `processing`, `failed` y `completed`.
+  - Permite reintentos de operaciones fallidas.
+  - Utiliza `operationId` para evitar duplicados.
+  - Utiliza `attemptId` para evitar que una respuesta desactualizada sobrescriba un estado más reciente.
+  - Serializa llamadas concurrentes mediante `processLock`.
+
+- `src/lib/storage/schema.ts`
+  - Define los tipos y estados utilizados por el almacenamiento local y la sincronización.
+  - Define los estados de sincronización de inspecciones y operaciones.
+  - Define la información asociada a conflictos.
+
+- `src/lib/storage/indexed-db.ts`
+  - Implementa la persistencia local mediante IndexedDB.
+  - Mantiene los almacenes `inspections` y `syncOperations`.
+  - Define índices para consultar estados, inspecciones y claves de idempotencia.
+
+- `src/lib/sync/conflict-policy.ts`
+  - Implementa la detección de conflictos.
+  - Define `manual` como política predeterminada.
+  - Conserva el cambio local cuando se detecta un conflicto y registra el conflicto para revisión.
+
+- `docs/sync-policy.md`
+  - Documenta las decisiones de sincronización, duplicación, reintentos, conflictos y limitaciones.
+
+- `tests/sync.spec.ts`
+  - Contiene las pruebas automatizadas correspondientes a la sincronización de la semana 5.
+
+## Política de sincronización
+
+Una operación puede encontrarse en los siguientes estados:
+
+```text
+pending → processing → completed
+                   ↘ failed → processing → completed
+```
+
+Las operaciones que fallan permanecen disponibles para un procesamiento posterior.
+
+Una operación utiliza `operationId` como identificador de idempotencia. Si se intenta registrar nuevamente una operación con el mismo identificador, se conserva la operación existente en lugar de crear un duplicado.
+
+Para protegerse contra respuestas fuera de orden, cada intento de procesamiento genera un `attemptId`. Antes de actualizar una operación a `completed` o `failed`, se comprueba que la operación continúe en estado `processing` y que el `attemptId` corresponda al intento que realizó la operación.
+
+## Resolución de conflictos
+
+La política predeterminada es:
+
+```text
+manual
+```
+
+Se considera que existe un conflicto cuando la versión remota avanzó respecto de la última versión conocida por el cliente y el contenido local y remoto es diferente.
+
+Cuando se detecta un conflicto:
+
+- No se descarta automáticamente la información local.
+- Se conserva el cambio local.
+- La inspección se marca con `syncStatus = "conflict"`.
+- Se almacena información sobre la versión remota y la fecha de detección.
+- La resolución queda pendiente de una decisión manual.
+
+Si la versión remota avanzó pero el contenido local y remoto es idéntico, no se considera conflicto.
+
+## Ejecución
+
+Instalar las dependencias:
+
+```bash
+npm ci
+```
+
+Ejecutar las pruebas:
+
+```bash
+npm test
+```
+
+Ejecutar la verificación del proyecto:
+
+```bash
+npm run verify
+```
+
+El proyecto también mantiene el equivalente mediante:
+
+```bash
+make verify
+```
+
+## Verificación realizada
+
+La prueba de sincronización se encuentra incluida en el script `npm test`.
+
+Resultado de la ejecución:
+
+```text
+tests/sync.spec.ts
+9 pruebas ejecutadas
+9 pruebas aprobadas
+0 pruebas fallidas
+```
+
+La verificación del proyecto también fue ejecutada mediante:
+
+```bash
+npm run verify
+```
+
+Resultado:
+
+```text
+Starter verificable: PASS
+```
+
+El reporte generado en `reports/verification.json` indicó:
+
+```json
+{
+  "status": "pass",
+  "missing": []
+}
+```
+
+## Casos verificados
+
+Las pruebas de `tests/sync.spec.ts` verifican:
+
+1. Persistencia de una operación pendiente entre instancias de la cola.
+2. Procesamiento correcto de una operación pendiente.
+3. Reintento de una operación después de un fallo.
+4. Prevención de operaciones duplicadas.
+5. Idempotencia de operaciones completadas.
+6. Protección frente a estados fuera de orden.
+7. Detección y resolución manual de conflictos.
+8. Caso sin conflicto cuando el contenido local y remoto es idéntico.
+9. Protección frente a llamadas concurrentes a `process()` en la misma instancia de la cola.
+
+## Limitaciones conocidas
+
+La implementación actual tiene las siguientes limitaciones:
+
+- Las pruebas de la cola utilizan un almacenamiento en memoria para verificar el comportamiento de sincronización; no simulan un cierre y reapertura real del navegador utilizando IndexedDB.
+- La protección mediante `processLock` evita procesamiento concurrente dentro de la misma instancia de `SyncQueue`, pero no constituye un mecanismo de coordinación entre diferentes pestañas o instancias independientes.
+- La política predeterminada de conflictos es manual; no se realiza una resolución automática de conflictos.
+- La comparación de contenido de inspecciones utiliza la representación completa del objeto para determinar si los cambios son diferentes.
+- Los reintentos se realizan mediante una nueva ejecución de `process()`; no se implementa en esta semana un mecanismo automático de espera o backoff.
+
+## Estado de la Semana 5
+
+La Semana 5 incorpora:
+
+- Implementación de una **cola de sincronización offline** en `src/lib/sync/queue.ts`, con operaciones `create` y `update`, estados de procesamiento, reintentos y protección frente a operaciones duplicadas.
+
+- Persistencia local de inspecciones y operaciones de sincronización mediante IndexedDB en `src/lib/storage/indexed-db.ts`, utilizando el esquema definido en `src/lib/storage/schema.ts`.
+
+- Implementación de una política de conflictos en `src/lib/sync/conflict-policy.ts`, con política predeterminada `manual` para evitar descartar automáticamente cambios locales o remotos.
+
+- Documentación de las decisiones de sincronización, idempotencia, reintentos, conflictos y limitaciones en `docs/sync-policy.md`.
+
+- Pruebas automatizadas de persistencia, sincronización, reintentos, duplicados, idempotencia, respuestas fuera de orden, conflictos y procesamiento concurrente en `tests/sync.spec.ts`.
+
+- Integración de la implementación de la Semana 5 con las funcionalidades desarrolladas durante las semanas anteriores, conservando el funcionamiento offline, el Service Worker, las estrategias de caché y la estructura de la PWA.
+
+## Por qué esta versión cumple con los requisitos de la Semana 5
+
+- Existe `src/lib/sync/queue.ts`, que implementa la cola de operaciones offline, permite reintentos de operaciones fallidas, evita duplicados mediante `operationId` y utiliza `attemptId` para proteger el estado frente a respuestas fuera de orden.
+
+- Existe `src/lib/storage/schema.ts` y la implementación correspondiente en `src/lib/storage/indexed-db.ts`, que permiten persistir inspecciones y operaciones de sincronización localmente mediante IndexedDB.
+
+- Existe `src/lib/sync/conflict-policy.ts`, que detecta conflictos cuando la versión remota avanzó y el contenido local y remoto es diferente. La política predeterminada es `manual`, conservando la información local y marcando el conflicto para revisión.
+
+- Existe `docs/sync-policy.md`, que documenta las decisiones de sincronización, duplicación, idempotencia, reintentos, concurrencia, conflictos y limitaciones conocidas.
+
+- Existe `tests/sync.spec.ts` con **9 pruebas**, que cubren persistencia de operaciones, sincronización, reintentos, prevención de duplicados, idempotencia, protección frente a estados fuera de orden, resolución de conflictos, ausencia de conflicto cuando el contenido es idéntico y llamadas concurrentes a la cola.
+
+- `npm test` se ejecutó correctamente, con **9 pruebas de sincronización aprobadas y 0 fallidas**.
+
+- `npm run verify` se ejecutó correctamente y generó `reports/verification.json` con estado `pass` y `missing: []`.
+
+- `README.md` documenta la instalación, ejecución, verificación y reproducción de la evidencia correspondiente a la Semana 5.
