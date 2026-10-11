@@ -1,4 +1,5 @@
 import { inspections } from "../../lib/data/inspections";
+import { NotificationControls } from "@/components/notification-controls";
 
 // Le indica a Next.js que la ruta debe renderizarse dinámicamente en el servidor en lugar de tratarla como una página estática.
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export default function InspeccionesPage() {
 				<p className="lead">
 					Consulta las inspecciones registradas para los laboratorios.
 				</p>
+				<NotificationControls />
 			</header>
 
 			<section
