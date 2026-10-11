@@ -669,10 +669,10 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Mi contribución concreta y enlace:**
   Me encargué de las pruebas, la documentación y la verificación de las capacidades de la semana 6. Amplié `tests/capabilities.spec.ts` con 11 casos nuevos: cámara con permiso concedido, `SecurityError`, fallo de hardware, códigos 2 y 3 de geolocalización, que el acceso solo ocurre al invocar la función, notificaciones con permiso concedido, denegado y sin API, y un caso en el que el flujo de inspecciones continúa cuando ninguna capacidad está disponible. Incorporé `tests/notifications.spec.ts` al script `npm test` (antes no se ejecutaba), extendí `scripts/verify.mjs` y `public-tests/check.sh` con los artefactos de la semana 6, escribí `docs/capabilities.md` y agregué la sección de la semana 6 al README.
 
-  Enlaces de commit:
+  Enlace de commit:
 
-  - `test(capabilities): add negative cases, wire notifications spec and week 6 artifacts` — [0967a5a](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/"0967a5a86379612231cdda6e693ee91ada007396") — ISSUE #46 — Pruebas y documentación
-  - `docs(capabilities): document permissions, privacy, fallback and known limits` — [fa1827b](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/"fa1827be57d2c84fc6a00807fcfb6162e1a36ea7") — ISSUE #46 — Pruebas y documentación
+  - `test(capabilities): add negative cases, wire notifications spec and week 6 artifacts` — [0967a5a](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/0967a5a86379612231cdda6e693ee91ada007396) — ISSUE #28 — Pruebas automatizadas, documentación y verificación de capacidades
+  - `docs(capabilities): document permissions, privacy, fallback and known limits` — [fa1827b](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fa1827be57d2c84fc6a00807fcfb6162e1a36ea7) — ISSUE #28 — Pruebas automatizadas, documentación y verificación de capacidades
 
 - **Decisión que puedo explicar y por qué:**
   Amplié el archivo de pruebas existente en lugar de reescribirlo, para no pisar el trabajo de mis compañeros ni cambiar su código. Mis casos usan un auxiliar `withNavigator` que restaura `navigator` en un bloque `finally`, de modo que una aserción fallida no contamina las pruebas siguientes. En la documentación describí cámara y geolocalización como funciones todavía no conectadas a una pantalla, en lugar de afirmar que funcionan de punta a punta.
