@@ -664,3 +664,40 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Uso de IA:**
   Utilicé IA como apoyo para analizar la issue, diseñar el contrato del cliente de notificaciones, considerar los estados de permiso y los fallbacks accesibles, y preparar pruebas deterministas y documentación de la decisión. Revisé la integración con la arquitectura SSR existente y ejecuté las pruebas y el build para confirmar los resultados reportados.
 
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+  Me encargué de las pruebas, la documentación y la verificación de las capacidades de la semana 6. Amplié `tests/capabilities.spec.ts` con 11 casos nuevos: cámara con permiso concedido, `SecurityError`, fallo de hardware, códigos 2 y 3 de geolocalización, que el acceso solo ocurre al invocar la función, notificaciones con permiso concedido, denegado y sin API, y un caso en el que el flujo de inspecciones continúa cuando ninguna capacidad está disponible. Incorporé `tests/notifications.spec.ts` al script `npm test` (antes no se ejecutaba), extendí `scripts/verify.mjs` y `public-tests/check.sh` con los artefactos de la semana 6, escribí `docs/capabilities.md` y agregué la sección de la semana 6 al README.
+
+  Enlaces de commit:
+
+  - `test(capabilities): add negative cases, wire notifications spec and week 6 artifacts` — [0967a5a](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/"0967a5a86379612231cdda6e693ee91ada007396") — ISSUE #46 — Pruebas y documentación
+  - `docs(capabilities): document permissions, privacy, fallback and known limits` — [fa1827b](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/"fa1827be57d2c84fc6a00807fcfb6162e1a36ea7") — ISSUE #46 — Pruebas y documentación
+
+- **Decisión que puedo explicar y por qué:**
+  Amplié el archivo de pruebas existente en lugar de reescribirlo, para no pisar el trabajo de mis compañeros ni cambiar su código. Mis casos usan un auxiliar `withNavigator` que restaura `navigator` en un bloque `finally`, de modo que una aserción fallida no contamina las pruebas siguientes. En la documentación describí cámara y geolocalización como funciones todavía no conectadas a una pantalla, en lugar de afirmar que funcionan de punta a punta.
+
+- **Comando o prueba que ejecuté:**
+  - `npm ci`
+  - `node --experimental-strip-types tests/capabilities.spec.ts`
+  - `npm test`
+  - `make verify`
+  - `npm run build`
+  - Prueba de regresión: cambié `audio: false` por `audio: true` en `src/lib/device/camera.ts`, ejecuté `tests/capabilities.spec.ts` y restauré el archivo con `git checkout`.
+
+- **Resultado real que observé:**
+  - `npm ci` terminó correctamente (28 paquetes) y reportó 3 vulnerabilidades en dependencias (2 altas, 1 crítica).
+  - `tests/capabilities.spec.ts`: 18 pruebas aprobadas, 0 fallidas.
+  - `npm test` terminó correctamente, incluidas las 8 pruebas de `tests/notifications.spec.ts`.
+  - `make verify` terminó con código de salida 0.
+  - `npm run build` terminó correctamente (compilación, revisión de tipos y 5 páginas generadas).
+  - En la prueba de regresión, con `audio: true` falló "camara: solicita video sin solicitar audio" (17 aprobadas, 1 fallida); tras restaurar el archivo volvieron a pasar las 18.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Verifican, de forma determinista y con APIs simuladas, los caminos exitosos y los fallos de cámara, geolocalización y notificaciones (API inexistente, permiso denegado, errores), que nada se solicita hasta invocar la función explícita y que el flujo de inspecciones continúa con el fallback. No verifican el diálogo de permisos ni el comportamiento en navegadores o dispositivos reales, ni que cámara y geolocalización estén integradas a una pantalla.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Cámara y geolocalización existen solo como funciones y los avisos por evento aún no se invocan desde ningún flujo; solo el botón de notificaciones está conectado. Las 3 vulnerabilidades de `npm ci` no se corrigieron porque `npm audit fix --force` puede introducir cambios incompatibles con Next.js. Además, `evaluation.json` llega solo hasta la semana 5 y no hay un workflow específico de la semana 6, por lo que la evidencia de CI corresponde al workflow existente.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para revisar el código de cámara, geolocalización y notificaciones, proponer los casos de prueba adicionales y redactar el borrador de `docs/capabilities.md` y de la sección del README. Ejecuté personalmente los comandos, revisé los resultados, hice la prueba de regresión y verifiqué que la documentación describiera lo que el código realmente hace.
