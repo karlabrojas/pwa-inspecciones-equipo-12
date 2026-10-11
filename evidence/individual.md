@@ -623,3 +623,44 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Uso de IA:**
   Utilicé IA como apoyo para diseñar la estructura del esquema de almacenamiento, pensar en los campos necesarios para sincronización y deduplicación, y revisar cómo encajar el contrato de almacenamiento con la futura cola de sincronización. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente `npm run build` y `npm test` para validar que el resultado fuera consistente con la estructura real del repositorio.
 
+# SEMANA 6 - WEEK 6
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución concreta y enlace:**
+  Implementé la primera etapa del cliente de notificaciones locales para la PWA. En `src/lib/notifications/client.ts` agregué la detección de soporte de la API `Notification`, la consulta de permisos (`granted`, `default` y `denied`), la solicitud del permiso y la creación de avisos genéricos para eventos de inspección sincronizada o asignada. La solicitud solo se realiza al pulsar una acción explícita del usuario; los avisos de eventos no solicitan permiso automáticamente.
+
+  Integré el control **Activar notificaciones** en la pantalla de inspecciones mediante `src/components/notification-controls.tsx`. El control presenta un mensaje accesible en la interfaz si la API no está disponible, el permiso se rechaza o ocurre un error, sin bloquear el flujo principal. También agregué pruebas deterministas en `tests/notifications.spec.ts`, incorporé su ejecución a `npm test`, y documenté la decisión técnica y sus límites en `docs/notifications-decision.md`.
+
+  Enlace de commit: 
+
+  - `feat(notifications): add local notices for inspection events` — [7e89328](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e89328f62a2baf76bf5e3e84332020bd7f3a3a7) — ISSUE #27 — Implementar notificaciones con permisos mínimos y fallback 
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí separar la solicitud del permiso de la notificación de eventos. El permiso se pide únicamente como consecuencia del clic del usuario en **Activar notificaciones**; cuando se sincronice o asigne una inspección, la función de evento solo muestra el aviso si el permiso ya fue concedido. Así se evita solicitar permisos inesperadamente y un error de notificación no interrumpe las operaciones de inspección.
+
+  Utilicé mensajes genéricos y datos sintéticos para no incluir información personal. El fallback se devuelve a la interfaz para mostrarse de forma accesible con `role="status"` y `aria-live="polite"`. Esta entrega implementa notificaciones locales; las notificaciones push en segundo plano quedan fuera de este incremento porque requieren suscripción push, manejo en el Service Worker y un servidor emisor.
+
+- **Comando o prueba que ejecuté:**
+  - `node --experimental-strip-types --test tests/notifications.spec.ts`
+  - `npm test`
+  - `npm run build`
+  - `git diff --check`
+
+- **Resultado real que observé:**
+  - Las pruebas específicas de notificaciones terminaron con **8 aprobadas y 0 fallidas**.
+  - `npm test` terminó correctamente con todas las pruebas del proyecto, incluidas las ocho nuevas pruebas de notificaciones.
+  - `npm run build` terminó correctamente. Next.js mantuvo `/inspecciones` como ruta dinámica renderizada en el servidor (`ƒ`), mientras el control interactivo de permisos quedó encapsulado en un componente cliente.
+  - `git diff --check` terminó sin reportar problemas de formato.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas específicas comprueban la ausencia de la API, los estados de permiso, que el permiso se solicite desde la función explícita, que la concesión permita mostrar una notificación, que los eventos no abran automáticamente el diálogo de permiso y que los errores produzcan un fallback no bloqueante. Se usa una API simulada e inyectable para que los casos sean deterministas y no dependan de permisos reales, tokens, credenciales ni servicios privados.
+
+  La suite y el build verifican que la implementación se integre y compile con el proyecto actual. No prueban la entrega de una notificación en todos los navegadores o dispositivos reales, ni el envío en segundo plano con la aplicación cerrada. Tampoco verifican una conexión efectiva con la cola de sincronización o un flujo de asignación, porque esos eventos todavía no están conectados a una instancia productiva de la interfaz.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  La API deja disponibles funciones para avisar después de una sincronización o asignación exitosa, pero en el estado actual del proyecto todavía no existe un flujo productivo que las invoque; deberán conectarse al confirmar esos eventos. Las notificaciones locales tampoco equivalen a notificaciones push y no garantizan avisos con la pestaña cerrada. Para implementar push posteriormente se necesitarán suscripciones, cambios en el Service Worker y un servidor emisor; esa etapa no debe introducir secretos ni credenciales en el cliente.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para analizar la issue, diseñar el contrato del cliente de notificaciones, considerar los estados de permiso y los fallbacks accesibles, y preparar pruebas deterministas y documentación de la decisión. Revisé la integración con la arquitectura SSR existente y ejecuté las pruebas y el build para confirmar los resultados reportados.
+
