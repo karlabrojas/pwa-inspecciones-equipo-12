@@ -632,9 +632,8 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 
   Integré el control **Activar notificaciones** en la pantalla de inspecciones mediante `src/components/notification-controls.tsx`. El control presenta un mensaje accesible en la interfaz si la API no está disponible, el permiso se rechaza o ocurre un error, sin bloquear el flujo principal. También agregué pruebas deterministas en `tests/notifications.spec.ts`, incorporé su ejecución a `npm test`, y documenté la decisión técnica y sus límites en `docs/notifications-decision.md`.
 
-  Enlace de commit: 
-
-  - `feat(notifications): add local notices for inspection events` — [7e89328](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e89328f62a2baf76bf5e3e84332020bd7f3a3a7) — ISSUE #27 — Implementar notificaciones con permisos mínimos y fallback 
+  Enlace de commit:
+  - `feat(notifications): add local notices for inspection events` — [7e89328](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e89328f62a2baf76bf5e3e84332020bd7f3a3a7) — ISSUE #27 — Implementar notificaciones con permisos mínimos y fallback
 
 - **Decisión que puedo explicar y por qué:**
   Decidí separar la solicitud del permiso de la notificación de eventos. El permiso se pide únicamente como consecuencia del clic del usuario en **Activar notificaciones**; cuando se sincronice o asigne una inspección, la función de evento solo muestra el aviso si el permiso ya fue concedido. Así se evita solicitar permisos inesperadamente y un error de notificación no interrumpe las operaciones de inspección.
@@ -670,7 +669,6 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
   Me encargué de las pruebas, la documentación y la verificación de las capacidades de la semana 6. Amplié `tests/capabilities.spec.ts` con 11 casos nuevos: cámara con permiso concedido, `SecurityError`, fallo de hardware, códigos 2 y 3 de geolocalización, que el acceso solo ocurre al invocar la función, notificaciones con permiso concedido, denegado y sin API, y un caso en el que el flujo de inspecciones continúa cuando ninguna capacidad está disponible. Incorporé `tests/notifications.spec.ts` al script `npm test` (antes no se ejecutaba), extendí `scripts/verify.mjs` y `public-tests/check.sh` con los artefactos de la semana 6, escribí `docs/capabilities.md` y agregué la sección de la semana 6 al README.
 
   Enlace de commit:
-
   - `test(capabilities): add negative cases, wire notifications spec and week 6 artifacts` — [0967a5a](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/0967a5a86379612231cdda6e693ee91ada007396) — ISSUE #28 — Pruebas automatizadas, documentación y verificación de capacidades
   - `docs(capabilities): document permissions, privacy, fallback and known limits` — [fa1827b](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fa1827be57d2c84fc6a00807fcfb6162e1a36ea7) — ISSUE #28 — Pruebas automatizadas, documentación y verificación de capacidades
 
@@ -701,3 +699,34 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 
 - **Uso de IA:**
   Utilicé IA como apoyo para revisar el código de cámara, geolocalización y notificaciones, proponer los casos de prueba adicionales y redactar el borrador de `docs/capabilities.md` y de la sección del README. Ejecuté personalmente los comandos, revisé los resultados, hice la prueba de regresión y verifiqué que la documentación describiera lo que el código realmente hace.
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+  Implementación de las capacidades de cámara y geolocalización del dispositivo en `src/lib/device/camera.ts` y `src/lib/device/geolocation.ts`.
+  En el módulo de cámara implementé `requestCamera()` para solicitar acceso únicamente al video y `stopCamera()` para detener las pistas del flujo. En el módulo de geolocalización implementé `requestGeolocation()` con opciones de bajo consumo de energía y manejo de errores.
+  También agregué `tests/capabilities.spec.ts` con siete pruebas automatizadas e incorporé su ejecución al script `npm test` de `package.json`.
+
+  Enlace del commit:
+  Enlaces de commits:
+  - `feat: add camera and geolocation capabilities` — [`9bff8c1`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9bff8c10896128e0861c93f53a489e81561e86e0) — Issue #26 — Implementar cámara y geolocalización.
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí separar las funciones de cámara y geolocalización en módulos independientes para facilitar su reutilización y mantenimiento. En la cámara deshabilité el audio mediante `audio: false`, porque la funcionalidad requiere video y no necesita capturar sonido. Además, implementé el manejo de los casos de API no disponible, permisos denegados y otros errores. Para la geolocalización configuré `enableHighAccuracy: false`, `maximumAge: 300_000` y `timeout: 10_000`, con el propósito de priorizar el bajo consumo de energía y limitar el tiempo de espera.
+
+- **Comando o prueba que ejecuté:**
+  `node --experimental-strip-types tests/capabilities.spec.ts`
+  También ejecuté `npm test`, `npx tsc --noEmit`, `npm run build` y `npm run verify`.
+
+- **Resultado real que observé:**
+  Las siete pruebas de capacidades finalizaron correctamente, con cero pruebas fallidas. La suite completa de `npm test` también pasó, incluyendo las pruebas de capacidades. La comprobación de TypeScript terminó sin errores, la compilación de Next.js fue exitosa y `npm run verify` reportó `Starter verificable: PASS`.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas automatizadas verifican el comportamiento de las funciones ante solicitudes exitosas, APIs no disponibles, permisos denegados y errores simulados. También comprueban que la cámara solicite video sin audio, que se puedan detener sus pistas y que la geolocalización utilice las opciones configuradas.
+  Estas pruebas no verifican el funcionamiento físico de una cámara, la precisión real de la ubicación GPS ni los diálogos de permisos en un navegador real, porque utilizan APIs simuladas.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  El acceso a la cámara y la geolocalización depende de que el navegador y el dispositivo sean compatibles y de que el usuario conceda los permisos necesarios. En caso de denegación o falta de compatibilidad, la aplicación debe manejar el resultado sin asumir que la capacidad estará disponible. Además, el acceso a estas API requiere un contexto seguro, como HTTPS o localhost. La implementación de estos módulos no demuestra por sí sola su integración con la interfaz de usuario ni su funcionamiento en dispositivos físicos.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para orientar la implementación de las funciones, revisar el manejo de permisos y errores, preparar las pruebas automatizadas y resolver dificultades durante la validación. Revisé los cambios y ejecuté los comandos de prueba, compilación y verificación para comprobar los resultados en el proyecto.
