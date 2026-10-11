@@ -1,4 +1,4 @@
-﻿import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -15,7 +15,13 @@ const required = [
   "docs/decision-record.md",
   "tests/starter.spec.mjs",
   "tests/manifest.spec.ts",
-  "evidence/individual.md"
+  "evidence/individual.md",
+  "src/lib/device/camera.ts",
+  "src/lib/device/geolocation.ts",
+  "src/lib/notifications/client.ts",
+  "tests/capabilities.spec.ts",
+  "tests/notifications.spec.ts",
+  "docs/capabilities.md"
 ];
 
 const missing = required.filter((file) => !existsSync(resolve(root, file)));
