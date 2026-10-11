@@ -1034,3 +1034,40 @@ La Semana 5 incorpora:
 - `npm run verify` se ejecutó correctamente y generó `reports/verification.json` con estado `pass` y `missing: []`.
 
 - `README.md` documenta la instalación, ejecución, verificación y reproducción de la evidencia correspondiente a la Semana 5.
+
+# Semana 6
+
+## Capacidades del dispositivo y notificaciones
+
+La PWA incorpora tres capacidades opcionales: cámara, geolocalización y notificaciones locales. Ninguna se solicita al cargar la aplicación y todas tienen fallback para que el flujo de inspecciones continúe. El detalle de permisos, privacidad y límites está en [`docs/capabilities.md`](docs/capabilities.md).
+
+### Instalación y ejecución
+
+```bash
+npm ci
+npm run dev
+```
+
+Abre http://localhost:3000/inspecciones. El botón **Activar notificaciones** es el único punto donde se solicita un permiso.
+
+### Verificación
+
+```bash
+npm test
+make verify
+```
+
+En Windows, si `make` no está instalado, `npm run verify` hace lo mismo. `npm test` ejecuta `tests/capabilities.spec.ts` y `tests/notifications.spec.ts`; `make verify` comprueba los artefactos obligatorios y genera `reports/verification.json`.
+
+### Qué cubren las pruebas
+
+- Caminos positivos: cámara, geolocalización y notificaciones con permiso concedido.
+- Caminos negativos: API inexistente, permiso denegado y errores.
+- Fallback: el flujo principal continúa cuando una capacidad no está disponible.
+- Todas usan datos sintéticos y APIs simuladas, sin red ni permisos reales.
+
+### Evidencia
+
+- Resultado de `npm test` y `make verify`: ejecutados localmente y en GitHub Actions.
+- Evidencia individual de cada integrante: `evidence/individual.md`.
+- Limitaciones conocidas: sección correspondiente de `docs/capabilities.md`.
