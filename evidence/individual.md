@@ -623,3 +623,110 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Uso de IA:**
   Utilicé IA como apoyo para diseñar la estructura del esquema de almacenamiento, pensar en los campos necesarios para sincronización y deduplicación, y revisar cómo encajar el contrato de almacenamiento con la futura cola de sincronización. La implementación final fue revisada y adaptada al contexto del proyecto, y ejecuté personalmente `npm run build` y `npm test` para validar que el resultado fuera consistente con la estructura real del repositorio.
 
+# SEMANA 6 - WEEK 6
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución concreta y enlace:**
+  Implementé la primera etapa del cliente de notificaciones locales para la PWA. En `src/lib/notifications/client.ts` agregué la detección de soporte de la API `Notification`, la consulta de permisos (`granted`, `default` y `denied`), la solicitud del permiso y la creación de avisos genéricos para eventos de inspección sincronizada o asignada. La solicitud solo se realiza al pulsar una acción explícita del usuario; los avisos de eventos no solicitan permiso automáticamente.
+
+  Integré el control **Activar notificaciones** en la pantalla de inspecciones mediante `src/components/notification-controls.tsx`. El control presenta un mensaje accesible en la interfaz si la API no está disponible, el permiso se rechaza o ocurre un error, sin bloquear el flujo principal. También agregué pruebas deterministas en `tests/notifications.spec.ts`, incorporé su ejecución a `npm test`, y documenté la decisión técnica y sus límites en `docs/notifications-decision.md`.
+
+  Enlace de commit:
+  - `feat(notifications): add local notices for inspection events` — [7e89328](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/7e89328f62a2baf76bf5e3e84332020bd7f3a3a7) — ISSUE #27 — Implementar notificaciones con permisos mínimos y fallback
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí separar la solicitud del permiso de la notificación de eventos. El permiso se pide únicamente como consecuencia del clic del usuario en **Activar notificaciones**; cuando se sincronice o asigne una inspección, la función de evento solo muestra el aviso si el permiso ya fue concedido. Así se evita solicitar permisos inesperadamente y un error de notificación no interrumpe las operaciones de inspección.
+
+  Utilicé mensajes genéricos y datos sintéticos para no incluir información personal. El fallback se devuelve a la interfaz para mostrarse de forma accesible con `role="status"` y `aria-live="polite"`. Esta entrega implementa notificaciones locales; las notificaciones push en segundo plano quedan fuera de este incremento porque requieren suscripción push, manejo en el Service Worker y un servidor emisor.
+
+- **Comando o prueba que ejecuté:**
+  - `node --experimental-strip-types --test tests/notifications.spec.ts`
+  - `npm test`
+  - `npm run build`
+  - `git diff --check`
+
+- **Resultado real que observé:**
+  - Las pruebas específicas de notificaciones terminaron con **8 aprobadas y 0 fallidas**.
+  - `npm test` terminó correctamente con todas las pruebas del proyecto, incluidas las ocho nuevas pruebas de notificaciones.
+  - `npm run build` terminó correctamente. Next.js mantuvo `/inspecciones` como ruta dinámica renderizada en el servidor (`ƒ`), mientras el control interactivo de permisos quedó encapsulado en un componente cliente.
+  - `git diff --check` terminó sin reportar problemas de formato.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas específicas comprueban la ausencia de la API, los estados de permiso, que el permiso se solicite desde la función explícita, que la concesión permita mostrar una notificación, que los eventos no abran automáticamente el diálogo de permiso y que los errores produzcan un fallback no bloqueante. Se usa una API simulada e inyectable para que los casos sean deterministas y no dependan de permisos reales, tokens, credenciales ni servicios privados.
+
+  La suite y el build verifican que la implementación se integre y compile con el proyecto actual. No prueban la entrega de una notificación en todos los navegadores o dispositivos reales, ni el envío en segundo plano con la aplicación cerrada. Tampoco verifican una conexión efectiva con la cola de sincronización o un flujo de asignación, porque esos eventos todavía no están conectados a una instancia productiva de la interfaz.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  La API deja disponibles funciones para avisar después de una sincronización o asignación exitosa, pero en el estado actual del proyecto todavía no existe un flujo productivo que las invoque; deberán conectarse al confirmar esos eventos. Las notificaciones locales tampoco equivalen a notificaciones push y no garantizan avisos con la pestaña cerrada. Para implementar push posteriormente se necesitarán suscripciones, cambios en el Service Worker y un servidor emisor; esa etapa no debe introducir secretos ni credenciales en el cliente.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para analizar la issue, diseñar el contrato del cliente de notificaciones, considerar los estados de permiso y los fallbacks accesibles, y preparar pruebas deterministas y documentación de la decisión. Revisé la integración con la arquitectura SSR existente y ejecuté las pruebas y el build para confirmar los resultados reportados.
+
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución concreta y enlace:**
+  Me encargué de las pruebas, la documentación y la verificación de las capacidades de la semana 6. Amplié `tests/capabilities.spec.ts` con 11 casos nuevos: cámara con permiso concedido, `SecurityError`, fallo de hardware, códigos 2 y 3 de geolocalización, que el acceso solo ocurre al invocar la función, notificaciones con permiso concedido, denegado y sin API, y un caso en el que el flujo de inspecciones continúa cuando ninguna capacidad está disponible. Incorporé `tests/notifications.spec.ts` al script `npm test` (antes no se ejecutaba), extendí `scripts/verify.mjs` y `public-tests/check.sh` con los artefactos de la semana 6, escribí `docs/capabilities.md` y agregué la sección de la semana 6 al README.
+
+  Enlace de commit:
+  - `test(capabilities): add negative cases, wire notifications spec and week 6 artifacts` — [0967a5a](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/0967a5a86379612231cdda6e693ee91ada007396) — ISSUE #28 — Pruebas automatizadas, documentación y verificación de capacidades
+  - `docs(capabilities): document permissions, privacy, fallback and known limits` — [fa1827b](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/fa1827be57d2c84fc6a00807fcfb6162e1a36ea7) — ISSUE #28 — Pruebas automatizadas, documentación y verificación de capacidades
+
+- **Decisión que puedo explicar y por qué:**
+  Amplié el archivo de pruebas existente en lugar de reescribirlo, para no pisar el trabajo de mis compañeros ni cambiar su código. Mis casos usan un auxiliar `withNavigator` que restaura `navigator` en un bloque `finally`, de modo que una aserción fallida no contamina las pruebas siguientes. En la documentación describí cámara y geolocalización como funciones todavía no conectadas a una pantalla, en lugar de afirmar que funcionan de punta a punta.
+
+- **Comando o prueba que ejecuté:**
+  - `npm ci`
+  - `node --experimental-strip-types tests/capabilities.spec.ts`
+  - `npm test`
+  - `make verify`
+  - `npm run build`
+  - Prueba de regresión: cambié `audio: false` por `audio: true` en `src/lib/device/camera.ts`, ejecuté `tests/capabilities.spec.ts` y restauré el archivo con `git checkout`.
+
+- **Resultado real que observé:**
+  - `npm ci` terminó correctamente (28 paquetes) y reportó 3 vulnerabilidades en dependencias (2 altas, 1 crítica).
+  - `tests/capabilities.spec.ts`: 18 pruebas aprobadas, 0 fallidas.
+  - `npm test` terminó correctamente, incluidas las 8 pruebas de `tests/notifications.spec.ts`.
+  - `make verify` terminó con código de salida 0.
+  - `npm run build` terminó correctamente (compilación, revisión de tipos y 5 páginas generadas).
+  - En la prueba de regresión, con `audio: true` falló "camara: solicita video sin solicitar audio" (17 aprobadas, 1 fallida); tras restaurar el archivo volvieron a pasar las 18.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Verifican, de forma determinista y con APIs simuladas, los caminos exitosos y los fallos de cámara, geolocalización y notificaciones (API inexistente, permiso denegado, errores), que nada se solicita hasta invocar la función explícita y que el flujo de inspecciones continúa con el fallback. No verifican el diálogo de permisos ni el comportamiento en navegadores o dispositivos reales, ni que cámara y geolocalización estén integradas a una pantalla.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  Cámara y geolocalización existen solo como funciones y los avisos por evento aún no se invocan desde ningún flujo; solo el botón de notificaciones está conectado. Las 3 vulnerabilidades de `npm ci` no se corrigieron porque `npm audit fix --force` puede introducir cambios incompatibles con Next.js. Además, `evaluation.json` llega solo hasta la semana 5 y no hay un workflow específico de la semana 6, por lo que la evidencia de CI corresponde al workflow existente.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para revisar el código de cámara, geolocalización y notificaciones, proponer los casos de prueba adicionales y redactar el borrador de `docs/capabilities.md` y de la sección del README. Ejecuté personalmente los comandos, revisé los resultados, hice la prueba de regresión y verifiqué que la documentación describiera lo que el código realmente hace.
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+- **Mi contribución concreta y enlace:**
+  Implementación de las capacidades de cámara y geolocalización del dispositivo en `src/lib/device/camera.ts` y `src/lib/device/geolocation.ts`.
+  En el módulo de cámara implementé `requestCamera()` para solicitar acceso únicamente al video y `stopCamera()` para detener las pistas del flujo. En el módulo de geolocalización implementé `requestGeolocation()` con opciones de bajo consumo de energía y manejo de errores.
+  También agregué `tests/capabilities.spec.ts` con siete pruebas automatizadas e incorporé su ejecución al script `npm test` de `package.json`.
+
+  Enlace del commit:
+  Enlaces de commits:
+  - `feat: add camera and geolocation capabilities` — [`9bff8c1`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/9bff8c10896128e0861c93f53a489e81561e86e0) — Issue #26 — Implementar cámara y geolocalización.
+
+- **Decisión que puedo explicar y por qué:**
+  Decidí separar las funciones de cámara y geolocalización en módulos independientes para facilitar su reutilización y mantenimiento. En la cámara deshabilité el audio mediante `audio: false`, porque la funcionalidad requiere video y no necesita capturar sonido. Además, implementé el manejo de los casos de API no disponible, permisos denegados y otros errores. Para la geolocalización configuré `enableHighAccuracy: false`, `maximumAge: 300_000` y `timeout: 10_000`, con el propósito de priorizar el bajo consumo de energía y limitar el tiempo de espera.
+
+- **Comando o prueba que ejecuté:**
+  `node --experimental-strip-types tests/capabilities.spec.ts`
+  También ejecuté `npm test`, `npx tsc --noEmit`, `npm run build` y `npm run verify`.
+
+- **Resultado real que observé:**
+  Las siete pruebas de capacidades finalizaron correctamente, con cero pruebas fallidas. La suite completa de `npm test` también pasó, incluyendo las pruebas de capacidades. La comprobación de TypeScript terminó sin errores, la compilación de Next.js fue exitosa y `npm run verify` reportó `Starter verificable: PASS`.
+
+- **Qué verifica esa prueba y qué no verifica:**
+  Las pruebas automatizadas verifican el comportamiento de las funciones ante solicitudes exitosas, APIs no disponibles, permisos denegados y errores simulados. También comprueban que la cámara solicite video sin audio, que se puedan detener sus pistas y que la geolocalización utilice las opciones configuradas.
+  Estas pruebas no verifican el funcionamiento físico de una cámara, la precisión real de la ubicación GPS ni los diálogos de permisos en un navegador real, porque utilizan APIs simuladas.
+
+- **Limitación, dificultad o riesgo que identifiqué:**
+  El acceso a la cámara y la geolocalización depende de que el navegador y el dispositivo sean compatibles y de que el usuario conceda los permisos necesarios. En caso de denegación o falta de compatibilidad, la aplicación debe manejar el resultado sin asumir que la capacidad estará disponible. Además, el acceso a estas API requiere un contexto seguro, como HTTPS o localhost. La implementación de estos módulos no demuestra por sí sola su integración con la interfaz de usuario ni su funcionamiento en dispositivos físicos.
+
+- **Uso de IA:**
+  Utilicé IA como apoyo para orientar la implementación de las funciones, revisar el manejo de permisos y errores, preparar las pruebas automatizadas y resolver dificultades durante la validación. Revisé los cambios y ejecuté los comandos de prueba, compilación y verificación para comprobar los resultados en el proyecto.

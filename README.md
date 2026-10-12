@@ -1034,3 +1034,59 @@ La Semana 5 incorpora:
 - `npm run verify` se ejecutó correctamente y generó `reports/verification.json` con estado `pass` y `missing: []`.
 
 - `README.md` documenta la instalación, ejecución, verificación y reproducción de la evidencia correspondiente a la Semana 5.
+
+# Semana 6
+
+## Capacidades del dispositivo y notificaciones
+
+La PWA incorpora tres módulos de capacidades opcionales: cámara, geolocalización y notificaciones locales. Solo las notificaciones tienen un punto de interfaz conectado (el botón Activar notificaciones); la cámara y la geolocalización están implementadas y probadas como módulos, pero aún no se conectan a una pantalla. Ninguna se solicita al cargar la aplicación y todas devuelven un resultado de fallback para que el flujo de inspecciones continúe. El detalle de permisos, privacidad, decisiones, trade-offs y límites está en [`docs/capabilities.md`](docs/capabilities.md).
+
+Todos los datos usados en pruebas y ejemplos son sintéticos.
+
+### Requisitos
+
+- Node.js 22.6 o superior (las pruebas usan `--experimental-strip-types`) y npm.
+- Un navegador moderno, servido por HTTPS o `localhost`, para probar los permisos.
+
+### Instalación y ejecución
+
+```bash
+npm ci
+npm run dev
+```
+
+Abre http://localhost:3000/inspecciones. El botón **Activar notificaciones** es el único punto donde se solicita un permiso.
+
+### Verificación
+
+```bash
+npm ci
+npm test
+make verify
+npm run build
+```
+
+En Windows, si `make` no está instalado, `npm run verify` hace lo mismo. `npm test` ejecuta `tests/capabilities.spec.ts` (24 pruebas) y `tests/notifications.spec.ts` (8 pruebas); `make verify` comprueba los artefactos obligatorios y genera `reports/verification.json`.
+
+### Qué cubren las pruebas
+
+- Caminos positivos: cámara, geolocalización y notificaciones con permiso concedido.
+- Caminos negativos: API inexistente (incluida la ejecución sin `navigator`), permiso denegado, errores y excepciones de las APIs.
+- Que cargar los módulos de cámara y geolocalización no solicita permisos, y que los avisos no incluyen datos personales.
+- Fallback: el flujo principal continúa cuando una capacidad no está disponible.
+- Todas usan datos sintéticos y APIs simuladas, sin red ni permisos reales.
+
+### Decisiones y límites (resumen)
+
+- Resultados tipados en lugar de excepciones; permisos mínimos; permiso de notificaciones solo desde un botón.
+- Las notificaciones son locales (no push): no avisan con la pestaña cerrada y pueden fallar en navegadores móviles donde el constructor `Notification` no está permitido.
+- Las pruebas no corren en un navegador real.
+- Cámara y geolocalización aún no están conectadas a la interfaz; los avisos por evento tampoco se invocan desde ningún flujo, porque el proyecto aún no conecta la cola de sincronización con la interfaz.
+
+El detalle completo está en [`docs/capabilities.md`](docs/capabilities.md).
+
+### Evidencia
+
+- Resultado de `npm test`, `make verify` y del workflow de GitHub Actions: verde en el commit entregado (el SHA y el enlace del run están en `evidence/individual.md`).
+- Evidencia individual (SHA, decisión técnica, prueba ejecutada, limitación y uso declarado de IA): `evidence/individual.md`.
+- Limitaciones conocidas: sección correspondiente de `docs/capabilities.md`.

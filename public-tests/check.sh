@@ -42,6 +42,14 @@ test -e 'tests/offline.spec.ts'
 test -e 'tests/rendering.spec.ts'
 test -e 'tests/sync.spec.ts'
 
+# Device capabilities and notifications
+test -e 'src/lib/device/camera.ts'
+test -e 'src/lib/device/geolocation.ts'
+test -e 'src/lib/notifications/client.ts'
+test -e 'tests/capabilities.spec.ts'
+test -e 'tests/notifications.spec.ts'
+test -e 'docs/capabilities.md'
+
 # README
 test -f README.md
 
