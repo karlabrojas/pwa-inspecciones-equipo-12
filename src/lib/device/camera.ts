@@ -9,8 +9,17 @@ export type CameraResult =
       error?: unknown;
     };
 
+/**
+ * Pide acceso a la cámara. Llamar solo desde una acción directa del usuario.
+ * Nunca lanza: devuelve un resultado para que el flujo principal continúe.
+ * Solo pide video; no solicita micrófono.
+ */
 export async function requestCamera(): Promise<CameraResult> {
-  if (!navigator.mediaDevices?.getUserMedia) {
+  // `typeof navigator` evita un ReferenceError fuera del navegador (render en servidor).
+  if (
+    typeof navigator === "undefined" ||
+    !navigator.mediaDevices?.getUserMedia
+  ) {
     return {
       ok: false,
       reason: "unsupported",
@@ -47,6 +56,7 @@ export async function requestCamera(): Promise<CameraResult> {
   }
 }
 
+/** Libera la cámara: detiene todas las pistas del stream. */
 export function stopCamera(stream: MediaStream): void {
   stream.getTracks().forEach((track) => track.stop());
 }
