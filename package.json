@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts && node --experimental-strip-types tests/service-worker-behavior.spec.ts && node --experimental-strip-types tests/offline.spec.ts && node --experimental-strip-types tests/rendering.spec.ts && node --experimental-strip-types tests/sync.spec.ts && node --experimental-strip-types tests/capabilities.spec.ts && node --experimental-strip-types tests/notifications.spec.ts",
+    "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts && node --experimental-strip-types tests/service-worker-behavior.spec.ts && node --experimental-strip-types tests/offline.spec.ts && node --experimental-strip-types tests/rendering.spec.ts && node --experimental-strip-types tests/sync.spec.ts && node --experimental-strip-types tests/capabilities.spec.ts && node --experimental-strip-types tests/notifications.spec.ts && node --experimental-strip-types tests/unit/validation.spec.ts && node --experimental-strip-types tests/unit/queue.spec.ts && node --experimental-strip-types tests/integration/offline-sync.spec.ts",
     "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "@types/node": "^20.14.15",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "fake-indexeddb": "^6.2.6",
     "typescript": "^5.4.5"
   }
 }
