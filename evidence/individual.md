@@ -777,3 +777,35 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
   Solo Chromium y servidor de demostración en memoria (se reinicia con el servidor). Cámara y geolocalización no tienen pantalla, así que esos cuatro escenarios solo comprueban que la captura funciona sin la capacidad; los de notificaciones sí verifican el aviso real de la interfaz. Las esperas fijas de 1,5 s no garantizan detectar un duplicado muy tardío. Agregué código de aplicación (captura y API) fuera del alcance estricto de las pruebas, que conviene revisar con el equipo. La rama `e2e/defecto-duplicados` contiene el defecto y no debe fusionarse; el run de recuperación con reporte es un commit de merge que incluye el `revert`. Los artefactos de CI caducan a los 30 días, por lo que los resultados también están copiados en esta sección.
 
 - **IA:** Claude (Anthropic), para planear la suite, escribir las pruebas, la pantalla de captura, el sincronizador, la API y el workflow. Validación propia: ejecuté build, pruebas unitarias y E2E (`--repeat-each=3`); detecté que `helpers.ts` estaba desactualizado; corregí el reformateo de Prettier en `page.tsx`; revisé los diffs y los commits; comprobé que el defecto falla por el motivo esperado y que la restauración deja `queue.ts` idéntico; detecté que los runs verdes no subían reporte y lo corregí.
+
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución de esta semana y enlace:**
+  Incorporé una regla de validación que exige un título con contenido antes de guardar una inspección, pruebas unitarias para los casos válidos e inválidos y para la idempotencia de la cola, y una prueba de integración que comprueba la persistencia offline y el reintento de sincronización sin duplicados. Añadí un fixture remoto controlado y conecté las pruebas nuevas al comando `npm test`.
+  Commits:
+  - [8a92291](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8a9229167bba3300327b6d73f3f3ed7a47436ae7)
+  - [343fbff](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/343fbff23da57e26ae795ff35d6f792163352e11)
+
+- **Decisión técnica y motivo:**
+  El proyecto no contaba con una función de validación independiente ni con una pantalla de captura que permitiera probar reglas de entrada. Añadí una regla acotada y verificable para el título, aplicada por `saveInspection` antes de abrir IndexedDB. Para integración utilicé `fake-indexeddb` en memoria y un remoto simulado que conserva la inspección por clave idempotente y pierde intencionalmente la primera respuesta, de forma que la prueba ejercita el reintento cuando el cliente no sabe si la primera operación llegó al servidor.
+
+- **Prueba/comando que ejecuté:**
+  - `npm install --save-dev fake-indexeddb`
+  - `node --experimental-strip-types tests/unit/validation.spec.ts`
+  - `node --experimental-strip-types tests/unit/queue.spec.ts`
+  - `node --experimental-strip-types tests/integration/offline-sync.spec.ts`
+  - `npm test`
+  - `npm run build`
+  - `git diff --check`
+
+- **Resultado observado y enlace al reporte:**
+  Las pruebas unitarias específicas terminaron en verde: validación **2/2** y cola **1/1**. La integración terminó en verde (**1/1**). `npm test` completó la suite del proyecto, `npm run build` compiló y comprobó los tipos correctamente, y `git diff --check` no reportó errores. Los resultados se obtuvieron localmente; no se generó un reporte externo de CI para esta ejecución.
+
+- **Qué demuestra y qué no demuestra:**
+  Demuestra que los títulos con contenido se aceptan, los vacíos o compuestos por espacios se rechazan, la inspección y sus datos sintéticos se conservan en IndexedDB al guardar offline, y repetir la sincronización con la misma clave idempotente no añade otro registro al remoto simulado. No demuestra compatibilidad con un backend real ni con todos los motores IndexedDB de navegador, y la cobertura de validación se limita al título porque el proyecto no define otras reglas para los campos.
+
+- **Limitación o riesgo:**
+  La prueba de persistencia usa `fake-indexeddb` en memoria, no un navegador real. La integración comprueba el contrato frente a una fixture idempotente, no la implementación de un endpoint productivo. La instalación de la dependencia informó tres vulnerabilidades en el árbol de paquetes (dos altas y una crítica); no ejecuté una actualización forzada, que queda fuera del alcance de esta contribución.
+
+- **IA:** utilicé IA como apoyo para revisar el código existente, proponer la cobertura y redactar parte de las pruebas. Revisé los cambios, ejecuté los comandos documentados y comprobé sus resultados; los datos y las respuestas remotas de prueba son sintéticos.
