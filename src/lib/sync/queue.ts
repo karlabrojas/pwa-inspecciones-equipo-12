@@ -119,7 +119,9 @@ export class SyncQueue {
 
     return operations.filter(
       (operation) =>
-        operation.status === "pending" || operation.status === "failed",
+        operation.status === "pending" ||
+        operation.status === "failed" ||
+        operation.status === "completed", // DEFECTO CONTROLADO
     );
   }
 
@@ -145,7 +147,11 @@ export class SyncQueue {
         continue;
       }
 
-      if (current.status !== "pending" && current.status !== "failed") {
+      if (
+        current.status !== "pending" &&
+        current.status !== "failed" &&
+        current.status !== "completed" // DEFECTO CONTROLADO
+      ) {
         skipped += 1;
         continue;
       }
