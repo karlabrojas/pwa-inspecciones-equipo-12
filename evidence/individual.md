@@ -730,3 +730,50 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 
 - **Uso de IA:**
   Utilicé IA como apoyo para orientar la implementación de las funciones, revisar el manejo de permisos y errores, preparar las pruebas automatizadas y resolver dificultades durante la validación. Revisé los cambios y ejecuté los comandos de prueba, compilación y verificación para comprobar los resultados en el proyecto.
+
+# SEMANA 8 - WEEK 8
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+# Evidencia individual · semana 8
+
+## Nombre: Karla Beatriz Rojas Rojas
+
+- **Mi contribución de esta semana y enlace**:  
+  Implementé una suite de 14 pruebas Playwright en `tests/e2e/` que ejercita la interfaz real de la PWA: arranque, creación de una inspección sin conexión, persistencia tras recargar, reconexión y sincronización sin duplicados, y captura completada cuando la geolocalización, la cámara o las notificaciones están denegadas o ausentes. Como la interfaz era solo de lectura, también agregué lo mínimo para poder probarla: una pantalla de captura offline, un sincronizador que usa una única instancia de `SyncQueue` y una API de demostración en memoria. Además, un workflow de CI que ejecuta la suite en cada push y sube el reporte.
+  Commits:
+- [df22161](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/df22161)
+- [ff594af](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/ff594af)
+- [8799084](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8799084)
+- [579ab60](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/579ab60)
+- [aa2de43](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/aa2de43)
+
+- **Decisión técnica y motivo:**
+  Usé Playwright porque maneja el modo offline, el Service Worker y la recarga sobre la interfaz real, algo que `node:test` no puede hacer. La sincronización se verifica por tres vías (interfaz, IndexedDB y recepciones en el servidor), porque la lista de la interfaz se indexa por id y no mostraría un reenvío duplicado. Al ejecutar la PWA el primer bloqueo fue que `/inspecciones` y `/inspecciones/[id]` leían datos estáticos y ningún componente usaba IndexedDB ni `SyncQueue`, por lo que agregué la pantalla de captura y la API. El defecto controlado retira el filtro de `SyncQueue` que impide reprocesar operaciones `completed` (en `getPending` y dentro de `processInternal`). Esa es la protección contra duplicados del cliente; el servidor aporta una segunda capa con `Idempotency-Key`, por lo que con el defecto sigue existiendo una sola inspección aunque la operación llegue varias veces.
+
+- **Prueba/comando que ejecuté:**
+  `npx playwright test --repeat-each=3` (42/42 en verde, sin intermitencias); `npm run build`; `npm run test`. Con el defecto: `npx playwright test 02-sync-no-duplicates` y `npm run test`. En CI, el workflow E2E Regression Evidence ejecuta `npx playwright test` contra el build de producción.
+
+- **Resultado observado y enlace al reporte:**
+  1. Línea base en verde
+  - Commit: [`579ab60`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/579ab60)
+  - [Run #1](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40157424232): no publicó el reporte HTML.
+  - Corrección: [`aa2de43`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/aa2de43).
+  - [Run #4 y artefacto](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40166556430): reporte HTML disponible.
+  2. Defecto controlado: sincronización duplicada
+  - Commit: [`f1c1045`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f1c1045).
+  - [Run #2 fallido](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40165359637): fallaron las tres pruebas de sincronización por envíos duplicados.
+  - [Artefactos E2E](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40165359637#artifacts): trazas, capturas y videos.
+  3. Restauración y validación
+  - Reversión del defecto: [`f426058`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f426058).
+  - [Run #3](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40165644689): pruebas en verde.
+  - [Run #5](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40166565775): pruebas en verde y [artefacto publicado](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40166565775#artifacts).
+  - Se confirmó que `queue.ts` quedó idéntico a la línea base.
+
+- **Qué demuestra y qué no demuestra:**
+  Demuestra que lo creado sin conexión persiste tras recargar, que al reconectar se sincroniza una sola vez, y que el E2E detecta, desde la interfaz y el servidor, un reenvío de operaciones ya completadas que ni la lista ni IndexedDB muestran. También demuestra que la prueba vuelve a pasar al restaurar el código. No demuestra comportamiento en otros navegadores ni en dispositivos reales, ni que cámara o geolocalización tengan pantalla. Las pruebas unitarias de la cola también fallan con este defecto (`idempotencia: procesar dos veces la misma operacion completada no la vuelve a enviar` y `regresion: sin el candado processLock, dos llamadas concurrentes duplicarian el envio`), así que el E2E aporta la observación desde fuera, no la única detección.
+
+- **Limitación o riesgo:**
+  Solo Chromium y servidor de demostración en memoria (se reinicia con el servidor). Cámara y geolocalización no tienen pantalla, así que esos cuatro escenarios solo comprueban que la captura funciona sin la capacidad; los de notificaciones sí verifican el aviso real de la interfaz. Las esperas fijas de 1,5 s no garantizan detectar un duplicado muy tardío. Agregué código de aplicación (captura y API) fuera del alcance estricto de las pruebas, que conviene revisar con el equipo. La rama `e2e/defecto-duplicados` contiene el defecto y no debe fusionarse; el run de recuperación con reporte es un commit de merge que incluye el `revert`. Los artefactos de CI caducan a los 30 días, por lo que los resultados también están copiados en esta sección.
+
+- **IA:** Claude (Anthropic), para planear la suite, escribir las pruebas, la pantalla de captura, el sincronizador, la API y el workflow. Validación propia: ejecuté build, pruebas unitarias y E2E (`--repeat-each=3`); detecté que `helpers.ts` estaba desactualizado; corregí el reformateo de Prettier en `page.tsx`; revisé los diffs y los commits; comprobé que el defecto falla por el motivo esperado y que la restauración deja `queue.ts` idéntico; detecté que los runs verdes no subían reporte y lo corregí.
