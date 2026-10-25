@@ -1,0 +1,69 @@
+# Workflow de la Issue #2 (semana 8): pruebas E2E y detección de regresiones.
+name: E2E Regression Evidence
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Install Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium
+
+      - name: AC-02 - Existen las pruebas E2E y la configuración
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f playwright.config.ts
+          test -f tests/e2e/helpers.ts
+          test -f tests/e2e/01-offline-persistence.e2e.ts
+          test -f tests/e2e/02-sync-no-duplicates.e2e.ts
+          test -f tests/e2e/03-missing-capability.e2e.ts
+
+      - name: AC-02 - Las pruebas E2E compilan sin errores de tipos
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsc --noEmit -p tests/e2e/tsconfig.json
+
+      - name: AC-03 - Las pruebas E2E pasan contra el build de producción
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx playwright test
+
+      - name: Upload E2E evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-evidence-w08-${{ github.sha }}
+          if-no-files-found: ignore
+          retention-days: 30
+          path: |
+            playwright-report/
+            test-results/
