@@ -788,3 +788,34 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Qué demuestra y qué no demuestra:** Demuestra que la instalación limpia, la compilación y las pruebas existentes se reproducen con comandos documentados y que el workflow publica reportes aunque falle una etapa. No demuestra las pruebas de `tests/unit` y `tests/integration` de la semana 8 mientras esas carpetas no existan en la rama integrada, ni funcionamiento en navegadores distintos de Chromium.
 - **Limitación o riesgo:** Las capas `tests/unit` y `tests/integration` dependen de la entrega del integrante 1; si faltan, el workflow lo advierte y no las marca como aprobadas. No hay script de lint separado. La cobertura es experimental y no cubre el E2E. `npm ci` reporta 3 vulnerabilidades (2 altas, 1 crítica) sin corregir. El E2E corre también en `week-08-e2e.yml`, por lo que se ejecuta dos veces por push.
 - **IA:** Utilicé IA como apoyo para redactar el workflow, la estrategia de pruebas y el borrador de esta sección. Validación propia: ejecuté `npm ci`, `npm test`, `npm run build`, `npm run verify` y `npx tsc --noEmit`, y revisaré el run de Actions antes de dar la etapa por aprobada.
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución de esta semana y enlace:**
+  Incorporé una regla de validación que exige un título con contenido antes de guardar una inspección, pruebas unitarias para los casos válidos e inválidos y para la idempotencia de la cola, y una prueba de integración que comprueba la persistencia offline y el reintento de sincronización sin duplicados. Añadí un fixture remoto controlado y conecté las pruebas nuevas al comando `npm test`.
+  Commits:
+  - [8a92291](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8a9229167bba3300327b6d73f3f3ed7a47436ae7)
+  - [343fbff](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/343fbff23da57e26ae795ff35d6f792163352e11)
+
+- **Decisión técnica y motivo:**
+  El proyecto no contaba con una función de validación independiente ni con una pantalla de captura que permitiera probar reglas de entrada. Añadí una regla acotada y verificable para el título, aplicada por `saveInspection` antes de abrir IndexedDB. Para integración utilicé `fake-indexeddb` en memoria y un remoto simulado que conserva la inspección por clave idempotente y pierde intencionalmente la primera respuesta, de forma que la prueba ejercita el reintento cuando el cliente no sabe si la primera operación llegó al servidor.
+
+- **Prueba/comando que ejecuté:**
+  - `npm install --save-dev fake-indexeddb`
+  - `node --experimental-strip-types tests/unit/validation.spec.ts`
+  - `node --experimental-strip-types tests/unit/queue.spec.ts`
+  - `node --experimental-strip-types tests/integration/offline-sync.spec.ts`
+  - `npm test`
+  - `npm run build`
+  - `git diff --check`
+
+- **Resultado observado y enlace al reporte:**
+  Las pruebas unitarias específicas terminaron en verde: validación **2/2** y cola **1/1**. La integración terminó en verde (**1/1**). `npm test` completó la suite del proyecto, `npm run build` compiló y comprobó los tipos correctamente, y `git diff --check` no reportó errores. Los resultados se obtuvieron localmente; no se generó un reporte externo de CI para esta ejecución.
+
+- **Qué demuestra y qué no demuestra:**
+  Demuestra que los títulos con contenido se aceptan, los vacíos o compuestos por espacios se rechazan, la inspección y sus datos sintéticos se conservan en IndexedDB al guardar offline, y repetir la sincronización con la misma clave idempotente no añade otro registro al remoto simulado. No demuestra compatibilidad con un backend real ni con todos los motores IndexedDB de navegador, y la cobertura de validación se limita al título porque el proyecto no define otras reglas para los campos.
+
+- **Limitación o riesgo:**
+  La prueba de persistencia usa `fake-indexeddb` en memoria, no un navegador real. La integración comprueba el contrato frente a una fixture idempotente, no la implementación de un endpoint productivo. La instalación de la dependencia informó tres vulnerabilidades en el árbol de paquetes (dos altas y una crítica); no ejecuté una actualización forzada, que queda fuera del alcance de esta contribución.
+
+- **IA:** utilicé IA como apoyo para revisar el código existente, proponer la cobertura y redactar parte de las pruebas. Revisé los cambios, ejecuté los comandos documentados y comprobé sus resultados; los datos y las respuestas remotas de prueba son sintéticos.

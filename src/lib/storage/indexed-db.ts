@@ -1,8 +1,9 @@
-import type { Inspection } from "../data/inspections";
+import { validateInspectionTitle } from "../data/inspection-validation.ts";
+import type { Inspection } from "../data/inspections.ts";
 import type {
   QueueStorage,
   SyncOperation as QueueSyncOperation,
-} from "../sync/queue";
+} from "../sync/queue.ts";
 import {
   INSPECTION_DATABASE_NAME,
   INSPECTION_DATABASE_VERSION,
@@ -11,7 +12,7 @@ import {
   type StoredInspection,
   type SyncOperation,
   type SyncOperationType,
-} from "./schema";
+} from "./schema.ts";
 
 let databasePromise: Promise<IDBDatabase> | undefined;
 
@@ -112,6 +113,11 @@ export async function saveInspection(
   inspection: Inspection,
   type: SyncOperationType = "create",
 ): Promise<StoredInspection> {
+  const titleValidationError = validateInspectionTitle(inspection.title);
+  if (titleValidationError) {
+    throw new Error(titleValidationError);
+  }
+
   const database = await openInspectionDatabase();
   const transaction = database.transaction(
     [INSPECTIONS_STORE, SYNC_OPERATIONS_STORE],
