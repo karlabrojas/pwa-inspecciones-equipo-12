@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx playwright test --reporter=list
+          npx playwright test
 
       - name: Upload E2E evidence
         if: always()
