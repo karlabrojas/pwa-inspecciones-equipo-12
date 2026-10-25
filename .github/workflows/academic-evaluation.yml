@@ -41,6 +41,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: npm test
 
+      - name: Pruebas de persistencia IndexedDB (tests/storage.spec.ts)
+        if: ${{ !cancelled() }}
+        run: node --experimental-strip-types tests/storage.spec.ts
+
       - name: Pruebas de tests/unit y tests/integration
         if: ${{ !cancelled() }}
         run: |

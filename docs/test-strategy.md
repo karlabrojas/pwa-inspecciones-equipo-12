@@ -16,7 +16,7 @@ Todos los datos de prueba son sintéticos. Ninguna prueba usa servicios privados
 
 | Riesgo | Prueba | Capa | Justificación | Estado |
 |---|---|---|---|---|
-| Captura inválida se acepta | `tests/unit/` (validación de inspección) | Unitaria | Una regla de validación se prueba con entradas válidas e inválidas. | Pendiente de la rama de Angel |
+| Captura inválida se acepta | `tests/unit/validation.spec.ts` | Unitaria | Una regla de validación se prueba con entradas válidas e inválidas. | Existe (2 pruebas) |
 | Se pierde una inspección sin conexión | `tests/storage.spec.ts`, `tests/sync.spec.ts` (persistencia), `tests/e2e/01-offline-persistence.e2e.ts` | Integración / E2E | Comprueba que lo guardado sobrevive a cerrar la cola y a recargar la página. | Existe |
 | Reconexión no sincroniza | `tests/e2e/02-sync-no-duplicates.e2e.ts` | E2E | Recorre crear, guardar offline, recargar, reconectar y sincronizar sobre la interfaz real. | Existe |
 | Duplicados al reintentar | `tests/sync.spec.ts` (duplicación, idempotencia, `processLock`), `tests/e2e/02-sync-no-duplicates.e2e.ts` | Unitaria / E2E | La cola no reenvía una operación completada y el E2E observa los envíos recibidos por el servidor. | Existe |
@@ -56,5 +56,6 @@ npx playwright test
 - Cámara y geolocalización no tienen pantalla; sus escenarios E2E comprueban que la captura funciona sin la capacidad.
 - No hay script de `lint` separado: el lint y los tipos que ejecuta `next build` son los que aplican.
 - La cobertura de Node es experimental y mide solo las pruebas basadas en `node:test`, no el E2E.
-- Las capas `tests/unit/` y `tests/integration/` dependen de la entrega de Angel; si no existen, el workflow lo advierte y no las marca como aprobadas.
+- `tests/unit/` y `tests/integration/` tienen pocas pruebas (2 de validación, 1 de cola y 1 de integración offline); cubren una regla de validación y la idempotencia, no todos los casos.
+- `tests/storage.spec.ts` ya no está en el script `npm test` tras el merge de la rama de la semana 8 (el `package.json` perdió `tsx`); el workflow lo ejecuta aparte con `node --experimental-strip-types`.
 - `npm ci` reporta 3 vulnerabilidades (2 altas, 1 crítica); no se corrigieron porque `npm audit fix --force` puede romper Next.js.
