@@ -1090,3 +1090,37 @@ El detalle completo está en [`docs/capabilities.md`](docs/capabilities.md).
 - Resultado de `npm test`, `make verify` y del workflow de GitHub Actions: verde en el commit entregado (el SHA y el enlace del run están en `evidence/individual.md`).
 - Evidencia individual (SHA, decisión técnica, prueba ejecutada, limitación y uso declarado de IA): `evidence/individual.md`.
 - Limitaciones conocidas: sección correspondiente de `docs/capabilities.md`.
+
+
+# Semana 8 — CI, estrategia de pruebas y reproducción
+
+- **Node.js:** 22.6 o superior (las pruebas usan `--experimental-strip-types`). El CI usa Node 22. npm 10 o superior.
+- **Estrategia y matriz riesgo–prueba:** [`docs/test-strategy.md`](docs/test-strategy.md).
+- **Workflow:** `.github/workflows/academic-evaluation.yml`.
+
+## Instalación y arranque
+
+```bash
+npm ci
+npm run dev
+```
+
+Abre http://localhost:3000/inspecciones.
+
+## Comandos de verificación
+
+```bash
+npm ci
+npx tsc --noEmit
+npm run build
+npm run verify
+npm test
+npx playwright install chromium
+npx playwright test
+```
+
+`npx playwright test` compila y arranca la aplicación por sí mismo (`playwright.config.ts`). Con `npx playwright test --ui` puedes depurarlo. Reportes: `reports/verification.json` y `playwright-report/`.
+
+## Qué hace el CI
+
+Instalación limpia, tipos, compilación, `npm run verify`, `npm test`, `tests/unit` y `tests/integration` (si existen), cobertura informativa y E2E. Si falla una etapa obligatoria, el job queda en rojo, y los reportes se publican como artefacto aunque haya fallos.
