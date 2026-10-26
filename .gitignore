@@ -9,3 +9,7 @@ reports/verification.json
 
 
 tsconfig.tsbuildinfo
+playwright-report/
+test-results/
+reports/
+coverage/

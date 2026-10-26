@@ -730,3 +730,95 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 
 - **Uso de IA:**
   Utilicé IA como apoyo para orientar la implementación de las funciones, revisar el manejo de permisos y errores, preparar las pruebas automatizadas y resolver dificultades durante la validación. Revisé los cambios y ejecuté los comandos de prueba, compilación y verificación para comprobar los resultados en el proyecto.
+
+# SEMANA 8 - WEEK 8
+
+## Integrante: Karla Beatriz Rojas Rojas
+
+# Evidencia individual · semana 8
+
+## Nombre: Karla Beatriz Rojas Rojas
+
+- **Mi contribución de esta semana y enlace**:  
+  Implementé una suite de 14 pruebas Playwright en `tests/e2e/` que ejercita la interfaz real de la PWA: arranque, creación de una inspección sin conexión, persistencia tras recargar, reconexión y sincronización sin duplicados, y captura completada cuando la geolocalización, la cámara o las notificaciones están denegadas o ausentes. Como la interfaz era solo de lectura, también agregué lo mínimo para poder probarla: una pantalla de captura offline, un sincronizador que usa una única instancia de `SyncQueue` y una API de demostración en memoria. Además, un workflow de CI que ejecuta la suite en cada push y sube el reporte.
+  Commits:
+- [df22161](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/df22161)
+- [ff594af](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/ff594af)
+- [8799084](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8799084)
+- [579ab60](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/579ab60)
+- [aa2de43](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/aa2de43)
+
+- **Decisión técnica y motivo:**
+  Usé Playwright porque maneja el modo offline, el Service Worker y la recarga sobre la interfaz real, algo que `node:test` no puede hacer. La sincronización se verifica por tres vías (interfaz, IndexedDB y recepciones en el servidor), porque la lista de la interfaz se indexa por id y no mostraría un reenvío duplicado. Al ejecutar la PWA el primer bloqueo fue que `/inspecciones` y `/inspecciones/[id]` leían datos estáticos y ningún componente usaba IndexedDB ni `SyncQueue`, por lo que agregué la pantalla de captura y la API. El defecto controlado retira el filtro de `SyncQueue` que impide reprocesar operaciones `completed` (en `getPending` y dentro de `processInternal`). Esa es la protección contra duplicados del cliente; el servidor aporta una segunda capa con `Idempotency-Key`, por lo que con el defecto sigue existiendo una sola inspección aunque la operación llegue varias veces.
+
+- **Prueba/comando que ejecuté:**
+  `npx playwright test --repeat-each=3` (42/42 en verde, sin intermitencias); `npm run build`; `npm run test`. Con el defecto: `npx playwright test 02-sync-no-duplicates` y `npm run test`. En CI, el workflow E2E Regression Evidence ejecuta `npx playwright test` contra el build de producción.
+
+- **Resultado observado y enlace al reporte:**
+  1. Línea base en verde
+  - Commit: [`579ab60`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/579ab60)
+  - [Run #1](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40157424232): no publicó el reporte HTML.
+  - Corrección: [`aa2de43`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/aa2de43).
+  - [Run #4 y artefacto](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40166556430): reporte HTML disponible.
+  2. Defecto controlado: sincronización duplicada
+  - Commit: [`f1c1045`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f1c1045).
+  - [Run #2 fallido](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40165359637): fallaron las tres pruebas de sincronización por envíos duplicados.
+  - [Artefactos E2E](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40165359637#artifacts): trazas, capturas y videos.
+  3. Restauración y validación
+  - Reversión del defecto: [`f426058`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f426058).
+  - [Run #3](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40165644689): pruebas en verde.
+  - [Run #5](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40166565775): pruebas en verde y [artefacto publicado](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/actions/runs/40166565775#artifacts).
+  - Se confirmó que `queue.ts` quedó idéntico a la línea base.
+
+- **Qué demuestra y qué no demuestra:**
+  Demuestra que lo creado sin conexión persiste tras recargar, que al reconectar se sincroniza una sola vez, y que el E2E detecta, desde la interfaz y el servidor, un reenvío de operaciones ya completadas que ni la lista ni IndexedDB muestran. También demuestra que la prueba vuelve a pasar al restaurar el código. No demuestra comportamiento en otros navegadores ni en dispositivos reales, ni que cámara o geolocalización tengan pantalla. Las pruebas unitarias de la cola también fallan con este defecto (`idempotencia: procesar dos veces la misma operacion completada no la vuelve a enviar` y `regresion: sin el candado processLock, dos llamadas concurrentes duplicarian el envio`), así que el E2E aporta la observación desde fuera, no la única detección.
+
+- **Limitación o riesgo:**
+  Solo Chromium y servidor de demostración en memoria (se reinicia con el servidor). Cámara y geolocalización no tienen pantalla, así que esos cuatro escenarios solo comprueban que la captura funciona sin la capacidad; los de notificaciones sí verifican el aviso real de la interfaz. Las esperas fijas de 1,5 s no garantizan detectar un duplicado muy tardío. Agregué código de aplicación (captura y API) fuera del alcance estricto de las pruebas, que conviene revisar con el equipo. La rama `e2e/defecto-duplicados` contiene el defecto y no debe fusionarse; el run de recuperación con reporte es un commit de merge que incluye el `revert`. Los artefactos de CI caducan a los 30 días, por lo que los resultados también están copiados en esta sección.
+
+- **IA:** Claude (Anthropic), para planear la suite, escribir las pruebas, la pantalla de captura, el sincronizador, la API y el workflow. Validación propia: ejecuté build, pruebas unitarias y E2E (`--repeat-each=3`); detecté que `helpers.ts` estaba desactualizado; corregí el reformateo de Prettier en `page.tsx`; revisé los diffs y los commits; comprobé que el defecto falla por el motivo esperado y que la restauración deja `queue.ts` idéntico; detecté que los runs verdes no subían reporte y lo corregí.
+
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución de esta semana y enlace:** Issue #3 (#54 en GitHub): CI, estrategia de pruebas y documentación. Creé `.github/workflows/academic-evaluation.yml` (instalación limpia, tipos, compilación, verificación, `npm test`, `tests/storage.spec.ts`, `tests/unit` y `tests/integration`, cobertura informativa y E2E, con artefactos publicados siempre), `docs/test-strategy.md` con la matriz riesgo–prueba y la sección de la semana 8 del README. Integré las ramas de Angel y Karla en la mía y comprobé que funcionan juntas.
+  Commits:
+  - [f50e4a5](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/f50e4a570bf25e5fbe05ca89921a81edbbf36719)
+  - [1f041b5](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/1f041b5bc48bc6de7dd3ddcb1442057460f11dd8)
+    Rama: `feat/w08-ci-docs`.
+- **Decisión técnica y motivo:** Los `week-0X-*.yml` los generó el profesor y `week-08-e2e.yml` solo ejecuta E2E, así que creé un pipeline completo en vez de modificarlos. Cada paso usa `if: !cancelled()` para que una falla no oculte los resultados de los demás, y la publicación del artefacto usa `if: always()`. Usé Node 22 porque las pruebas dependen de `--experimental-strip-types`. El servidor E2E lo arranca `playwright.config.ts`, para no levantarlo dos veces. La cobertura usa la herramienta nativa de Node y no bloquea el CI. Como el proyecto no tiene script de lint, documenté que el lint y los tipos de `next build` son los que aplican, en vez de inventar uno.
+- **Prueba/comando que ejecuté:** `npm ci`, `npx tsc --noEmit`, `npm test`, `npm run build`, `npm run verify`, `node --experimental-strip-types tests/storage.spec.ts`, `node --experimental-strip-types --test tests/unit/queue.spec.ts tests/unit/validation.spec.ts tests/integration/offline-sync.spec.ts` y `npx playwright test`.
+- **Resultado observado y enlace al reporte:** Con la rama integrada, localmente: `npx tsc --noEmit` sin errores; `npm test` completo en verde (incluye 24 pruebas de capacidades, 9 de sincronización y las de Angel: 2 de validación, 1 de cola y 1 de integración offline); `tests/storage.spec.ts` 3/3; `npx playwright test` 14/14. Antes del merge, `npm run build` compiló sin errores y `npm run verify` dio `Starter verificable: PASS`.
+- **Qué demuestra y qué no demuestra:** Demuestra que la instalación limpia, los tipos, las pruebas de las tres ramas y el E2E se reproducen con comandos documentados, y que el workflow publica reportes aunque falle una etapa. No demuestra funcionamiento en navegadores distintos de Chromium ni cobertura amplia de `tests/unit` y `tests/integration`, que tienen pocas pruebas. Tampoco demuestra que el CI esté en verde hasta revisar el run de Actions.
+- **Limitación o riesgo:** Tras el merge de la rama de la semana 8 de Angel, `package.json` quedó sin `tsx` ni el script `test:e2e`, por lo que `tests/storage.spec.ts` ya no corre en `npm test`; lo ejecuto aparte en el workflow. No hay script de lint separado. La cobertura es experimental y no cubre el E2E. `npm ci` reporta 3 vulnerabilidades (2 altas, 1 crítica) sin corregir. El E2E corre también en `week-08-e2e.yml`, por lo que se ejecuta dos veces por push.
+- **IA:** Utilicé IA como apoyo para redactar el workflow, la estrategia de pruebas y el borrador de esta sección. Validación propia: ejecuté los comandos listados arriba, revisé los diffs y los conflictos de merge, y revisaré el run de Actions antes de dar la etapa por aprobada.
+
+## Integrante: Angel Romero Barragan
+
+- **Mi contribución de esta semana y enlace:**
+  Incorporé una regla de validación que exige un título con contenido antes de guardar una inspección, pruebas unitarias para los casos válidos e inválidos y para la idempotencia de la cola, y una prueba de integración que comprueba la persistencia offline y el reintento de sincronización sin duplicados. Añadí un fixture remoto controlado y conecté las pruebas nuevas al comando `npm test`.
+  Commits:
+  - [8a92291](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/8a9229167bba3300327b6d73f3f3ed7a47436ae7)
+  - [343fbff](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/343fbff23da57e26ae795ff35d6f792163352e11)
+
+- **Decisión técnica y motivo:**
+  El proyecto no contaba con una función de validación independiente ni con una pantalla de captura que permitiera probar reglas de entrada. Añadí una regla acotada y verificable para el título, aplicada por `saveInspection` antes de abrir IndexedDB. Para integración utilicé `fake-indexeddb` en memoria y un remoto simulado que conserva la inspección por clave idempotente y pierde intencionalmente la primera respuesta, de forma que la prueba ejercita el reintento cuando el cliente no sabe si la primera operación llegó al servidor.
+
+- **Prueba/comando que ejecuté:**
+  - `npm install --save-dev fake-indexeddb`
+  - `node --experimental-strip-types tests/unit/validation.spec.ts`
+  - `node --experimental-strip-types tests/unit/queue.spec.ts`
+  - `node --experimental-strip-types tests/integration/offline-sync.spec.ts`
+  - `npm test`
+  - `npm run build`
+  - `git diff --check`
+
+- **Resultado observado y enlace al reporte:**
+  Las pruebas unitarias específicas terminaron en verde: validación **2/2** y cola **1/1**. La integración terminó en verde (**1/1**). `npm test` completó la suite del proyecto, `npm run build` compiló y comprobó los tipos correctamente, y `git diff --check` no reportó errores. Los resultados se obtuvieron localmente; no se generó un reporte externo de CI para esta ejecución.
+
+- **Qué demuestra y qué no demuestra:**
+  Demuestra que los títulos con contenido se aceptan, los vacíos o compuestos por espacios se rechazan, la inspección y sus datos sintéticos se conservan en IndexedDB al guardar offline, y repetir la sincronización con la misma clave idempotente no añade otro registro al remoto simulado. No demuestra compatibilidad con un backend real ni con todos los motores IndexedDB de navegador, y la cobertura de validación se limita al título porque el proyecto no define otras reglas para los campos.
+
+- **Limitación o riesgo:**
+  La prueba de persistencia usa `fake-indexeddb` en memoria, no un navegador real. La integración comprueba el contrato frente a una fixture idempotente, no la implementación de un endpoint productivo. La instalación de la dependencia informó tres vulnerabilidades en el árbol de paquetes (dos altas y una crítica); no ejecuté una actualización forzada, que queda fuera del alcance de esta contribución.
+
+- **IA:** utilicé IA como apoyo para revisar el código existente, proponer la cobertura y redactar parte de las pruebas. Revisé los cambios, ejecuté los comandos documentados y comprobé sus resultados; los datos y las respuestas remotas de prueba son sintéticos.

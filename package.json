@@ -7,18 +7,27 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts && node --experimental-strip-types tests/service-worker-behavior.spec.ts && node --experimental-strip-types tests/offline.spec.ts && node --experimental-strip-types tests/rendering.spec.ts && node --experimental-strip-types tests/sync.spec.ts && node --experimental-strip-types tests/capabilities.spec.ts && node --experimental-strip-types tests/notifications.spec.ts",
-    "verify": "node scripts/verify.mjs"
+    "test": "node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts && node --experimental-strip-types tests/service-worker-behavior.spec.ts && node --experimental-strip-types tests/offline.spec.ts && node --experimental-strip-types tests/rendering.spec.ts && node --experimental-strip-types tests/sync.spec.ts && node --experimental-strip-types tests/capabilities.spec.ts && node --experimental-strip-types tests/notifications.spec.ts && node --experimental-strip-types tests/unit/validation.spec.ts && node --experimental-strip-types tests/unit/queue.spec.ts && node --experimental-strip-types tests/integration/offline-sync.spec.ts && node --experimental-strip-types tests/storage.spec.ts",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "verify:artifacts": "node scripts/verify.mjs",
+    "verify": "npm run verify:artifacts && npm run lint && npm run typecheck && npm run build && npm test"
   },
+  "engines": { "node": ">=22.6" },
   "dependencies": {
     "next": "14.2.35",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@types/node": "^20.14.15",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^20.19.43",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
+    "fake-indexeddb": "^6.2.6",
     "typescript": "^5.4.5"
   }
 }

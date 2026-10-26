@@ -1,5 +1,6 @@
 import { inspections } from "../../lib/data/inspections";
 import { NotificationControls } from "@/components/notification-controls";
+import { InspectionCapture } from "@/components/inspection-capture";
 
 // Le indica a Next.js que la ruta debe renderizarse dinámicamente en el servidor en lugar de tratarla como una página estática.
 export const dynamic = "force-dynamic";
@@ -25,6 +26,8 @@ export default function InspeccionesPage() {
 				</p>
 				<NotificationControls />
 			</header>
+
+			<InspectionCapture />
 
 			<section
 				aria-labelledby="inspections-heading"

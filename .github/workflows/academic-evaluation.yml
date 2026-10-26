@@ -1,0 +1,89 @@
+# Pipeline de CI de la semana 8: instalacion limpia, lint, tipos, build,
+# capas de pruebas y publicacion de reportes aunque una etapa falle.
+name: Academic Evaluation CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalacion limpia
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verificacion de artefactos del proyecto
+        if: ${{ !cancelled() }}
+        run: npm run verify:artifacts
+
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: npm run lint
+
+      - name: Comprobacion de tipos
+        if: ${{ !cancelled() }}
+        run: npm run typecheck
+
+      - name: Compilacion
+        if: ${{ !cancelled() }}
+        run: npm run build
+
+      - name: Pruebas del proyecto (npm test)
+        if: ${{ !cancelled() }}
+        run: npm test
+
+      - name: Unitarias e integracion con reporte JUnit
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p reports
+          node --experimental-strip-types --test \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=junit --test-reporter-destination=reports/junit-unit-integration.xml \
+            "tests/unit/*.spec.ts" "tests/integration/*.spec.ts"
+
+      - name: Cobertura (informativa, no bloqueante)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: |
+          mkdir -p coverage
+          node --experimental-strip-types --experimental-test-coverage --test \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \
+            "tests/unit/*.spec.ts" "tests/integration/*.spec.ts" tests/storage.spec.ts \
+            tests/sync.spec.ts tests/capabilities.spec.ts tests/notifications.spec.ts
+
+      - name: Instalar Chromium
+        if: ${{ !cancelled() }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas E2E (Playwright arranca el servidor de produccion)
+        if: ${{ !cancelled() }}
+        run: npx playwright test
+
+      - name: Publicar reportes y cobertura
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-evidence-w08-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            reports/
+            coverage/
+            playwright-report/
+            test-results/

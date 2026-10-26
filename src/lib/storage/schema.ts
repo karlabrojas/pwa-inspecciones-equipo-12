@@ -1,4 +1,4 @@
-import type { Inspection } from "../data/inspections";
+import type { Inspection } from "../data/inspections.ts";
 
 export const INSPECTION_DATABASE_NAME = "pwa-inspecciones";
 export const INSPECTION_DATABASE_VERSION = 1;
