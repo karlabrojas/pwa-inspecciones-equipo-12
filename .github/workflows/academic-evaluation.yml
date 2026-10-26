@@ -1,4 +1,4 @@
-# Pipeline de CI de la semana 8 (Issue #3): instalacion limpia, tipos, build,
+# Pipeline de CI de la semana 8: instalacion limpia, lint, tipos, build,
 # capas de pruebas y publicacion de reportes aunque una etapa falle.
 name: Academic Evaluation CI
 
@@ -27,33 +27,34 @@ jobs:
       - name: Instalacion limpia
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Comprobacion de tipos
-        run: npx tsc --noEmit
-
-      - name: Compilacion (incluye el lint y los tipos de next build)
-        run: npm run build
-
       - name: Verificacion de artefactos del proyecto
         if: ${{ !cancelled() }}
-        run: npm run verify
+        run: npm run verify:artifacts
 
-      - name: Pruebas unitarias y del proyecto (npm test)
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: npm run lint
+
+      - name: Comprobacion de tipos
+        if: ${{ !cancelled() }}
+        run: npm run typecheck
+
+      - name: Compilacion
+        if: ${{ !cancelled() }}
+        run: npm run build
+
+      - name: Pruebas del proyecto (npm test)
         if: ${{ !cancelled() }}
         run: npm test
 
-      - name: Pruebas de persistencia IndexedDB (tests/storage.spec.ts)
-        if: ${{ !cancelled() }}
-        run: node --experimental-strip-types tests/storage.spec.ts
-
-      - name: Pruebas de tests/unit y tests/integration
+      - name: Unitarias e integracion con reporte JUnit
         if: ${{ !cancelled() }}
         run: |
-          files=$(find tests/unit tests/integration -type f \( -name '*.ts' -o -name '*.mjs' \) 2>/dev/null || true)
-          if [ -z "$files" ]; then
-            echo "::warning::tests/unit y tests/integration no existen o estan vacios: esta capa NO se ejecuto."
-            exit 0
-          fi
-          node --experimental-strip-types --test $files
+          mkdir -p reports
+          node --experimental-strip-types --test \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=junit --test-reporter-destination=reports/junit-unit-integration.xml \
+            "tests/unit/*.spec.ts" "tests/integration/*.spec.ts"
 
       - name: Cobertura (informativa, no bloqueante)
         if: ${{ !cancelled() }}
@@ -61,9 +62,10 @@ jobs:
         run: |
           mkdir -p coverage
           node --experimental-strip-types --experimental-test-coverage --test \
-            tests/sync.spec.ts tests/capabilities.spec.ts tests/notifications.spec.ts \
-            tests/offline.spec.ts tests/service-worker-behavior.spec.ts tests/rendering.spec.ts \
-            | tee coverage/coverage.txt
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=lcov --test-reporter-destination=coverage/lcov.info \
+            "tests/unit/*.spec.ts" "tests/integration/*.spec.ts" tests/storage.spec.ts \
+            tests/sync.spec.ts tests/capabilities.spec.ts tests/notifications.spec.ts
 
       - name: Instalar Chromium
         if: ${{ !cancelled() }}

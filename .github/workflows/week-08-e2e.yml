@@ -2,8 +2,6 @@
 name: E2E Regression Evidence
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:

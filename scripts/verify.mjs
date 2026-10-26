@@ -21,7 +21,15 @@ const required = [
   "src/lib/notifications/client.ts",
   "tests/capabilities.spec.ts",
   "tests/notifications.spec.ts",
-  "docs/capabilities.md"
+  "docs/capabilities.md",
+  "docs/test-strategy.md",
+  ".github/workflows/academic-evaluation.yml",
+  "playwright.config.ts",
+  "tests/e2e/helpers.ts",
+  "tests/unit/validation.spec.ts",
+  "tests/unit/queue.spec.ts",
+  "tests/integration/offline-sync.spec.ts",
+  ".eslintrc.json"
 ];
 
 const missing = required.filter((file) => !existsSync(resolve(root, file)));

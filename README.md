@@ -1091,12 +1091,13 @@ El detalle completo está en [`docs/capabilities.md`](docs/capabilities.md).
 - Evidencia individual (SHA, decisión técnica, prueba ejecutada, limitación y uso declarado de IA): `evidence/individual.md`.
 - Limitaciones conocidas: sección correspondiente de `docs/capabilities.md`.
 
-
 # Semana 8 — CI, estrategia de pruebas y reproducción
 
-- **Node.js:** 22.6 o superior (las pruebas usan `--experimental-strip-types`). El CI usa Node 22. npm 10 o superior.
-- **Estrategia y matriz riesgo–prueba:** [`docs/test-strategy.md`](docs/test-strategy.md).
-- **Workflow:** `.github/workflows/academic-evaluation.yml`.
+- **Node:** 22.6 o superior (`.nvmrc`).
+- **Instalación:** `npm ci`
+- **Arranque:** `npm run build && npm run start` (http://localhost:3000)
+- **Navegador para E2E:** `npx playwright install chromium` (Windows) o `npx playwright install --with-deps chromium` (Linux/WSL)
+- **Verificación completa:** `npm run verify` (Windows) o `make verify` (Linux/WSL); `make verify` solo ejecuta `npm run verify`.
 
 ## Instalación y arranque
 
@@ -1119,7 +1120,17 @@ npx playwright install chromium
 npx playwright test
 ```
 
+| Comando             | Qué ejecuta                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| `npm run lint`      | ESLint con `next/core-web-vitals`                               |
+| `npm run typecheck` | `tsc --noEmit`                                                  |
+| `npm run build`     | Compilación de Next.js                                          |
+| `npm test`          | Pruebas Node (proyecto, unitarias, integración, almacenamiento) |
+| `npm run test:e2e`  | Playwright (el servidor lo arranca `playwright.config.ts`)      |
+
 `npx playwright test` compila y arranca la aplicación por sí mismo (`playwright.config.ts`). Con `npx playwright test --ui` puedes depurarlo. Reportes: `reports/verification.json` y `playwright-report/`.
+
+Los reportes y la cobertura de CI se publican como artefacto `ci-evidence-w08-<sha>` en GitHub Actions. La estrategia y la evidencia del defecto controlado están en `docs/test-strategy.md`; la evidencia personal, en `evidence/individual.md`. La estructura del proyecto coincide con la solicitada, así que no hay correspondencia que documentar.
 
 ## Qué hace el CI
 

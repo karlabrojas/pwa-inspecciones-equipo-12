@@ -8,6 +8,7 @@ export default defineConfig({
   reporter: [
     ["list"],
     ["html", { outputFolder: "playwright-report", open: "never" }],
+    ["junit", { outputFile: "reports/junit-e2e.xml" }],
   ],
   use: {
     baseURL: "http://localhost:3000",
