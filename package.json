@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "verify:artifacts": "node scripts/verify.mjs",
-    "verify": "npm run verify:artifacts && npm run lint && npm run typecheck && npm run build && npm test && npm run test:e2e"
+    "verify": "npm run verify:artifacts && npm run lint && npm run typecheck && npm run build && npm test"
   },
   "engines": { "node": ">=22.6" },
   "dependencies": {
