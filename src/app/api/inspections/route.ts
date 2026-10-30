@@ -1,16 +1,5 @@
 import { NextResponse } from "next/server";
 
-/**
- * Servidor de demostración en memoria para las pruebas E2E de sincronización.
- *
- * - POST recibe una operación con el encabezado Idempotency-Key.
- *   Si la clave ya se había recibido, no crea otro registro (responde 200),
- *   pero cuenta la recepción en `receipts`.
- * - GET lista lo recibido, para que las pruebas verifiquen del lado servidor
- *   cuántas inspecciones existen y cuántas veces se envió cada operación.
- *
- * No es persistente: se reinicia junto con el servidor.
- */
 export const dynamic = "force-dynamic";
 
 type ReceivedOperation = {
@@ -25,7 +14,7 @@ const globalStore = globalThis as typeof globalThis & {
   __receivedInspections?: Map<string, ReceivedOperation>;
 };
 
-function getStore(): Map<string, ReceivedOperation> {
+function getStore() {
   if (!globalStore.__receivedInspections) {
     globalStore.__receivedInspections = new Map();
   }
@@ -33,20 +22,52 @@ function getStore(): Map<string, ReceivedOperation> {
   return globalStore.__receivedInspections;
 }
 
+function isValidInspection(value: unknown): value is Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const inspection = value as Record<string, unknown>;
+
+  return (
+    typeof inspection.id === "string" &&
+    inspection.id.trim().length > 0 &&
+    inspection.id.length <= 100 &&
+    typeof inspection.title === "string" &&
+    inspection.title.trim().length > 0 &&
+    inspection.title.length <= 120 &&
+    typeof inspection.location === "string" &&
+    inspection.location.length <= 200
+  );
+}
+
 export async function POST(request: Request) {
   const idempotencyKey = request.headers.get("Idempotency-Key");
 
-  if (!idempotencyKey) {
+  if (
+    !idempotencyKey ||
+    idempotencyKey.length > 150 ||
+    !/^[a-zA-Z0-9_-]+$/.test(idempotencyKey)
+  ) {
     return NextResponse.json(
-      { error: "Falta el encabezado Idempotency-Key." },
+      { error: "El encabezado Idempotency-Key no es válido." },
       { status: 400 },
     );
   }
 
-  let body: { inspection?: Record<string, unknown> };
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+
+  if (contentLength > 100_000) {
+    return NextResponse.json(
+      { error: "El cuerpo de la solicitud es demasiado grande." },
+      { status: 413 },
+    );
+  }
+
+  let body: { inspection?: unknown };
 
   try {
-    body = (await request.json()) as { inspection?: Record<string, unknown> };
+    body = await request.json();
   } catch {
     return NextResponse.json(
       { error: "Cuerpo JSON no válido." },
@@ -54,7 +75,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!body.inspection || typeof body.inspection.id !== "string") {
+  if (!isValidInspection(body.inspection)) {
     return NextResponse.json(
       { error: "La inspección no es válida." },
       { status: 400 },
@@ -90,5 +111,5 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ items: Array.from(getStore().values()) });
+  return NextResponse.json({ error: "Método no disponible." }, { status: 405 });
 }
