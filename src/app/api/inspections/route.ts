@@ -111,5 +111,18 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ error: "Método no disponible." }, { status: 405 });
+  const store = getStore();
+
+  const items = Array.from(store.values()).map((record) => ({
+    operationId: record.operationId,
+    version: record.version,
+    receipts: record.receipts,
+    receivedAt: record.receivedAt,
+    inspection: {
+      id: record.inspection.id,
+      title: record.inspection.title,
+    },
+  }));
+
+  return NextResponse.json({ items });
 }
