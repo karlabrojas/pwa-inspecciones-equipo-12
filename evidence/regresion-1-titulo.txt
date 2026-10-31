@@ -1,0 +1,154 @@
+﻿node : (node:20556) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+En línea: 4 Carácter: 1
++ node --experimental-strip-types --test tests/security.spec.ts 2>&1 |  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:20556) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# (node:20656) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:20656) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: seguridad/encabezados: CSP real cumple la politica minima
+ok 1 - seguridad/encabezados: CSP real cumple la politica minima
+  ---
+  duration_ms: 2.5588
+  ...
+# Subtest: seguridad/encabezados: encabezados complementarios presentes
+ok 2 - seguridad/encabezados: encabezados complementarios presentes
+  ---
+  duration_ms: 0.1892
+  ...
+# Subtest: seguridad/encabezados: la CSP no bloquea capacidades legitimas de la PWA
+ok 3 - seguridad/encabezados: la CSP no bloquea capacidades legitimas de la PWA
+  ---
+  duration_ms: 0.106
+  ...
+# Subtest: NEGATIVO seguridad/encabezados: una CSP debilitada es detectada
+ok 4 - NEGATIVO seguridad/encabezados: una CSP debilitada es detectada
+  ---
+  duration_ms: 0.2046
+  ...
+# Subtest: seguridad/validacion: acepta titulos validos y casos limite
+ok 5 - seguridad/validacion: acepta titulos validos y casos limite
+  ---
+  duration_ms: 0.0954
+  ...
+# Subtest: seguridad/validacion: rechaza titulos invalidos
+not ok 6 - seguridad/validacion: rechaza titulos invalidos
+  ---
+  duration_ms: 0.4793
+  location: 'C:\\Users\\alfar\\OneDrive\\Documentos\\PWA\\pwa-inspecciones-equipo-12\\tests\\security.spec.ts:150:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected "actual" to be strictly unequal to: null'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: ~
+  actual: ~
+  operator: 'notStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/alfar/OneDrive/Documentos/PWA/pwa-inspecciones-equipo-12/tests/security.spec.ts:154:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:934:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:633:18)
+    Test.postRun (node:internal/test_runner/test:1045:19)
+    Test.run (node:internal/test_runner/test:973:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: seguridad/validacion: rechaza tipos no textuales
+ok 7 - seguridad/validacion: rechaza tipos no textuales
+  ---
+  duration_ms: 0.1409
+  ...
+# Subtest: NEGATIVO seguridad/validacion: un validador que acepta todo es detectado
+not ok 8 - NEGATIVO seguridad/validacion: un validador que acepta todo es detectado
+  ---
+  duration_ms: 0.2731
+  location: 'C:\\Users\\alfar\\OneDrive\\Documentos\\PWA\\pwa-inspecciones-equipo-12\\tests\\security.spec.ts:164:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/alfar/OneDrive/Documentos/PWA/pwa-inspecciones-equipo-12/tests/security.spec.ts:165:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:934:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:633:18)
+    Test.postRun (node:internal/test_runner/test:1045:19)
+    Test.run (node:internal/test_runner/test:973:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+  ...
+# Subtest: seguridad/api: acepta una inspeccion valida (201) y detecta el duplicado (200)
+ok 9 - seguridad/api: acepta una inspeccion valida (201) y detecta el duplicado (200)
+  ---
+  duration_ms: 15.7462
+  ...
+# Subtest: seguridad/api: acepta valores exactamente en el limite
+ok 10 - seguridad/api: acepta valores exactamente en el limite
+  ---
+  duration_ms: 0.6051
+  ...
+# Subtest: seguridad/api: rechaza Idempotency-Key ausente, invalida o demasiado larga
+ok 11 - seguridad/api: rechaza Idempotency-Key ausente, invalida o demasiado larga
+  ---
+  duration_ms: 1.1742
+  ...
+# Subtest: seguridad/api: rechaza cuerpos demasiado grandes (413)
+ok 12 - seguridad/api: rechaza cuerpos demasiado grandes (413)
+  ---
+  duration_ms: 0.3261
+  ...
+# Subtest: seguridad/api: rechaza JSON malformado (400)
+ok 13 - seguridad/api: rechaza JSON malformado (400)
+  ---
+  duration_ms: 0.3026
+  ...
+# Subtest: seguridad/api: rechaza inspecciones invalidas sin almacenarlas
+ok 14 - seguridad/api: rechaza inspecciones invalidas sin almacenarlas
+  ---
+  duration_ms: 3.2595
+  ...
+# Subtest: seguridad/api: GET no expone campos innecesarios (minimizacion)
+ok 15 - seguridad/api: GET no expone campos innecesarios (minimizacion)
+  ---
+  duration_ms: 0.3417
+  ...
+# Subtest: seguridad/robots: existe y excluye rutas de API e inspecciones (no es autorizacion)
+ok 16 - seguridad/robots: existe y excluye rutas de API e inspecciones (no es autorizacion)
+  ---
+  duration_ms: 0.3272
+  ...
+# Subtest: seguridad/secretos: no hay credenciales en src, public ni next.config.mjs
+ok 17 - seguridad/secretos: no hay credenciales en src, public ni next.config.mjs
+  ---
+  duration_ms: 5.3611
+  ...
+# Subtest: NEGATIVO seguridad/secretos: el escaner detecta secretos de muestra
+ok 18 - NEGATIVO seguridad/secretos: el escaner detecta secretos de muestra
+  ---
+  duration_ms: 0.1008
+  ...
+# Subtest: reproducibilidad: lockfile y version de Node configurados
+ok 19 - reproducibilidad: lockfile y version de Node configurados
+  ---
+  duration_ms: 2.0524
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 17
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 169.5209
+

@@ -1,0 +1,674 @@
+﻿
+> pwa-inspecciones-laboratorio@0.1.0 verify
+> npm run verify:artifacts && npm run lint && npm run typecheck && npm run build && npm test
+
+
+> pwa-inspecciones-laboratorio@0.1.0 verify:artifacts
+> node scripts/verify.mjs
+
+Starter verificable: PASS
+Reporte: C:\Users\alfar\OneDrive\Documentos\PWA\pwa-inspecciones-equipo-12\reports\verification.json
+
+> pwa-inspecciones-laboratorio@0.1.0 lint
+> next lint
+
+Ô£ö No ESLint warnings or errors
+
+> pwa-inspecciones-laboratorio@0.1.0 typecheck
+> tsc --noEmit
+
+
+> pwa-inspecciones-laboratorio@0.1.0 build
+> next build
+
+  Ôû▓ Next.js 14.2.35
+
+   Creating an optimized production build ...
+ Ô£ô Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/5) ...
+   Generating static pages (1/5) 
+   Generating static pages (2/5) 
+   Generating static pages (3/5) 
+ Ô£ô Generating static pages (5/5)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+Ôöî Ôùï /                                    2.48 kB        89.7 kB
+Ôö£ Ôùï /_not-found                          873 B          88.1 kB
+Ôö£ ãÆ /api/inspections                     0 B                0 B
+Ôö£ ãÆ /inspecciones                        5.85 kB        93.1 kB
+Ôöö ãÆ /inspecciones/[id]                   2.7 kB         89.9 kB
++ First Load JS shared by all            87.2 kB
+  Ôö£ chunks/117-19e2607edffa9051.js       31.7 kB
+  Ôö£ chunks/fd9d1056-5f55067fad1d0619.js  53.6 kB
+  Ôöö other shared chunks (total)          1.86 kB
+
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+
+
+> pwa-inspecciones-laboratorio@0.1.0 test
+> node tests/starter.spec.mjs && node --experimental-strip-types tests/manifest.spec.ts && node --experimental-strip-types tests/service-worker.spec.ts && node --experimental-strip-types tests/service-worker-behavior.spec.ts && node --experimental-strip-types tests/offline.spec.ts && node --experimental-strip-types tests/rendering.spec.ts && node --experimental-strip-types tests/sync.spec.ts && node --experimental-strip-types tests/capabilities.spec.ts && node --experimental-strip-types tests/notifications.spec.ts && node --experimental-strip-types tests/unit/validation.spec.ts && node --experimental-strip-types tests/unit/queue.spec.ts && node --experimental-strip-types tests/integration/offline-sync.spec.ts && node --experimental-strip-types tests/storage.spec.ts && node --experimental-strip-types tests/security.spec.ts
+
+starter.spec.mjs: PASS
+node.exe : (node:3756) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+En C:\Program Files\nodejs\npm.ps1: 29 Carácter: 3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:3756) Exp...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+manifest.spec.ts: PASS
+(node:27700) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+service-worker.spec.ts: PASS
+(node:26164) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: existe public/sw.js y registra install, activate y fetch
+ok 1 - existe public/sw.js y registra install, activate y fetch
+  ---
+  duration_ms: 13.7844
+  ...
+# Subtest: install: precachea exactamente los recursos base en la cache estatica
+ok 2 - install: precachea exactamente los recursos base en la cache estatica
+  ---
+  duration_ms: 4.5646
+  ...
+# Subtest: activate: borra caches viejas de inspecciones, conserva las vigentes y las ajenas
+ok 3 - activate: borra caches viejas de inspecciones, conserva las vigentes y las ajenas
+  ---
+  duration_ms: 26.3719
+  ...
+# Subtest: fetch: una peticion POST va directo a la red y no se cachea
+ok 4 - fetch: una peticion POST va directo a la red y no se cachea
+  ---
+  duration_ms: 30.85
+  ...
+# Subtest: fetch: una peticion a otro origen va directo a la red y no se cachea
+ok 5 - fetch: una peticion a otro origen va directo a la red y no se cachea
+  ---
+  duration_ms: 29.8055
+  ...
+# Subtest: cache first: /_next/static ignora el parametro ?v= al buscar en cache
+ok 6 - cache first: /_next/static ignora el parametro ?v= al buscar en cache
+  ---
+  duration_ms: 47.025
+  ...
+# Subtest: stale-while-revalidate: el manifest responde desde cache y revalida en segundo plano
+ok 7 - stale-while-revalidate: el manifest responde desde cache y revalida en segundo plano
+  ---
+  duration_ms: 30.5341
+  ...
+# Subtest: seguridad: public/sw.js no contiene secretos ni tokens
+ok 8 - seguridad: public/sw.js no contiene secretos ni tokens
+  ---
+  duration_ms: 0.7058
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 187.7438
+(node:24600) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: sin conexion, navegar a la raiz sirve la pagina precacheada
+ok 1 - sin conexion, navegar a la raiz sirve la pagina precacheada
+  ---
+  duration_ms: 40.5746
+  ...
+# Subtest: sin conexion, una ruta nunca visitada cae a la pagina inicial precacheada
+ok 2 - sin conexion, una ruta nunca visitada cae a la pagina inicial precacheada
+  ---
+  duration_ms: 45.8928
+  ...
+# Subtest: sin conexion y sin cache, la navegacion devuelve la pagina 'Sin conexion' con 503
+ok 3 - sin conexion y sin cache, la navegacion devuelve la pagina 'Sin conexion' con 503
+  ---
+  duration_ms: 15.1162
+  ...
+# Subtest: network first: con conexion usa la red y luego la ultima copia al perderla
+ok 4 - network first: con conexion usa la red y luego la ultima copia al perderla
+  ---
+  duration_ms: 47.3972
+  ...
+# Subtest: sin conexion, los iconos precacheados siguen disponibles (cache first)
+ok 5 - sin conexion, los iconos precacheados siguen disponibles (cache first)
+  ---
+  duration_ms: 47.0657
+  ...
+# Subtest: sin conexion, el manifest se sirve desde cache
+ok 6 - sin conexion, el manifest se sirve desde cache
+  ---
+  duration_ms: 30.1027
+  ...
+# Subtest: network first: /api/inspections queda disponible offline tras una consulta con conexion
+ok 7 - network first: /api/inspections queda disponible offline tras una consulta con conexion
+  ---
+  duration_ms: 61.8389
+  ...
+# Subtest: regresion: una respuesta 500 no se guarda ni se sirve despues sin conexion
+ok 8 - regresion: una respuesta 500 no se guarda ni se sirve despues sin conexion
+  ---
+  duration_ms: 62.6468
+  ...
+# Subtest: limite: un recurso estatico no cacheado falla sin conexion (sin fallback)
+ok 9 - limite: un recurso estatico no cacheado falla sin conexion (sin fallback)
+  ---
+  duration_ms: 46.162
+  ...
+# Subtest: limite: una peticion POST sin conexion falla (aun no hay cola offline)
+ok 10 - limite: una peticion POST sin conexion falla (aun no hay cola offline)
+  ---
+  duration_ms: 31.1295
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 432.4092
+(node:8880) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: listado: devuelve todas las inspecciones sinteticas con campos requeridos
+ok 1 - listado: devuelve todas las inspecciones sinteticas con campos requeridos
+  ---
+  duration_ms: 0.6254
+  ...
+# Subtest: regresion: no existen ids duplicados en el listado
+ok 2 - regresion: no existen ids duplicados en el listado
+  ---
+  duration_ms: 0.123
+  ...
+# Subtest: detalle: encuentra una inspeccion existente por id
+ok 3 - detalle: encuentra una inspeccion existente por id
+  ---
+  duration_ms: 0.1436
+  ...
+# Subtest: detalle: id inexistente devuelve null, no lanza excepcion
+ok 4 - detalle: id inexistente devuelve null, no lanza excepcion
+  ---
+  duration_ms: 0.0722
+  ...
+# Subtest: estado de carga: la promesa esta pendiente antes de que se cumpla el delay simulado
+ok 5 - estado de carga: la promesa esta pendiente antes de que se cumpla el delay simulado
+  ---
+  duration_ms: 64.3664
+  ...
+# Subtest: estado de error: loadInspectionWithError resuelve status 'error' sin inspeccion
+ok 6 - estado de error: loadInspectionWithError resuelve status 'error' sin inspeccion
+  ---
+  duration_ms: 15.7377
+  ...
+# Subtest: carga con id inexistente resuelve status 'not-found'
+ok 7 - carga con id inexistente resuelve status 'not-found'
+  ---
+  duration_ms: 15.2153
+  ...
+# Subtest: estructural: el listado (/inspecciones) es un Server Component SSR real
+ok 8 - estructural: el listado (/inspecciones) es un Server Component SSR real
+  ---
+  duration_ms: 0.6809
+  ...
+# Subtest: estructural: el detalle (/inspecciones/[id]) es un Client Component CSR
+ok 9 - estructural: el detalle (/inspecciones/[id]) es un Client Component CSR
+  ---
+  duration_ms: 0.4122
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 102.6244
+(node:2520) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: persistencia offline: una operacion encolada sigue disponible tras cerrar y reabrir la app
+ok 1 - persistencia offline: una operacion encolada sigue disponible tras cerrar y reabrir la app
+  ---
+  duration_ms: 2.1425
+  ...
+# Subtest: sincronizacion: una operacion pendiente se procesa y queda completed
+ok 2 - sincronizacion: una operacion pendiente se procesa y queda completed
+  ---
+  duration_ms: 0.7109
+  ...
+# Subtest: reintentos: un error temporal marca failed y una llamada posterior reintenta y completa
+ok 3 - reintentos: un error temporal marca failed y una llamada posterior reintenta y completa
+  ---
+  duration_ms: 0.2926
+  ...
+# Subtest: duplicacion: encolar dos veces el mismo operationId no crea una segunda operacion
+ok 4 - duplicacion: encolar dos veces el mismo operationId no crea una segunda operacion
+  ---
+  duration_ms: 0.1181
+  ...
+# Subtest: idempotencia: procesar dos veces la misma operacion completada no la vuelve a enviar
+ok 5 - idempotencia: procesar dos veces la misma operacion completada no la vuelve a enviar
+  ---
+  duration_ms: 0.762
+  ...
+# Subtest: respuestas fuera de orden: la respuesta de un intento viejo no sobrescribe un intento mas nuevo
+ok 6 - respuestas fuera de orden: la respuesta de un intento viejo no sobrescribe un intento mas nuevo
+  ---
+  duration_ms: 0.256
+  ...
+# Subtest: conflicto: cambios locales y remotos distintos se detectan y no se pierde el cambio local
+ok 7 - conflicto: cambios locales y remotos distintos se detectan y no se pierde el cambio local
+  ---
+  duration_ms: 0.2264
+  ...
+# Subtest: conflicto: si el remoto avanzo pero el contenido es igual, no se marca conflicto
+ok 8 - conflicto: si el remoto avanzo pero el contenido es igual, no se marca conflicto
+  ---
+  duration_ms: 0.0762
+  ...
+# Subtest: regresion: sin el candado processLock, dos llamadas concurrentes duplicarian el envio
+ok 9 - regresion: sin el candado processLock, dos llamadas concurrentes duplicarian el envio
+  ---
+  duration_ms: 18.5342
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 27.3114
+(node:26748) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: camara: si getUserMedia no esta disponible devuelve unsupported
+ok 1 - camara: si getUserMedia no esta disponible devuelve unsupported
+  ---
+  duration_ms: 1.1856
+  ...
+# Subtest: camara: sin objeto navigator (render en servidor) devuelve unsupported sin lanzar
+ok 2 - camara: sin objeto navigator (render en servidor) devuelve unsupported sin lanzar
+  ---
+  duration_ms: 0.1212
+  ...
+# Subtest: camara: solicita video sin solicitar audio
+ok 3 - camara: solicita video sin solicitar audio
+  ---
+  duration_ms: 0.3719
+  ...
+# Subtest: camara: con permiso concedido devuelve el stream recibido
+ok 4 - camara: con permiso concedido devuelve el stream recibido
+  ---
+  duration_ms: 0.1368
+  ...
+# Subtest: camara: un permiso denegado devuelve permission-denied
+ok 5 - camara: un permiso denegado devuelve permission-denied
+  ---
+  duration_ms: 0.2077
+  ...
+# Subtest: camara: SecurityError tambien se trata como permission-denied
+ok 6 - camara: SecurityError tambien se trata como permission-denied
+  ---
+  duration_ms: 0.1192
+  ...
+# Subtest: camara: un fallo de hardware devuelve reason error y conserva el error original
+ok 7 - camara: un fallo de hardware devuelve reason error y conserva el error original
+  ---
+  duration_ms: 0.1535
+  ...
+# Subtest: camara: stopCamera detiene todos los tracks
+ok 8 - camara: stopCamera detiene todos los tracks
+  ---
+  duration_ms: 0.0915
+  ...
+# Subtest: camara: cargar el modulo no solicita acceso a la camara
+ok 9 - camara: cargar el modulo no solicita acceso a la camara
+  ---
+  duration_ms: 5.5384
+  ...
+# Subtest: geolocalizacion: si la API no esta disponible devuelve unsupported
+ok 10 - geolocalizacion: si la API no esta disponible devuelve unsupported
+  ---
+  duration_ms: 0.3769
+  ...
+# Subtest: geolocalizacion: sin objeto navigator (render en servidor) devuelve unsupported sin lanzar
+ok 11 - geolocalizacion: sin objeto navigator (render en servidor) devuelve unsupported sin lanzar
+  ---
+  duration_ms: 0.1522
+  ...
+# Subtest: geolocalizacion: obtiene la posicion y usa configuracion de bajo consumo
+ok 12 - geolocalizacion: obtiene la posicion y usa configuracion de bajo consumo
+  ---
+  duration_ms: 0.1491
+  ...
+# Subtest: geolocalizacion: permiso denegado devuelve permission-denied
+ok 13 - geolocalizacion: permiso denegado devuelve permission-denied
+  ---
+  duration_ms: 0.1209
+  ...
+# Subtest: geolocalizacion: posicion no disponible (code 2) y timeout (code 3) devuelven reason error
+ok 14 - geolocalizacion: posicion no disponible (code 2) y timeout (code 3) devuelven reason error
+  ---
+  duration_ms: 0.1466
+  ...
+# Subtest: geolocalizacion: si la API lanza de forma sincrona devuelve reason error sin lanzar
+ok 15 - geolocalizacion: si la API lanza de forma sincrona devuelve reason error sin lanzar
+  ---
+  duration_ms: 0.087
+  ...
+# Subtest: geolocalizacion: cargar el modulo no consulta la ubicacion
+ok 16 - geolocalizacion: cargar el modulo no consulta la ubicacion
+  ---
+  duration_ms: 2.6167
+  ...
+# Subtest: notificaciones: con permiso concedido muestra el aviso del evento
+ok 17 - notificaciones: con permiso concedido muestra el aviso del evento
+  ---
+  duration_ms: 0.6515
+  ...
+# Subtest: notificaciones: con permiso denegado no muestra aviso y devuelve fallback
+ok 18 - notificaciones: con permiso denegado no muestra aviso y devuelve fallback
+  ---
+  duration_ms: 0.1659
+  ...
+# Subtest: notificaciones: sin la API devuelve unsupported sin lanzar
+ok 19 - notificaciones: sin la API devuelve unsupported sin lanzar
+  ---
+  duration_ms: 0.1086
+  ...
+# Subtest: notificaciones: si el constructor lanza devuelve status error sin propagar la excepcion
+ok 20 - notificaciones: si el constructor lanza devuelve status error sin propagar la excepcion
+  ---
+  duration_ms: 0.134
+  ...
+# Subtest: notificaciones: el permiso solo se pide desde requestNotificationPermission
+ok 21 - notificaciones: el permiso solo se pide desde requestNotificationPermission
+  ---
+  duration_ms: 0.1447
+  ...
+# Subtest: notificaciones: si el usuario rechaza el permiso el resultado es denied y no se muestra nada
+ok 22 - notificaciones: si el usuario rechaza el permiso el resultado es denied y no se muestra nada
+  ---
+  duration_ms: 0.068
+  ...
+# Subtest: notificaciones: los avisos usan texto generico, sin identificadores ni datos personales
+ok 23 - notificaciones: los avisos usan texto generico, sin identificadores ni datos personales
+  ---
+  duration_ms: 0.2552
+  ...
+# Subtest: flujo principal: la inspeccion se encola aunque camara, geolocalizacion y notificaciones no esten disponibles
+ok 24 - flujo principal: la inspeccion se encola aunque camara, geolocalizacion y notificaciones no esten disponibles
+  ---
+  duration_ms: 1.2451
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 22.3857
+(node:26336) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: permission state: reports unsupported when the Notification API is absent
+ok 1 - permission state: reports unsupported when the Notification API is absent
+  ---
+  duration_ms: 0.5767
+  ...
+# Subtest: permission state: reads default, granted and denied without prompting
+ok 2 - permission state: reads default, granted and denied without prompting
+  ---
+  duration_ms: 0.1635
+  ...
+# Subtest: explicit request: asks for permission and shows confirmation when granted
+ok 3 - explicit request: asks for permission and shows confirmation when granted
+  ---
+  duration_ms: 0.1668
+  ...
+# Subtest: explicit request: denied permission returns a non-blocking fallback
+ok 4 - explicit request: denied permission returns a non-blocking fallback
+  ---
+  duration_ms: 0.1522
+  ...
+# Subtest: explicit request: unsupported API returns fallback without throwing
+ok 5 - explicit request: unsupported API returns fallback without throwing
+  ---
+  duration_ms: 0.1095
+  ...
+# Subtest: event notification: default permission does not trigger an automatic prompt
+ok 6 - event notification: default permission does not trigger an automatic prompt
+  ---
+  duration_ms: 0.1061
+  ...
+# Subtest: event notification: shows generic synthetic message only when granted
+ok 7 - event notification: shows generic synthetic message only when granted
+  ---
+  duration_ms: 0.2107
+  ...
+# Subtest: errors: permission request and notification construction return fallbacks
+ok 8 - errors: permission request and notification construction return fallbacks
+  ---
+  duration_ms: 0.1514
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8.7384
+(node:27620) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: validaci├│n de inspecci├│n: acepta un t├¡tulo con contenido
+ok 1 - validaci├│n de inspecci├│n: acepta un t├¡tulo con contenido
+  ---
+  duration_ms: 0.5307
+  ...
+# Subtest: validaci├│n de inspecci├│n: rechaza un t├¡tulo vac├¡o o compuesto por espacios
+ok 2 - validaci├│n de inspecci├│n: rechaza un t├¡tulo vac├¡o o compuesto por espacios
+  ---
+  duration_ms: 0.118
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5.695
+(node:27072) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: cola: encolar y procesar dos veces una operaci├│n no la duplica
+ok 1 - cola: encolar y procesar dos veces una operaci├│n no la duplica
+  ---
+  duration_ms: 2.5175
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6.8198
+(node:29256) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: offline: conserva la inspecci├│n y un reintento de sincronizaci├│n no duplica el registro remoto
+ok 1 - offline: conserva la inspecci├│n y un reintento de sincronizaci├│n no duplica el registro remoto
+  ---
+  duration_ms: 10.41
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13.9221
+(node:27200) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: integraci├│n: guarda una inspecci├│n en IndexedDB y permite recuperarla
+ok 1 - integraci├│n: guarda una inspecci├│n en IndexedDB y permite recuperarla
+  ---
+  duration_ms: 6.5843
+  ...
+# Subtest: integraci├│n: guardar una inspecci├│n genera una operaci├│n pendiente
+ok 2 - integraci├│n: guardar una inspecci├│n genera una operaci├│n pendiente
+  ---
+  duration_ms: 9.4032
+  ...
+# Subtest: integraci├│n: encuentra otra inspecci├│n con datos equivalentes
+ok 3 - integraci├│n: encuentra otra inspecci├│n con datos equivalentes
+  ---
+  duration_ms: 1.6544
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 20.9359
+(node:20300) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20300) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+TAP version 13
+# Subtest: seguridad/encabezados: CSP real cumple la politica minima
+ok 1 - seguridad/encabezados: CSP real cumple la politica minima
+  ---
+  duration_ms: 1.714
+  ...
+# Subtest: seguridad/encabezados: encabezados complementarios presentes
+ok 2 - seguridad/encabezados: encabezados complementarios presentes
+  ---
+  duration_ms: 0.1931
+  ...
+# Subtest: seguridad/encabezados: la CSP no bloquea capacidades legitimas de la PWA
+ok 3 - seguridad/encabezados: la CSP no bloquea capacidades legitimas de la PWA
+  ---
+  duration_ms: 0.135
+  ...
+# Subtest: NEGATIVO seguridad/encabezados: una CSP debilitada es detectada
+ok 4 - NEGATIVO seguridad/encabezados: una CSP debilitada es detectada
+  ---
+  duration_ms: 0.1802
+  ...
+# Subtest: seguridad/validacion: acepta titulos validos y casos limite
+ok 5 - seguridad/validacion: acepta titulos validos y casos limite
+  ---
+  duration_ms: 0.0867
+  ...
+# Subtest: seguridad/validacion: rechaza titulos invalidos
+ok 6 - seguridad/validacion: rechaza titulos invalidos
+  ---
+  duration_ms: 0.0729
+  ...
+# Subtest: seguridad/validacion: rechaza tipos no textuales
+ok 7 - seguridad/validacion: rechaza tipos no textuales
+  ---
+  duration_ms: 0.1095
+  ...
+# Subtest: NEGATIVO seguridad/validacion: un validador que acepta todo es detectado
+ok 8 - NEGATIVO seguridad/validacion: un validador que acepta todo es detectado
+  ---
+  duration_ms: 0.0907
+  ...
+# Subtest: seguridad/api: acepta una inspeccion valida (201) y detecta el duplicado (200)
+ok 9 - seguridad/api: acepta una inspeccion valida (201) y detecta el duplicado (200)
+  ---
+  duration_ms: 15.7544
+  ...
+# Subtest: seguridad/api: acepta valores exactamente en el limite
+ok 10 - seguridad/api: acepta valores exactamente en el limite
+  ---
+  duration_ms: 0.6631
+  ...
+# Subtest: seguridad/api: rechaza Idempotency-Key ausente, invalida o demasiado larga
+ok 11 - seguridad/api: rechaza Idempotency-Key ausente, invalida o demasiado larga
+  ---
+  duration_ms: 1.1231
+  ...
+# Subtest: seguridad/api: rechaza cuerpos demasiado grandes (413)
+ok 12 - seguridad/api: rechaza cuerpos demasiado grandes (413)
+  ---
+  duration_ms: 0.248
+  ...
+# Subtest: seguridad/api: rechaza JSON malformado (400)
+ok 13 - seguridad/api: rechaza JSON malformado (400)
+  ---
+  duration_ms: 0.3453
+  ...
+# Subtest: seguridad/api: rechaza inspecciones invalidas sin almacenarlas
+ok 14 - seguridad/api: rechaza inspecciones invalidas sin almacenarlas
+  ---
+  duration_ms: 3.4722
+  ...
+# Subtest: seguridad/api: GET no expone campos innecesarios (minimizacion)
+ok 15 - seguridad/api: GET no expone campos innecesarios (minimizacion)
+  ---
+  duration_ms: 0.4205
+  ...
+# Subtest: seguridad/robots: existe y excluye rutas de API e inspecciones (no es autorizacion)
+ok 16 - seguridad/robots: existe y excluye rutas de API e inspecciones (no es autorizacion)
+  ---
+  duration_ms: 0.3118
+  ...
+# Subtest: seguridad/secretos: no hay credenciales en src, public ni next.config.mjs
+ok 17 - seguridad/secretos: no hay credenciales en src, public ni next.config.mjs
+  ---
+  duration_ms: 5.2563
+  ...
+# Subtest: NEGATIVO seguridad/secretos: el escaner detecta secretos de muestra
+ok 18 - NEGATIVO seguridad/secretos: el escaner detecta secretos de muestra
+  ---
+  duration_ms: 0.0882
+  ...
+# Subtest: reproducibilidad: lockfile y version de Node configurados
+ok 19 - reproducibilidad: lockfile y version de Node configurados
+  ---
+  duration_ms: 1.7168
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42.8948
+
