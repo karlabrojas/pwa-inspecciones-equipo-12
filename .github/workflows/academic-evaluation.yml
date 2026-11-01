@@ -56,6 +56,15 @@ jobs:
             --test-reporter=junit --test-reporter-destination=reports/junit-unit-integration.xml \
             "tests/unit/*.spec.ts" "tests/integration/*.spec.ts"
 
+      - name: Pruebas de seguridad con reporte JUnit y SHA evaluado
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p reports
+          echo "${{ github.sha }}" > reports/commit-sha.txt
+          node --experimental-strip-types --test \
+            --test-reporter=spec --test-reporter-destination=stdout \
+            --test-reporter=junit --test-reporter-destination=reports/junit-security.xml \
+            tests/security.spec.ts
       - name: Cobertura (informativa, no bloqueante)
         if: ${{ !cancelled() }}
         continue-on-error: true

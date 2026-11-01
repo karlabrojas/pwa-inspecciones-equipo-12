@@ -27,6 +27,7 @@ const required = [
   "playwright.config.ts",
   "tests/e2e/helpers.ts",
   "tests/unit/validation.spec.ts",
+  "tests/security.spec.ts",
   "tests/unit/queue.spec.ts",
   "tests/integration/offline-sync.spec.ts",
   ".eslintrc.json"
