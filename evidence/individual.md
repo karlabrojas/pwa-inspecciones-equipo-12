@@ -875,3 +875,34 @@ Puedo explicar y modificar los encabezados de seguridad en next.config.mjs, la v
 
 - **Uso declarado de IA:**
   Utilicé IA como apoyo para comprender los controles de seguridad, revisar errores, identificar problemas en las pruebas E2E y orientar la implementación. Validé las sugerencias ejecutando las pruebas unitarias, de integración, E2E, lint, typecheck y build en el proyecto.
+
+  ## Integrante: Angel Romero Barragan
+
+- **Mi contribución de esta semana y enlace:**
+  Documenté los riesgos de seguridad y privacidad de la PWA de inspecciones en [docs/threat-model.md](../docs/threat-model.md) y [docs/privacy-data-inventory.md](../docs/privacy-data-inventory.md). El modelo de amenazas identifica activos y límites de confianza, y analiza riesgos de XSS, acceso no autorizado a la API, pérdida del dispositivo, exposición de datos offline, secretos expuestos, sincronización y uso de fixtures potencialmente no sintéticos. Para cada riesgo describí el impacto, los controles que existen en el código y las medidas y pruebas que faltan.
+
+  El inventario clasifica los datos de inspección, los campos que podrían relacionarse con personas, los metadatos de sincronización, los adjuntos y los datos de red. Documenta para qué se usan, dónde se procesan y almacenan, quién puede acceder, cuánto tiempo permanecen según la implementación y sus riesgos. También registra el flujo desde la captura hasta IndexedDB, el envío a la API y la posible caché de respuestas GET.
+
+  **Commit SHA evaluado**
+  - [`734badf`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/734badf3f09a4493d0c28610ebf44be4458cab87) — docs: add threat model and privacy inventory
+
+- **Decisión técnica y motivo:**
+  Separé los controles ya implementados de las recomendaciones pendientes para que los documentos reflejen el estado real del proyecto y no presenten medidas futuras como si ya estuvieran activas. La revisión mostró que la API demostrativa no autentica ni autoriza, que IndexedDB no tiene cifrado propio ni caducidad y que el Service Worker puede almacenar respuestas GET del API. Por eso documenté estos puntos como riesgos residuales y condicioné cualquier uso con datos reales a controles y revisión institucional adicionales.
+
+  También indiqué que los datos deben ser sintéticos y que los fixtures con nombres e identificadores plausibles requieren confirmar su origen. Para el contexto de un sujeto obligado mexicano, describí aspectos que deben revisarse con las áreas institucionales correspondientes, aclarando que la documentación no es asesoría legal ni una certificación de cumplimiento.
+
+- **Prueba/comando que ejecuté:**
+  - Revisé el código de captura, almacenamiento IndexedDB, sincronización, API de demostración, Service Worker y las pruebas relacionadas.
+  - `git diff --check`
+  - No ejecuté la suite de pruebas, porque los cambios de esta contribución son documentales.
+
+- **Resultado observado y enlace al reporte:**
+  Los dos documentos quedaron creados y `git diff --check` terminó sin reportar errores de formato. No se generó un reporte de pruebas ni de CI para esta contribución.
+
+- **Qué demuestra y qué no demuestra:**
+  La documentación relaciona los riesgos con la implementación observada y señala cuáles tienen evidencia automatizada actual y cuáles requieren nuevas pruebas o controles. No demuestra que los controles pendientes estén implementados, que el sistema sea seguro para producción ni que cumpla por sí mismo la normativa aplicable.
+
+- **Limitación o riesgo:**
+  El código y las pruebas describen los registros de ejemplo como sintéticos, pero no permiten verificar su procedencia; se debe confirmar que los nombres e identificadores plausibles son ficticios. El endpoint de demostración es volátil y no cuenta con control de acceso, y los datos offline pueden permanecer en IndexedDB y en la caché del navegador. Antes de usar datos reales se requieren, como mínimo, revisión institucional de privacidad y seguridad, autenticación/autorización, minimización, reglas de conservación y borrado, y pruebas de los controles pendientes.
+
+- **IA:** utilicé IA como apoyo para analizar el código, estructurar los documentos y redactar el contenido. Contrasté las afirmaciones con la implementación y las pruebas existentes, distinguí controles actuales de recomendaciones y revisé el diff. No ejecuté pruebas automatizadas.
