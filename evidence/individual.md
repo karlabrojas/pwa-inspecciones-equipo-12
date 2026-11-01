@@ -852,3 +852,26 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
 - **Limitación o riesgo:** La CSP conserva `'unsafe-inline'` en `script-src` y `style-src`, por lo que mitiga XSS solo parcialmente. `robots.txt` no es un mecanismo de autorización. El almacén del endpoint vive en memoria. `npm ci` reportó 22 vulnerabilidades (16 moderadas, 5 altas y 1 crítica) sin corregir, y una advertencia `EBADENGINE` porque mi Node local es 22.12.0 y `eslint-visitor-keys` pide 22.13 o superior (solo advertencia; el CI usa Node 22). `src/lib/security/` no fue entregado. El escáner de secretos usa patrones y no detecta todos los casos posibles.
 
 - **IA:** utilicé IA como apoyo para diseñar y escribir `tests/security.spec.ts`, el paso de CI, la sección del README, esta evidencia y los comandos de terminal. Validación propia: ejecuté todos los comandos, revisé las salidas reales (19/19, tres regresiones detectadas, código de salida 0 en `npm run verify` y `make verify`), confirmé con `git status` que los archivos de Karla quedaron restaurados tras cada mutación, y revisaré los checks del PR #64 antes de dar la etapa por aprobada.
+
+## Integrante: Karla Beatriz Rojas Rojas 
+
+- **Commit SHA evaluado:**
+- `66e0689` — feat: implement security controls
+- `3deb216` — fix: restore inspections GET endpoint for e2e tests
+
+- **Decisión técnica que puedo explicar:**
+Implementé controles de seguridad para la PWA mediante encabezados HTTP en next.config.mjs, incluyendo Content Security Policy (CSP), X-Content-Type-Options, X-Frame-Options y Referrer-Policy. También agregué validación de datos en la API de inspecciones y configuré robots.txt para restringir el rastreo de rutas privadas y de API.
+
+- **Prueba que ejecuté y resultado:**
+Ejecuté npm run lint, npm run typecheck, npm test, npm run build y las pruebas E2E con Playwright.
+
+  Resultado: todas las verificaciones finalizaron correctamente y las 14 pruebas E2E fueron aprobadas.
+
+- **Limitación o fallo diagnosticado:**
+Inicialmente, las pruebas E2E fallaban porque el navegador Chromium no podía iniciarse debido a la dependencia del sistema libnspr4.so. Instalé las dependencias necesarias. También detecté que el método GET de /api/inspections respondía con error 405, por lo que restauré su funcionalidad para consultar las inspecciones recibidas.
+
+- **Cambio que podría defender o modificar en vivo:**
+Puedo explicar y modificar los encabezados de seguridad en next.config.mjs, la validación de inspecciones en src/app/api/inspections/route.ts y el método GET que devuelve los registros recibidos sin exponer toda la información almacenada.
+
+- **Uso declarado de IA:**
+  Utilicé IA como apoyo para comprender los controles de seguridad, revisar errores, identificar problemas en las pruebas E2E y orientar la implementación. Validé las sugerencias ejecutando las pruebas unitarias, de integración, E2E, lint, typecheck y build en el proyecto.
