@@ -36,6 +36,23 @@ export const filasCon = (page: Page, titulo: string): Locator =>
 /** Carga online, espera al Service Worker y recarga para que controle la página. */
 export async function prepararOnline(page: Page) {
   await page.goto(RUTA);
+  page.on("pageerror", (error) => {
+    console.error("[E2E PAGE ERROR]", error.message);
+  });
+
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      console.error("[E2E CONSOLE ERROR]", message.text());
+    }
+  });
+
+  page.on("requestfailed", (request) => {
+    console.error(
+      "[E2E REQUEST FAILED]",
+      request.url(),
+      request.failure()?.errorText,
+    );
+  });
   await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
   await page.reload();
   const controlado = await page.evaluate(
