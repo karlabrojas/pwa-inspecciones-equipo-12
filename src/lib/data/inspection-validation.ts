@@ -1,19 +1,3 @@
-const MAX_INSPECTION_TITLE_LENGTH = 120;
-
-export function validateInspectionTitle(title: string): string | null {
-  if (typeof title !== "string") {
-    return "El título de la inspección debe ser texto.";
-  }
-
-  const normalizedTitle = title.trim();
-
-  if (normalizedTitle.length === 0) {
-    return "El título de la inspección es obligatorio.";
-  }
-
-  if (normalizedTitle.length > MAX_INSPECTION_TITLE_LENGTH) {
-    return `El título no puede superar ${MAX_INSPECTION_TITLE_LENGTH} caracteres.`;
-  }
-
-  return null;
-}
+// La validación vive ahora en src/lib/security/. Se conserva este módulo
+// para no romper importaciones ni pruebas existentes.
+export { validateInspectionTitle } from "../security/inspection-schema.ts";

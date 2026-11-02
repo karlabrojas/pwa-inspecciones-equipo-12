@@ -18,10 +18,13 @@ export default defineConfig({
     serviceWorkers: "allow",
   },
   webServer: {
-    command: "npm run build && npm run start",
+    command: "npm run start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    timeout: 60_000,
+    env: {
+      ALLOW_INSPECTIONS_DEBUG: "1",
+    },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

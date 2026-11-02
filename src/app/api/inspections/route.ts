@@ -1,15 +1,26 @@
 import { NextResponse } from "next/server";
+import {
+  parseInspectionInput,
+  type InspectionInput,
+} from "../../../lib/security/inspection-schema";
 
 export const dynamic = "force-dynamic";
+
+const MAX_BODY_BYTES = 100_000;
+const MAX_STORED_OPERATIONS = 1000;
+const NO_STORE = { "Cache-Control": "no-store" };
 
 type ReceivedOperation = {
   operationId: string;
   version: number;
   receipts: number;
   receivedAt: string;
-  inspection: Record<string, unknown>;
+  inspection: InspectionInput;
 };
 
+// Limitación: este almacén vive en memoria de UNA instancia. En un despliegue
+// serverless (Vercel) no es compartido ni durable; una base de datos real
+// sería infraestructura adicional.
 const globalStore = globalThis as typeof globalThis & {
   __receivedInspections?: Map<string, ReceivedOperation>;
 };
@@ -22,23 +33,8 @@ function getStore() {
   return globalStore.__receivedInspections;
 }
 
-function isValidInspection(value: unknown): value is Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return false;
-  }
-
-  const inspection = value as Record<string, unknown>;
-
-  return (
-    typeof inspection.id === "string" &&
-    inspection.id.trim().length > 0 &&
-    inspection.id.length <= 100 &&
-    typeof inspection.title === "string" &&
-    inspection.title.trim().length > 0 &&
-    inspection.title.length <= 120 &&
-    typeof inspection.location === "string" &&
-    inspection.location.length <= 200
-  );
+function json(body: unknown, status: number) {
+  return NextResponse.json(body, { status, headers: NO_STORE });
 }
 
 export async function POST(request: Request) {
@@ -49,36 +45,55 @@ export async function POST(request: Request) {
     idempotencyKey.length > 150 ||
     !/^[a-zA-Z0-9_-]+$/.test(idempotencyKey)
   ) {
-    return NextResponse.json(
-      { error: "El encabezado Idempotency-Key no es válido." },
-      { status: 400 },
-    );
+    return json({ error: "El encabezado Idempotency-Key no es válido." }, 400);
   }
 
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  const contentType = request.headers.get("content-type") ?? "";
 
-  if (contentLength > 100_000) {
-    return NextResponse.json(
+  if (!contentType.toLowerCase().startsWith("application/json")) {
+    return json({ error: "Content-Type debe ser application/json." }, 415);
+  }
+
+  // Rechazo temprano si el cliente declara un tamaño excesivo...
+  const declaredLength = Number(request.headers.get("content-length") ?? 0);
+
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+    return json(
       { error: "El cuerpo de la solicitud es demasiado grande." },
-      { status: 413 },
+      413,
     );
   }
 
-  let body: { inspection?: unknown };
+  // ...pero el límite real se aplica sobre los bytes recibidos, porque
+  // content-length puede faltar (chunked) o no ser fiable.
+  const rawBody = await request.text();
+
+  if (new TextEncoder().encode(rawBody).length > MAX_BODY_BYTES) {
+    return json(
+      { error: "El cuerpo de la solicitud es demasiado grande." },
+      413,
+    );
+  }
+
+  let body: unknown;
 
   try {
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
-    return NextResponse.json(
-      { error: "Cuerpo JSON no válido." },
-      { status: 400 },
-    );
+    return json({ error: "Cuerpo JSON no válido." }, 400);
   }
 
-  if (!isValidInspection(body.inspection)) {
-    return NextResponse.json(
-      { error: "La inspección no es válida." },
-      { status: 400 },
+  const candidate =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? (body as Record<string, unknown>).inspection
+      : undefined;
+
+  const parsed = parseInspectionInput(candidate);
+
+  if (!parsed.ok) {
+    return json(
+      { error: "La inspección no es válida.", details: parsed.errors },
+      400,
     );
   }
 
@@ -88,10 +103,11 @@ export async function POST(request: Request) {
   if (existing) {
     existing.receipts += 1;
 
-    return NextResponse.json(
-      { duplicate: true, version: existing.version },
-      { status: 200 },
-    );
+    return json({ duplicate: true, version: existing.version }, 200);
+  }
+
+  if (store.size >= MAX_STORED_OPERATIONS) {
+    return json({ error: "Capacidad de recepción agotada." }, 503);
   }
 
   const record: ReceivedOperation = {
@@ -99,21 +115,21 @@ export async function POST(request: Request) {
     version: 1,
     receipts: 1,
     receivedAt: new Date().toISOString(),
-    inspection: body.inspection,
+    inspection: parsed.value, // solo el objeto validado y normalizado
   };
 
   store.set(idempotencyKey, record);
 
-  return NextResponse.json(
-    { duplicate: false, version: record.version },
-    { status: 201 },
-  );
+  return json({ duplicate: false, version: record.version }, 201);
 }
 
 export async function GET() {
-  const store = getStore();
+  // Mínimo privilegio: el listado es solo para pruebas/depuración.
+  if (process.env.ALLOW_INSPECTIONS_DEBUG !== "1") {
+    return json({ error: "No encontrado." }, 404);
+  }
 
-  const items = Array.from(store.values()).map((record) => ({
+  const items = Array.from(getStore().values()).map((record) => ({
     operationId: record.operationId,
     version: record.version,
     receipts: record.receipts,
@@ -124,5 +140,5 @@ export async function GET() {
     },
   }));
 
-  return NextResponse.json({ items });
+  return json({ items }, 200);
 }
