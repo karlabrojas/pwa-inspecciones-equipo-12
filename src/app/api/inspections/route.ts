@@ -50,10 +50,9 @@ export async function POST(request: Request) {
 
   const contentType = request.headers.get("content-type") ?? "";
 
-  if (!contentType.toLowerCase().startsWith("application/json")) {
+  if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
     return json({ error: "Content-Type debe ser application/json." }, 415);
   }
-
   // Rechazo temprano si el cliente declara un tamaño excesivo...
   const declaredLength = Number(request.headers.get("content-length") ?? 0);
 

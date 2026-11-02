@@ -397,6 +397,44 @@ test("seguridad/api: GET no expone campos innecesarios", async () => {
   assert.deepEqual(Object.keys(item.inspection).sort(), ["id", "title"]);
 });
 
+test("seguridad/api: rechaza Content-Type incorrecto", async () => {
+  const res = await route.POST(
+    postRequest({
+      headers: { "content-type": "text/plain" },
+    }),
+  );
+
+  assert.equal(res.status, 415);
+});
+
+test("seguridad/api: rechaza cuerpos que superan el límite real de bytes", async () => {
+  const res = await route.POST(
+    postRequest({
+      rawBody: " ".repeat(100_001),
+    }),
+  );
+
+  assert.equal(res.status, 413);
+});
+
+test("seguridad/api: GET permanece deshabilitado sin permiso de depuración", async () => {
+  const previousValue = process.env.ALLOW_INSPECTIONS_DEBUG;
+
+  try {
+    delete process.env.ALLOW_INSPECTIONS_DEBUG;
+
+    const res = await route.GET();
+
+    assert.equal(res.status, 404);
+  } finally {
+    if (previousValue === undefined) {
+      delete process.env.ALLOW_INSPECTIONS_DEBUG;
+    } else {
+      process.env.ALLOW_INSPECTIONS_DEBUG = previousValue;
+    }
+  }
+});
+
 // robots.txt, secretos y reproducibilidad
 test("seguridad/robots: existe y excluye rutas privadas de rastreo", () => {
   const robots = readFileSync(join(ROOT, "public/robots.txt"), "utf8");

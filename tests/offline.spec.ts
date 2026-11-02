@@ -38,7 +38,9 @@ test("sin conexion, navegar a la raiz sirve la pagina precacheada", async () => 
 test("sin conexion, una ruta nunca visitada cae a la pagina inicial precacheada", async () => {
   const sw = await arrancarSinConexion();
 
-  const r = await sw.fetchEvent("/inspecciones/ruta-nunca-visitada", { navigate: true });
+  const r = await sw.fetchEvent("/inspecciones/ruta-nunca-visitada", {
+    navigate: true,
+  });
 
   assert.equal(r.error, undefined);
   assert.equal(r.response.status, 200);
@@ -79,11 +81,16 @@ test("network first: con conexion usa la red y luego la ultima copia al perderla
 test("sin conexion, los iconos precacheados siguen disponibles (cache first)", async () => {
   const sw = await arrancarSinConexion();
 
-  const r = await sw.fetchEvent("/icons/icon-192.png", { destination: "image" });
+  const r = await sw.fetchEvent("/icons/icon-192.png", {
+    destination: "image",
+  });
 
   assert.equal(r.error, undefined);
   assert.equal(r.response.status, 200);
-  assert.equal(await r.response.text(), `sintetico:${abs("/icons/icon-192.png")}`);
+  assert.equal(
+    await r.response.text(),
+    `sintetico:${abs("/icons/icon-192.png")}`,
+  );
 });
 
 test("sin conexion, el manifest se sirve desde cache", async () => {
@@ -95,21 +102,58 @@ test("sin conexion, el manifest se sirve desde cache", async () => {
   assert.equal(r.response.status, 200);
 });
 
-test("network first: /api/inspections queda disponible offline tras una consulta con conexion", async () => {
+test("seguridad: /api/inspections no se guarda en cache y requiere conexion", async () => {
   const sw = loadServiceWorker();
+
   await sw.install();
   await sw.activate();
+
+  // Simular una respuesta exitosa de la API.
   sw.network.state.routes.set(
     abs("/api/inspections"),
-    () => new Response('[{"id":"insp-sintetica-1"}]', { status: 200 }),
+    () =>
+      new Response(
+        JSON.stringify({
+          items: [
+            {
+              id: "sintetico-1",
+              title: "Inspección de prueba",
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      ),
   );
 
-  await sw.fetchEvent("/api/inspections", { destination: "" });
-  sw.network.state.online = false;
-  const sinRed = await sw.fetchEvent("/api/inspections", { destination: "" });
+  // 1. Con conexión, la API debe responder correctamente.
+  const conRed = await sw.fetchEvent("/api/inspections");
 
-  assert.equal(sinRed.error, undefined);
-  assert.equal(await sinRed.response.text(), '[{"id":"insp-sintetica-1"}]');
+  assert.equal(conRed.error, undefined);
+  assert.equal(conRed.response.status, 200);
+
+  // 2. La respuesta de la API no debe almacenarse en caché.
+  const cachedUrls = await sw.cachedUrls();
+
+  assert.equal(
+    cachedUrls.includes(abs("/api/inspections")),
+    false,
+    "La respuesta de la API no debe guardarse en caché",
+  );
+
+  // 3. Sin conexión, la solicitud debe fallar.
+  sw.network.state.online = false;
+
+  const sinRed = await sw.fetchEvent("/api/inspections");
+
+  assert.ok(
+    sinRed.error,
+    "La API debe fallar sin conexión y no devolver datos antiguos",
+  );
 });
 
 // Regresion relevante: si se cacheara un 500, la app mostraria un error "pegado"
@@ -124,7 +168,11 @@ test("regresion: una respuesta 500 no se guarda ni se sirve despues sin conexion
   );
 
   const conRed = await sw.fetchEvent("/inspecciones/falla", { navigate: true });
-  assert.equal(conRed.response.status, 500, "con red se entrega tal cual lo que responde el servidor");
+  assert.equal(
+    conRed.response.status,
+    500,
+    "con red se entrega tal cual lo que responde el servidor",
+  );
 
   sw.network.state.online = false;
   const sinRed = await sw.fetchEvent("/inspecciones/falla", { navigate: true });
@@ -137,7 +185,9 @@ test("regresion: una respuesta 500 no se guarda ni se sirve despues sin conexion
 test("limite: un recurso estatico no cacheado falla sin conexion (sin fallback)", async () => {
   const sw = await arrancarSinConexion();
 
-  const r = await sw.fetchEvent("/assets/nunca-cacheado.js", { destination: "script" });
+  const r = await sw.fetchEvent("/assets/nunca-cacheado.js", {
+    destination: "script",
+  });
 
   assert.ok(r.error, "la peticion falla como error de red");
 });
