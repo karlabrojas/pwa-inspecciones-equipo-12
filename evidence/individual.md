@@ -822,3 +822,87 @@ Documenté que el listado (/inspecciones) es un Server Component con dynamic = "
   La prueba de persistencia usa `fake-indexeddb` en memoria, no un navegador real. La integración comprueba el contrato frente a una fixture idempotente, no la implementación de un endpoint productivo. La instalación de la dependencia informó tres vulnerabilidades en el árbol de paquetes (dos altas y una crítica); no ejecuté una actualización forzada, que queda fuera del alcance de esta contribución.
 
 - **IA:** utilicé IA como apoyo para revisar el código existente, proponer la cobertura y redactar parte de las pruebas. Revisé los cambios, ejecuté los comandos documentados y comprobé sus resultados; los datos y las respuestas remotas de prueba son sintéticos.
+
+
+# SEMANA 9 - WEEK 9
+
+## Integrante: Kevin Ricardo Simon Alfaro
+
+- **Mi contribución de esta semana y enlace:** Issue #3 (#61 en GitHub): pruebas de seguridad, CI y entrega reproducible. Creé `tests/security.spec.ts` (19 pruebas) que verifica los controles entregados esta semana: CSP y encabezados de `next.config.mjs`, validación del título, el endpoint `/api/inspections`, `public/robots.txt`, ausencia de secretos en el código y lockfile/versión de Node. Lo conecté a `npm test` y a `scripts/verify.mjs`, corregí `.nvmrc` (contenía un comando en lugar de `22`), agregué al workflow `academic-evaluation.yml` un paso que genera `reports/junit-security.xml` y `reports/commit-sha.txt`, y escribí la sección de la semana 9 del README con instalación, verificación, supuestos, decisiones y limitaciones. Integré en mi rama `dev` con los controles de Karla y la documentación de Angel.
+  Commits:
+  - [38c560e](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/38c560e56265e1195f3c8aafe92fae785917c655)
+
+  Rama: `feat/w09-security-tests-ci`. Pull request: [#64](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/pull/64).
+
+- **Decisión técnica y motivo:** `src/lib/security/` no existe en `dev`; los controles de Karla están en `next.config.mjs`, `src/app/api/inspections/route.ts`, `src/lib/data/inspection-validation.ts` y `public/robots.txt`, así que las pruebas cubren lo que realmente existe y no inventé pruebas de módulos ausentes. `route.ts` importa `next/server`, que Node puro no resuelve, por lo que la prueba registra un hook de resolución que sustituye `NextResponse` por un stub mínimo basado en `Response.json`; así se prueba la lógica de validación sin levantar Next. Para los casos negativos no me limité a probar auditores contra configuraciones débiles: además modifiqué a propósito el código real y comprobé que las pruebas fallan. El comando de verificación es `make verify` (solo llama a `npm run verify`); si `make` no estuviera instalado, el equivalente exacto es `npm run verify`.
+
+- **Prueba/comando que ejecuté:** `npm ci`, `node --experimental-strip-types --test tests/security.spec.ts`, tres mutaciones del código real con la misma prueba, `npm run verify`, `make verify`, y el mismo comando del paso de CI con reporte JUnit (`--test-reporter=junit --test-reporter-destination=reports/junit-security.xml`). En CI, el workflow Academic Evaluation CI ejecuta instalación limpia, lint, tipos, build, `npm test`, pruebas de seguridad con reporte y E2E.
+
+- **Resultado observado y enlace al reporte:**
+  1. Línea base: `tests/security.spec.ts` 19/19 en verde (`evidence/security-tests.txt`). `npm ci` instaló 335 paquetes (`evidence/npm-ci.txt`).
+  2. Regresiones reales detectadas (modifiqué el código de Karla y lo restauré con `git checkout`; `git status` confirmó que quedó idéntico):
+     - Límite del título de 120 a 100000 en `inspection-validation.ts`: fallaron 2 pruebas (`not ok 6` y `not ok 8`), 17 pass / 2 fail (`evidence/regresion-1-titulo.txt`).
+     - `'unsafe-eval'` agregado a `script-src` en `next.config.mjs`: falló 1 prueba (`not ok 1`), 18 pass / 1 fail (`evidence/regresion-2-csp.txt`).
+     - Límite de cuerpo de 100_000 a 100_000_000 en `route.ts`: falló 1 prueba (`not ok 12`), 18 pass / 1 fail (`evidence/regresion-3-api.txt`).
+  3. `npm run verify` y `make verify` terminaron con código de salida 0: verificación de artefactos, lint, typecheck, build y toda la batería de `npm test`, incluidas las 19 de seguridad (`evidence/verify-output.txt`, `evidence/make-verify-output.txt`, `evidence/make-verify-exitcode.txt`).
+  4. CI sobre el commit [38c560e](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/38c560e56265e1195f3c8aafe92fae785917c655): los runs se consultan en los [checks del PR #64](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/pull/64/checks). El workflow Academic Evaluation CI publica el artefacto `ci-evidence-w08-<sha>` con `reports/junit-security.xml` y `reports/commit-sha.txt`, que registra el SHA evaluado. Al redactar esta evidencia varios checks del PR ya estaban en verde y Academic Evaluation CI seguía en progreso, por lo que su resultado final se confirma en el PR.
+
+- **Qué demuestra y qué no demuestra:** Demuestra que la CSP, los encabezados, los límites de validación, el rechazo de `Idempotency-Key` y cuerpos inválidos, la minimización del GET, `robots.txt` y la ausencia de secretos se verifican de forma automática y determinista, que una regresión en tres controles distintos hace fallar la suite, y que la instalación limpia, la compilación y `make verify` terminan con código 0 con los comandos del README. No demuestra autenticación ni control de acceso (no existen en `/api/inspections`), el HTTPS del despliegue, el comportamiento en un navegador real ni el runtime de Next, porque el endpoint se prueba con un stub de `NextResponse`. Tampoco demuestra por sí sola que el CI completo esté en verde: eso se confirma en los checks del PR #64.
+
+- **Limitación o riesgo:** La CSP conserva `'unsafe-inline'` en `script-src` y `style-src`, por lo que mitiga XSS solo parcialmente. `robots.txt` no es un mecanismo de autorización. El almacén del endpoint vive en memoria. `npm ci` reportó 22 vulnerabilidades (16 moderadas, 5 altas y 1 crítica) sin corregir, y una advertencia `EBADENGINE` porque mi Node local es 22.12.0 y `eslint-visitor-keys` pide 22.13 o superior (solo advertencia; el CI usa Node 22). `src/lib/security/` no fue entregado. El escáner de secretos usa patrones y no detecta todos los casos posibles.
+
+- **IA:** utilicé IA como apoyo para diseñar y escribir `tests/security.spec.ts`, el paso de CI, la sección del README, esta evidencia y los comandos de terminal. Validación propia: ejecuté todos los comandos, revisé las salidas reales (19/19, tres regresiones detectadas, código de salida 0 en `npm run verify` y `make verify`), confirmé con `git status` que los archivos de Karla quedaron restaurados tras cada mutación, y revisaré los checks del PR #64 antes de dar la etapa por aprobada.
+
+## Integrante: Karla Beatriz Rojas Rojas 
+
+- **Commit SHA evaluado:**
+- `66e0689` — feat: implement security controls
+- `3deb216` — fix: restore inspections GET endpoint for e2e tests
+
+- **Decisión técnica que puedo explicar:**
+Implementé controles de seguridad para la PWA mediante encabezados HTTP en next.config.mjs, incluyendo Content Security Policy (CSP), X-Content-Type-Options, X-Frame-Options y Referrer-Policy. También agregué validación de datos en la API de inspecciones y configuré robots.txt para restringir el rastreo de rutas privadas y de API.
+
+- **Prueba que ejecuté y resultado:**
+Ejecuté npm run lint, npm run typecheck, npm test, npm run build y las pruebas E2E con Playwright.
+
+  Resultado: todas las verificaciones finalizaron correctamente y las 14 pruebas E2E fueron aprobadas.
+
+- **Limitación o fallo diagnosticado:**
+Inicialmente, las pruebas E2E fallaban porque el navegador Chromium no podía iniciarse debido a la dependencia del sistema libnspr4.so. Instalé las dependencias necesarias. También detecté que el método GET de /api/inspections respondía con error 405, por lo que restauré su funcionalidad para consultar las inspecciones recibidas.
+
+- **Cambio que podría defender o modificar en vivo:**
+Puedo explicar y modificar los encabezados de seguridad en next.config.mjs, la validación de inspecciones en src/app/api/inspections/route.ts y el método GET que devuelve los registros recibidos sin exponer toda la información almacenada.
+
+- **Uso declarado de IA:**
+  Utilicé IA como apoyo para comprender los controles de seguridad, revisar errores, identificar problemas en las pruebas E2E y orientar la implementación. Validé las sugerencias ejecutando las pruebas unitarias, de integración, E2E, lint, typecheck y build en el proyecto.
+
+  ## Integrante: Angel Romero Barragan
+
+- **Mi contribución de esta semana y enlace:**
+  Documenté los riesgos de seguridad y privacidad de la PWA de inspecciones en [docs/threat-model.md](../docs/threat-model.md) y [docs/privacy-data-inventory.md](../docs/privacy-data-inventory.md). El modelo de amenazas identifica activos y límites de confianza, y analiza riesgos de XSS, acceso no autorizado a la API, pérdida del dispositivo, exposición de datos offline, secretos expuestos, sincronización y uso de fixtures potencialmente no sintéticos. Para cada riesgo describí el impacto, los controles que existen en el código y las medidas y pruebas que faltan.
+
+  El inventario clasifica los datos de inspección, los campos que podrían relacionarse con personas, los metadatos de sincronización, los adjuntos y los datos de red. Documenta para qué se usan, dónde se procesan y almacenan, quién puede acceder, cuánto tiempo permanecen según la implementación y sus riesgos. También registra el flujo desde la captura hasta IndexedDB, el envío a la API y la posible caché de respuestas GET.
+
+  **Commit SHA evaluado**
+  - [`734badf`](https://github.com/karlabrojas/pwa-inspecciones-equipo-12/commit/734badf3f09a4493d0c28610ebf44be4458cab87) — docs: add threat model and privacy inventory
+
+- **Decisión técnica y motivo:**
+  Separé los controles ya implementados de las recomendaciones pendientes para que los documentos reflejen el estado real del proyecto y no presenten medidas futuras como si ya estuvieran activas. La revisión mostró que la API demostrativa no autentica ni autoriza, que IndexedDB no tiene cifrado propio ni caducidad y que el Service Worker puede almacenar respuestas GET del API. Por eso documenté estos puntos como riesgos residuales y condicioné cualquier uso con datos reales a controles y revisión institucional adicionales.
+
+  También indiqué que los datos deben ser sintéticos y que los fixtures con nombres e identificadores plausibles requieren confirmar su origen. Para el contexto de un sujeto obligado mexicano, describí aspectos que deben revisarse con las áreas institucionales correspondientes, aclarando que la documentación no es asesoría legal ni una certificación de cumplimiento.
+
+- **Prueba/comando que ejecuté:**
+  - Revisé el código de captura, almacenamiento IndexedDB, sincronización, API de demostración, Service Worker y las pruebas relacionadas.
+  - `git diff --check`
+  - No ejecuté la suite de pruebas, porque los cambios de esta contribución son documentales.
+
+- **Resultado observado y enlace al reporte:**
+  Los dos documentos quedaron creados y `git diff --check` terminó sin reportar errores de formato. No se generó un reporte de pruebas ni de CI para esta contribución.
+
+- **Qué demuestra y qué no demuestra:**
+  La documentación relaciona los riesgos con la implementación observada y señala cuáles tienen evidencia automatizada actual y cuáles requieren nuevas pruebas o controles. No demuestra que los controles pendientes estén implementados, que el sistema sea seguro para producción ni que cumpla por sí mismo la normativa aplicable.
+
+- **Limitación o riesgo:**
+  El código y las pruebas describen los registros de ejemplo como sintéticos, pero no permiten verificar su procedencia; se debe confirmar que los nombres e identificadores plausibles son ficticios. El endpoint de demostración es volátil y no cuenta con control de acceso, y los datos offline pueden permanecer en IndexedDB y en la caché del navegador. Antes de usar datos reales se requieren, como mínimo, revisión institucional de privacidad y seguridad, autenticación/autorización, minimización, reglas de conservación y borrado, y pruebas de los controles pendientes.
+
+- **IA:** utilicé IA como apoyo para analizar el código, estructurar los documentos y redactar el contenido. Contrasté las afirmaciones con la implementación y las pruebas existentes, distinguí controles actuales de recomendaciones y revisé el diff. No ejecuté pruebas automatizadas.

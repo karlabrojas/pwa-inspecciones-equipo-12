@@ -8,6 +8,9 @@ test -e 'docs/decision-record.md'
 test -e 'docs/cache-strategy.md'
 test -e 'docs/rendering-decision.md'
 test -e 'docs/sync-policy.md'
+test -e 'docs/capabilities.md'
+test -e 'docs/threat-model.md'
+test -e 'docs/privacy-data-inventory.md'
 
 # Project configuration
 test -e 'package.json'
@@ -34,6 +37,16 @@ test -e 'src/lib/sync/queue.ts'
 test -e 'src/lib/storage/schema.ts'
 test -e 'src/lib/sync/conflict-policy.ts'
 
+# Device capabilities and notifications
+test -e 'src/lib/device/camera.ts'
+test -e 'src/lib/device/geolocation.ts'
+test -e 'src/lib/notifications/client.ts'
+
+# Security and Privacy
+test -d 'src/lib/security'
+test -e 'tests/security.spec.ts'
+test -e 'public/robots.txt'
+
 # Tests
 test -e 'tests/manifest.spec.ts'
 test -e 'tests/service-worker.spec.ts'
@@ -41,14 +54,8 @@ test -e 'tests/service-worker-behavior.spec.ts'
 test -e 'tests/offline.spec.ts'
 test -e 'tests/rendering.spec.ts'
 test -e 'tests/sync.spec.ts'
-
-# Device capabilities and notifications
-test -e 'src/lib/device/camera.ts'
-test -e 'src/lib/device/geolocation.ts'
-test -e 'src/lib/notifications/client.ts'
 test -e 'tests/capabilities.spec.ts'
 test -e 'tests/notifications.spec.ts'
-test -e 'docs/capabilities.md'
 
 # README
 test -f README.md
