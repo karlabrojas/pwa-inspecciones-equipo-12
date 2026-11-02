@@ -287,6 +287,19 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
+    /*
+   * -------------------------------------------------------
+   * NETWORK ONLY PARA LA API DE INSPECCIONES
+   * -------------------------------------------------------
+   *
+   * Las respuestas de la API no se almacenan en caché.
+   */
+  if (url.pathname === "/api/inspections" ||
+      url.pathname.startsWith("/api/inspections/")) {
+    event.respondWith(networkOnly(request));
+    return;
+  }
+
   /*
    * -------------------------------------------------------
    * NETWORK FIRST PARA NAVEGACIONES
@@ -378,19 +391,6 @@ self.addEventListener("fetch", (event) => {
    */
   if (shouldRevalidate(url)) {
     event.respondWith(staleWhileRevalidate(request));
-    return;
-  }
-
-  /*
-   * -------------------------------------------------------
-   * NETWORK FIRST PARA DATOS DE INSPECCIONES
-   * -------------------------------------------------------
-   *
-   * Esta ruta queda preparada para cuando el proyecto
-   * obtenga las inspecciones mediante una API.
-   */
-  if (url.pathname.startsWith("/api/inspections")) {
-    event.respondWith(networkFirst(request));
     return;
   }
 

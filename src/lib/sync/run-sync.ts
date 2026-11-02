@@ -74,14 +74,25 @@ async function sendOperation(operation: SyncOperation): Promise<void> {
     },
     body: JSON.stringify({
       type: operation.type,
-      inspection: operation.payload,
+      inspection: {
+        id: operation.payload.id,
+        title: operation.payload.title,
+        location: operation.payload.location,
+      },
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`El servidor respondió ${response.status}.`);
-  }
+    const errorBody = await response.text();
 
+    console.error("Error de sincronización:", {
+      status: response.status,
+      body: errorBody,
+      operationId: operation.operationId,
+    });
+
+    throw new Error(`El servidor respondió ${response.status}: ${errorBody}`);
+  }
   const data = (await response.json()) as { version?: number };
 
   await markInspectionSynced(operation.inspectionId, data.version ?? null);

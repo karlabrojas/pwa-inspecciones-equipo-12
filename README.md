@@ -1135,3 +1135,80 @@ Los reportes y la cobertura de CI se publican como artefacto `ci-evidence-w08-<s
 ## Qué hace el CI
 
 Instalación limpia, tipos, compilación, `npm run verify`, `npm test`, `tests/unit` y `tests/integration` (si existen), cobertura informativa y E2E. Si falla una etapa obligatoria, el job queda en rojo, y los reportes se publican como artefacto aunque haya fallos.
+
+# Semana 9: Pruebas de seguridad, CI y entrega reproducible
+
+## Instalación y ejecución desde cero
+
+Requisitos: Node 22 (`.nvmrc`; `package.json` exige `>=22.6`) y el lockfile `package-lock.json`.
+
+```bash
+nvm use            # o instalar Node 22
+npm ci             # instalación reproducible desde el lockfile
+npm run build
+npm test           # incluye tests/security.spec.ts
+make verify        # equivalente exacto: npm run verify
+```
+
+`make verify` solo invoca `npm run verify`, que ejecuta en orden: `verify:artifacts`, `lint`, `typecheck`, `build` y `npm test`. Si `make` no está instalado (por ejemplo en Windows sin WinGet), usar `npm run verify`; el resultado es el mismo. Todos los pasos deben terminar con código 0.
+
+Solo las pruebas de seguridad:
+
+```bash
+node --experimental-strip-types --test tests/security.spec.ts
+```
+
+## Cobertura de las pruebas de seguridad
+
+### `tests/security.spec.ts`
+
+- **Validación de inspecciones:** comprueba entradas válidas e inválidas, límites de longitud, normalización de espacios, tipos incorrectos, campos adicionales y caracteres de control.
+- **Protección de objetos:** comprueba el rechazo de propiedades no permitidas, incluido `__proto__`.
+- **Compatibilidad:** verifica el comportamiento de `validateInspectionTitle`.
+- **Encabezados y CSP:** comprueba directivas principales de Content Security Policy y encabezados de seguridad configurados en `next.config.mjs`.
+
+### `tests/security-integration.spec.ts`
+
+- **Endpoint `/api/inspections`:** comprueba creación, idempotencia, límites, claves inválidas, JSON malformado, inspecciones inválidas y minimización de los datos devueltos por GET.
+- **Encabezados:** analiza la CSP real y comprueba encabezados complementarios.
+- **`robots.txt`:** verifica las reglas para rastreadores.
+- **Detección de secretos:** busca patrones conocidos en archivos seleccionados de `src/`, `public/` y `next.config.mjs`. No representa un escaneo completo del repositorio.
+- **Reproducibilidad:** comprueba la presencia del lockfile y la configuración de versión de Node.
+
+**Limitaciones de cobertura:** las pruebas del endpoint utilizan un stub de `NextResponse`; no sustituyen las pruebas del runtime real de Next.js. Tampoco demuestran por sí solas la ausencia de caché de datos sensibles en el Service Worker, la autenticación o la autorización del endpoint, ni la seguridad del almacenamiento local.
+
+## Detección de regresiones (demostrada)
+
+Se rompió a propósito el código real y se comprobó que las pruebas fallan (salidas en `evidence/regresion-*.txt`):
+
+| Mutación                                | Resultado observado                        |
+| --------------------------------------- | ------------------------------------------ |
+| Limite del titulo: 120 a 100000         | 2 pruebas fallan (`not ok 6` y `not ok 8`) |
+| `'unsafe-eval'` añadido a `script-src`  | 1 prueba falla (`not ok 1`)                |
+| Limite de cuerpo: 100 000 a 100 000 000 | 1 prueba falla (`not ok 12`)               |
+
+Los archivos se restauraron con `git checkout` tras cada mutación.
+
+## CI
+
+`.github/workflows/academic-evaluation.yml` ejecuta `npm ci`, verificación de artefactos, lint, typecheck, build, `npm test`, pruebas de seguridad con reporte JUnit y E2E. Publica como artefacto (`ci-evidence-w08-<sha>`) los reportes de `reports/` (incluye `junit-security.xml` y `commit-sha.txt` con el SHA evaluado), además de `playwright-report/` y `test-results/`. No depende de servicios privados ni de secretos.
+
+## Supuestos y decisiones
+
+- Los datos utilizados para las pruebas son sintéticos. No deben incorporarse datos personales reales, credenciales ni secretos.
+- `src/lib/security/inspection-schema.ts` centraliza la validación de inspecciones mediante `parseInspectionInput`. Rechaza objetos con campos no permitidos, tipos incorrectos, longitudes excesivas y caracteres de control. Devuelve un objeto nuevo con los campos permitidos y los textos normalizados.
+- `src/lib/data/inspection-validation.ts` conserva la compatibilidad con el validador anterior mediante la exportación de `validateInspectionTitle`.
+- `next.config.mjs` configura los encabezados de seguridad y la CSP; `src/app/api/inspections/route.ts` implementa las validaciones del endpoint; `public/robots.txt` establece reglas para rastreadores, pero no controla el acceso.
+- La prueba automatizada del endpoint utiliza un stub de `NextResponse` para ejecutar la lógica de la ruta en Node. Esto no sustituye las pruebas del runtime real de Next.js.
+- La validación completa del esquema se aplica en el endpoint. La función de guardado local debe revisarse por separado, ya que su comprobación básica del título no equivale a validar todos los campos mediante `parseInspectionInput`.
+- `.nvmrc` especifica la versión principal de Node 22, mientras que `package.json` exige Node `>=22.6`.
+
+## Limitaciones
+
+- `robots.txt` no es un mecanismo de autorización.
+- No hay autenticación en `/api/inspections`; las pruebas no pueden verificar restricciones de acceso que no existen.
+- Las pruebas del endpoint no cubren el runtime real de Next (lo cubren los E2E de Playwright).
+- La CSP conserva `'unsafe-inline'` en `script-src` y `style-src`, por lo que mitiga XSS solo parcialmente; eliminarlo requiere nonces u otra infraestructura.
+- La verificación de HTTPS depende del despliegue y no se prueba en local.
+- El almacén del endpoint vive en memoria del proceso (sin persistencia).
+- `npm ci` reporta vulnerabilidades en dependencias (`npm audit`); no se corrigieron en esta actividad.

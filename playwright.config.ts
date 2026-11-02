@@ -22,6 +22,9 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    env: {
+      ALLOW_INSPECTIONS_DEBUG: "1",
+    },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });

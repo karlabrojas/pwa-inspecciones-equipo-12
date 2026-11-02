@@ -1,5 +1,3 @@
-export function validateInspectionTitle(title: string): string | null {
-  return title.trim().length > 0
-    ? null
-    : "El título de la inspección es obligatorio.";
-}
+// La validación vive ahora en src/lib/security/. Se conserva este módulo
+// para no romper importaciones ni pruebas existentes.
+export { validateInspectionTitle } from "../security/inspection-schema.ts";
